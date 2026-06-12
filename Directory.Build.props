@@ -1,0 +1,9 @@
+<Project>
+	<PropertyGroup Label="Nuget">
+		<Authors>Clancini</Authors>
+		<Product>Dialuverc</Product>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl></PackageProjectUrl>
+		<RepositoryUrl></RepositoryUrl>
+	</PropertyGroup>
+</Project>

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../Dialuverc.Editor.Tests/Dialuverc.Editor.Tests.csproj" Id="b58ce0c7-0944-4732-83ab-145383bda4ee" />
+  <Project Path="../Dialuverc.Editor/Dialuverc.Editor.csproj" />
+  <Project Path="Dialuverc.csproj" />
+</Solution>
