@@ -38,6 +38,20 @@ namespace Dialuverc.Editor.Tests.Base
         }
 
         [Test]
+        public void NoCommitIfStateIsIdentical()
+        {
+            Assert.That(_testArea.SavedStates, Has.Count.EqualTo(0));
+
+            _testArea.ChangeState(_baseState);
+ 
+            Assert.That(_testArea.SavedStates, Has.Count.EqualTo(1));
+
+            _testArea.ChangeState("UserState");
+
+            Assert.That(_testArea.SavedStates, Has.Count.EqualTo(2));
+        }
+
+        [Test]
         public void RestoreStateBothDirections()
         {
             string state1 = "StateOne";
