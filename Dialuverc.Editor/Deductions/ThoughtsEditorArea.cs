@@ -90,12 +90,12 @@ namespace Dialuverc.Editor.Deductions
             EndChange();
         }
 
-        protected override string SerializeCurrentEditorState()
+        protected override byte[] SerializeCurrentEditorState()
         {
-            return JsonSerializer.Serialize(_thoughts);
+            return JsonSerializer.SerializeToUtf8Bytes(_thoughts);
         }
 
-        protected override void ApplyEditorState(string previousState, string newState)
+        protected override void ApplyEditorState(byte[] previousState, byte[] newState)
         {
             List<Thought> thoughtsToRestore = JsonSerializer.Deserialize<List<Thought>>(newState)!;
 

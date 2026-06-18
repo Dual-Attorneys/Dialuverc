@@ -1,4 +1,5 @@
 ﻿using Dialuverc.Editor.Base;
+using System.Text;
 
 namespace Dialuverc.Editor.Tests.Base
 {
@@ -106,7 +107,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             new public int MaxStates => base.MaxStates;
 
-            new public IReadOnlyList<string> SavedStates => base.SavedStates;
+            new public IReadOnlyList<byte[]> SavedStates => base.SavedStates;
 
             public TestArea(string baseState)
             {
@@ -122,14 +123,14 @@ namespace Dialuverc.Editor.Tests.Base
                 EndChange();
             }
 
-            protected override void ApplyEditorState(string previousState, string newState)
+            protected override void ApplyEditorState(byte[] previousState, byte[] newState)
             {
-                CurrentState = newState;
+                CurrentState = Encoding.UTF8.GetString(newState);
             }
 
-            protected override string SerializeCurrentEditorState()
+            protected override byte[] SerializeCurrentEditorState()
             {
-                return CurrentState;
+                return Encoding.UTF8.GetBytes(CurrentState);
             }
 
             public override string SerializeForExport()

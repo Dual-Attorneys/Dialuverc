@@ -8,7 +8,7 @@
     {
         protected virtual int MaxStates => 50;
 
-        List<string> _savedStates = new List<string>();
+        List<byte[]> _savedStates = new List<byte[]>();
 
         int _currentState;
 
@@ -38,9 +38,9 @@
             if (_isRestoringPreviousState)
                 return;
 
-            string text = SerializeCurrentEditorState();
+            byte[] stateToSave = SerializeCurrentEditorState();
 
-            if (_savedStates.Count > 0 && _savedStates[_currentState] == text)
+            if (_savedStates.Count > 0 && _savedStates[_currentState].SequenceEqual(stateToSave))
                 return;
 
             if (_currentState < _savedStates.Count - 1)
@@ -49,7 +49,7 @@
             if (_savedStates.Count >= MaxStates)
                 _savedStates.RemoveAt(0);
 
-            _savedStates.Add(text);
+            _savedStates.Add(stateToSave);
 
             _currentState = _savedStates.Count - 1;
         }
@@ -76,10 +76,10 @@
             _isRestoringPreviousState = false;
         }
 
-        protected abstract string SerializeCurrentEditorState();
+        protected abstract byte[] SerializeCurrentEditorState();
 
         // Pass both states. In case we'll need it in the future. Costs nothing anyway.
-        protected abstract void ApplyEditorState(string previousState, string newState);
+        protected abstract void ApplyEditorState(byte[] previousState, byte[] newState);
 
         public abstract string SerializeForExport();
 
@@ -96,7 +96,7 @@
         /// </summary>
         protected void PointToLatestState() => _currentState = _savedStates.Count - 1;
 
-        protected IReadOnlyList<string> SavedStates => _savedStates;
+        protected IReadOnlyList<byte[]> SavedStates => _savedStates;
 
         #endregion
     }
