@@ -1,12 +1,13 @@
 ﻿using Dialuverc.Deductions;
 using Dialuverc.Editor.Base;
+using System.Collections.Immutable;
 using System.Text.Json;
 
 namespace Dialuverc.Editor.Deductions
 {
-    public class ThoughtsEditorArea : EditorArea<byte[]>
+    public class ThoughtsEditorArea : EditorArea<ImmutableList<Thought>>
     {
-        List<Thought> _thoughts = new List<Thought>();
+        ImmutableList<Thought> _thoughts = ImmutableList<Thought>.Empty;
         public IReadOnlyList<Thought> Thoughts => _thoughts;
 
         public Guid AddThought(string nameKey, string descriptionKey, CharacterSides side)
@@ -17,7 +18,7 @@ namespace Dialuverc.Editor.Deductions
 
             BeginChange();
 
-            _thoughts.Add(thought);
+            _thoughts = _thoughts.Add(thought);
 
             EndChange();
 
@@ -32,7 +33,7 @@ namespace Dialuverc.Editor.Deductions
 
             BeginChange();
 
-            _thoughts.Insert(index, thought);
+            _thoughts = _thoughts.Insert(index, thought);
 
             EndChange();
 
@@ -50,7 +51,7 @@ namespace Dialuverc.Editor.Deductions
 
             BeginChange();
 
-            _thoughts.RemoveAt(foundThought);
+            _thoughts = _thoughts.RemoveAt(foundThought);
 
             EndChange();
 
@@ -67,7 +68,7 @@ namespace Dialuverc.Editor.Deductions
 
             BeginChange();
 
-            _thoughts[index] = new Thought(guid, nameKey, descriptionKey, side);
+            _thoughts = _thoughts.SetItem(index, new Thought(guid, nameKey, descriptionKey, side));
 
             EndChange();
         }
@@ -83,28 +84,26 @@ namespace Dialuverc.Editor.Deductions
 
             BeginChange();
 
-            _thoughts.RemoveAt(oldIndex);
-
-            _thoughts.Insert(newIndex, thoughtToMove);
+            _thoughts = _thoughts.RemoveAt(oldIndex).Insert(newIndex, thoughtToMove);
 
             EndChange();
         }
 
-        protected override byte[] GetStateToSave()
+        #region EditorArea
+
+        protected override ImmutableList<Thought> GetStateToSave()
         {
-            return JsonSerializer.SerializeToUtf8Bytes(_thoughts);
+            return _thoughts;
         }
 
-        protected override bool CheckStateEquality(byte[] a, byte[] b)
+        protected override bool CheckStateEquality(ImmutableList<Thought> a, ImmutableList<Thought> b)
         {
-            return a.SequenceEqual(b);
+            return a == b;
         }
 
-        protected override void ApplyRestoredState(byte[] newState)
+        protected override void ApplyRestoredState(ImmutableList<Thought> newState)
         {
-            List<Thought> thoughtsToRestore = JsonSerializer.Deserialize<List<Thought>>(newState)!;
-
-            _thoughts = thoughtsToRestore;
+            _thoughts = newState;
         }
 
         public override string SerializeForExport()
@@ -113,5 +112,7 @@ namespace Dialuverc.Editor.Deductions
             // we prefer to have exports be as readable as possible.
             return JsonSerializer.Serialize(Thoughts, new JsonSerializerOptions() { WriteIndented = true });
         }
+
+        #endregion
     }
 }

@@ -30,9 +30,9 @@ namespace Dialuverc.Editor.Benchmarks.EditorAreas
         [Benchmark]
         public void UndoThenRedo()
         {
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _area.RestorePreviousState(RestoreDirection.Previous);
 
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Next);
+            _area.RestorePreviousState(RestoreDirection.Next);
         }
 
         int _stateSerializationCounter = 0;
