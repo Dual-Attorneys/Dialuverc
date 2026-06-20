@@ -62,16 +62,16 @@ namespace Dialuverc.Editor.Tests.Base
 
             Assert.That(_testArea.CurrentState, Is.EqualTo(state2));
 
-            _testArea.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _testArea.RestorePreviousState(RestoreDirection.Previous);
 
             Assert.That(_testArea.CurrentState, Is.EqualTo(state1));
 
-            _testArea.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _testArea.RestorePreviousState(RestoreDirection.Previous);
 
             Assert.That(_testArea.CurrentState, Is.EqualTo(_baseState));
 
-            _testArea.RestorePreviousState(EditorArea.RestoreDirection.Next);
-            _testArea.RestorePreviousState(EditorArea.RestoreDirection.Next);
+            _testArea.RestorePreviousState(RestoreDirection.Next);
+            _testArea.RestorePreviousState(RestoreDirection.Next);
 
             Assert.That(_testArea.CurrentState, Is.EqualTo(state2));
         }
@@ -97,8 +97,8 @@ namespace Dialuverc.Editor.Tests.Base
 
             Assert.That(_testArea.CurrentState, Is.EqualTo(states[3]));
 
-            _testArea.RestorePreviousState(EditorArea.RestoreDirection.Previous);
-            _testArea.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _testArea.RestorePreviousState(RestoreDirection.Previous);
+            _testArea.RestorePreviousState(RestoreDirection.Previous);
 
             _testArea.ChangeState(states[4]);
 
@@ -106,16 +106,16 @@ namespace Dialuverc.Editor.Tests.Base
 
             Assert.That(_testArea.SavedStates[_testArea.SavedStates.Count - 1], Is.EqualTo(states[4]));
 
-            _testArea.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _testArea.RestorePreviousState(RestoreDirection.Previous);
 
             Assert.That(_testArea.CurrentState, Is.EqualTo(states[1]));
 
-            _testArea.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _testArea.RestorePreviousState(RestoreDirection.Previous);
 
             Assert.That(_testArea.CurrentState, Is.EqualTo(states[0]));
         }
 
-        private class TestArea : EditorArea
+        private class TestArea : EditorArea<byte[]>
         {
             public string CurrentState { get; private set; }
 
@@ -137,12 +137,17 @@ namespace Dialuverc.Editor.Tests.Base
                 EndChange();
             }
 
-            protected override void ApplyEditorState(byte[] previousState, byte[] newState)
+            protected override void ApplyRestoredState(byte[] newState)
             {
                 CurrentState = Encoding.UTF8.GetString(newState);
             }
 
-            protected override byte[] SerializeCurrentEditorState()
+            protected override bool CheckStateEquality(byte[] a, byte[] b)
+            {
+                return a.SequenceEqual(b);
+            }
+
+            protected override byte[] GetStateToSave()
             {
                 return Encoding.UTF8.GetBytes(CurrentState);
             }

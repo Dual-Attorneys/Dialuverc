@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Dialuverc.Editor.Deductions
 {
-    public class ThoughtsEditorArea : EditorArea
+    public class ThoughtsEditorArea : EditorArea<byte[]>
     {
         List<Thought> _thoughts = new List<Thought>();
         public IReadOnlyList<Thought> Thoughts => _thoughts;
@@ -90,12 +90,17 @@ namespace Dialuverc.Editor.Deductions
             EndChange();
         }
 
-        protected override byte[] SerializeCurrentEditorState()
+        protected override byte[] GetStateToSave()
         {
             return JsonSerializer.SerializeToUtf8Bytes(_thoughts);
         }
 
-        protected override void ApplyEditorState(byte[] previousState, byte[] newState)
+        protected override bool CheckStateEquality(byte[] a, byte[] b)
+        {
+            return a.SequenceEqual(b);
+        }
+
+        protected override void ApplyRestoredState(byte[] newState)
         {
             List<Thought> thoughtsToRestore = JsonSerializer.Deserialize<List<Thought>>(newState)!;
 

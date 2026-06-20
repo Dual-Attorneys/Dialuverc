@@ -171,7 +171,7 @@ namespace Dialuverc.Editor.Tests.Deductions
 
             while (_area.CanUndo)
             {
-                _area.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+                _area.RestorePreviousState(RestoreDirection.Previous);
 
                 int indexToCheck = _area.Thoughts.Count - 1;
 
@@ -189,7 +189,7 @@ namespace Dialuverc.Editor.Tests.Deductions
 
             while (_area.CanRedo)
             {
-                _area.RestorePreviousState(EditorArea.RestoreDirection.Next);
+                _area.RestorePreviousState(RestoreDirection.Next);
 
                 int indexToCheck = _area.Thoughts.Count - 1;
 
@@ -227,7 +227,7 @@ namespace Dialuverc.Editor.Tests.Deductions
 
             for (int i = 0; i < amountToRedo; i++) 
             {
-                _area.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+                _area.RestorePreviousState(RestoreDirection.Previous);
 
                 int indexToCheck =  _area.Thoughts.Count - 1;
 
@@ -241,7 +241,7 @@ namespace Dialuverc.Editor.Tests.Deductions
 
             while (_area.CanRedo)
             {
-                _area.RestorePreviousState(EditorArea.RestoreDirection.Next);
+                _area.RestorePreviousState(RestoreDirection.Next);
 
                 int indexToCheck = _area.Thoughts.Count - 1;
 
@@ -271,7 +271,7 @@ namespace Dialuverc.Editor.Tests.Deductions
 
             _area.EditThought(guid, newTemplate.NameKey, newTemplate.DescriptionKey, newTemplate.Side);
 
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _area.RestorePreviousState(RestoreDirection.Previous);
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length));
 
@@ -280,7 +280,7 @@ namespace Dialuverc.Editor.Tests.Deductions
                 Assert.That(ThoughtsAreEqual(_area.Thoughts[i], _thoughtTemplates[i]));
             }
 
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Next);
+            _area.RestorePreviousState(RestoreDirection.Next);
 
             int checksCount = 0;
 
@@ -306,7 +306,7 @@ namespace Dialuverc.Editor.Tests.Deductions
 
             _area.InsertThought(indexToInsert, "insteredName", "insertedDescription", CharacterSides.Any);
 
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _area.RestorePreviousState(RestoreDirection.Previous);
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length));
 
@@ -315,7 +315,7 @@ namespace Dialuverc.Editor.Tests.Deductions
                 Assert.That(ThoughtsAreEqual(_area.Thoughts[i], _thoughtTemplates[i]));
             }
 
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Next);
+            _area.RestorePreviousState(RestoreDirection.Next);
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length + 1));
 
@@ -344,14 +344,14 @@ namespace Dialuverc.Editor.Tests.Deductions
 
             _area.MoveThought(toMove, 1);
 
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _area.RestorePreviousState(RestoreDirection.Previous);
 
             for (int i = 0; i < _thoughtTemplates.Length; i++)
             {
                 Assert.That(ThoughtsAreEqual(_area.Thoughts[i], _thoughtTemplates[i]));
             }
 
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Next);
+            _area.RestorePreviousState(RestoreDirection.Next);
 
             for (int i = 0; i < _thoughtTemplates.Length; i++)
             {
