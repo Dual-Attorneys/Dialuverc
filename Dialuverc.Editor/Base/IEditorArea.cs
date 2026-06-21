@@ -6,6 +6,9 @@
     /// </summary>
     public interface IEditorArea
     {
+        public bool CanUndo { get; }
+        public bool CanRedo { get; }
+
         public void RestorePreviousState(RestoreDirection direction);
     }
 }

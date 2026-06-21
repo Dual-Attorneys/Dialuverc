@@ -2,9 +2,11 @@
 {
     /// <summary>
     /// An implementation of <see cref="IEditorArea"/>.
-    /// <para>Note: <typeparamref name="T"/> must be immutable (if it's a collection, its items must be immutable as well).</para>
+    /// <para>Note: <typeparamref name="T"/> must be immutable or at least handled like it is.<br/>
+    /// This means that state, even if possible to mutate, should not be mutated after being saved.<br/>
+    /// This also applies to items inside collections.</para>
     /// </summary>
-    /// <typeparam name="T">An immutable type (if it's a collection, its items are immutable as well).</typeparam>
+    /// <typeparam name="T">The object that represents the editor state.</typeparam>
     public abstract class EditorArea<T> : TransactionalObject, IEditorArea
     {
         protected virtual int MaxStates => 50;
