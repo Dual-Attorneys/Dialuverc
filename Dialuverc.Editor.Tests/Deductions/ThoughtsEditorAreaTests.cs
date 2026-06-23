@@ -41,6 +41,8 @@ namespace Dialuverc.Editor.Tests.Deductions
 
             expectedJson = String.Format(expectedJson, guid1, guid2);
 
+            Assert.That(_area.Thoughts.Count, Is.EqualTo(2));
+
             Assert.That(_area.SerializeForExport(), Is.EqualTo(expectedJson));
         }
 

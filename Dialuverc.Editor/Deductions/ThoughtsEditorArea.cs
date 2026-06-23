@@ -110,7 +110,11 @@ namespace Dialuverc.Editor.Deductions
         {
             // While we want to use as little space as possible while serializing editor state,
             // we prefer to have exports be as readable as possible.
-            return JsonSerializer.Serialize(Thoughts, new JsonSerializerOptions() { WriteIndented = true });
+            return JsonSerializer.Serialize(Thoughts, new JsonSerializerOptions() 
+            { 
+                WriteIndented = true,
+                IncludeFields = true,
+            });
         }
 
         #endregion
