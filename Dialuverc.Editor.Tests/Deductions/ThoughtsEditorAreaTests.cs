@@ -367,6 +367,85 @@ namespace Dialuverc.Editor.Tests.Deductions
             }
         }
 
+        [Test]
+        public void SelectionReturnsCorrectThought()
+        {
+            AppendTemplatesToList();
+
+            Thought? selected = null;
+
+            _area.OnThoughtSelectionChanged += (t) => { selected = t; };
+
+            _area.SelectThought(_area.Thoughts[0].Guid);
+
+            Assert.That(ThoughtsAreEqual(selected!, _area.Thoughts[0]), Is.True);
+
+            _area.SelectThought(Guid.Empty);
+
+            Assert.That(selected, Is.Null);
+        }
+
+        [Test]
+        public void SelectingSameIsNoOp()
+        {
+            int selections = 0;
+
+            _area.OnThoughtSelectionChanged += (_) => { selections++; };
+
+            Guid toSelect = _area.AddThought("name", "desc", CharacterSides.Any);
+
+            _area.SelectThought(toSelect);
+
+            Assert.That(selections, Is.EqualTo(1));
+
+            _area.SelectThought(toSelect);
+
+            Assert.That(selections, Is.EqualTo(1));
+
+            _area.SelectThought(Guid.Empty);
+
+            Assert.That(selections, Is.EqualTo(2));
+
+            _area.SelectThought(Guid.Empty);
+
+            Assert.That(selections, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void SelectionRestored()
+        {
+            AppendTemplatesToList();
+
+            Thought? selected = null;
+
+            _area.OnThoughtSelectionChanged += (t) => { selected = t; };
+
+            _area.SelectThought(_area.Thoughts[0].Guid);
+            _area.SelectThought(_area.Thoughts[1].Guid);
+
+            _area.EditThought(_area.Thoughts[2].Guid, "editedName1", "editedDesc1", CharacterSides.Any);
+
+            _area.SelectThought(_area.Thoughts[0].Guid);
+
+            _area.EditThought(_area.Thoughts[2].Guid, "editedName2", "editedDesc2", CharacterSides.Any);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(ThoughtsAreEqual(selected!, _area.Thoughts[1]), Is.True);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(selected, Is.Null);
+
+            _area.RestorePreviousState(RestoreDirection.Next);
+
+            Assert.That(ThoughtsAreEqual(selected!, _area.Thoughts[1]), Is.True);
+
+            _area.RestorePreviousState(RestoreDirection.Next);
+
+            Assert.That(ThoughtsAreEqual(selected!, _area.Thoughts[0]), Is.True);
+        }
+
         Thought[] _thoughtTemplates =
         [
             // Guids from the templates are ignored.

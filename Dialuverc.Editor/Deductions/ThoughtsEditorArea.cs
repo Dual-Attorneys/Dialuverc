@@ -5,10 +5,20 @@ using System.Text.Json;
 
 namespace Dialuverc.Editor.Deductions
 {
-    public class ThoughtsEditorArea : EditorArea<ImmutableList<Thought>>
+    public class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {
         ImmutableList<Thought> _thoughts = ImmutableList<Thought>.Empty;
         public IReadOnlyList<Thought> Thoughts => _thoughts;
+
+        // Used to compare Thought references so that selection events are not invoked
+        // if no changes were made or we're deselecting twice.
+        Thought? _lastSelectedThought = null;
+
+        /// <summary>
+        /// Invoked when a <see cref="Thought"/> is selected or deselected.
+        /// <para>Deselecting passes a <see langword="null"/> <see cref="Thought"/>.</para>
+        /// </summary>
+        public event Action<Thought?>? OnThoughtSelectionChanged;
 
         public Guid AddThought(string nameKey, string descriptionKey, CharacterSides side)
         {
@@ -89,21 +99,57 @@ namespace Dialuverc.Editor.Deductions
             EndChange();
         }
 
+        /// <summary>
+        /// Selects the <see cref="Thought"/> corresponding to the given <paramref name="guid"/>.
+        /// <para>Pass <see cref="Guid.Empty"/> to deselect.</para>
+        /// </summary>
+        public void SelectThought(Guid guid)
+        {
+            Thought? foundThought;
+
+            if (guid == Guid.Empty)
+            {
+                foundThought = null;
+            }
+            else
+            {
+                foundThought = Thoughts.FirstOrDefault(t => t.Guid == guid);
+
+                if (foundThought is null)
+                    throw new InvalidOperationException($"No thought with id '{guid}'");
+            }
+
+            if (ReferenceEquals(_lastSelectedThought, foundThought))
+                return;
+
+            _lastSelectedThought = foundThought;
+
+            OnThoughtSelectionChanged?.Invoke(foundThought);
+        }
+
         #region EditorArea
 
-        protected override ImmutableList<Thought> GetStateToSave()
+        protected override ThoughtsEditorState GetStateToSave()
         {
-            return _thoughts;
+            Guid toSave = Guid.Empty;
+
+            if (_lastSelectedThought is not null)
+                toSave = _lastSelectedThought.Guid;
+
+            return new ThoughtsEditorState(_thoughts, toSave);
         }
 
-        protected override bool CheckStateEquality(ImmutableList<Thought> a, ImmutableList<Thought> b)
+        protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
         {
-            return a == b;
+            // Selecting a thought is not a state change.
+            return a.Thoughts == b.Thoughts;
         }
 
-        protected override void ApplyRestoredState(ImmutableList<Thought> newState)
+        protected override void ApplyRestoredState(ThoughtsEditorState newState)
         {
-            _thoughts = newState;
+            _thoughts = newState.Thoughts;
+
+            SelectThought(newState.ThoughtSelection);
         }
 
         public override string SerializeForExport()
