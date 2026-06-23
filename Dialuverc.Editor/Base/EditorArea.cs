@@ -1,14 +1,17 @@
 ﻿namespace Dialuverc.Editor.Base
 {
     /// <summary>
-    /// Represents one of multiple editor areas, each allowing to work on a specific part of the narrative system.
-    /// <para>Provides basic undo/redo functionality.</para>
+    /// An implementation of <see cref="IEditorArea"/>.
+    /// <para>Note: <typeparamref name="T"/> must be immutable or at least handled like it is.<br/>
+    /// This means that state, even if possible to mutate, should not be mutated after being saved.<br/>
+    /// This also applies to items inside collections.</para>
     /// </summary>
-    public abstract class EditorArea : TransactionalObject
+    /// <typeparam name="T">The object that represents the editor state.</typeparam>
+    public abstract class EditorArea<T> : TransactionalObject, IEditorArea
     {
         protected virtual int MaxStates => 50;
 
-        List<byte[]> _savedStates = new List<byte[]>();
+        readonly List<T> _savedStates = new List<T>();
 
         int _currentState;
 
@@ -38,9 +41,12 @@
             if (_isRestoringPreviousState)
                 return;
 
-            byte[] stateToSave = SerializeCurrentEditorState();
+            T stateToSave = GetStateToSave();
 
-            if (_savedStates.Count > 0 && _savedStates[_currentState].SequenceEqual(stateToSave))
+            if (stateToSave is null)
+                throw new InvalidOperationException($"Can't save a null state");
+
+            if (_savedStates.Count > 0 && CheckStateEquality(_savedStates[_currentState], stateToSave))
                 return;
 
             if (_currentState < _savedStates.Count - 1)
@@ -69,25 +75,22 @@
 
             _isRestoringPreviousState = true;
 
-            ApplyEditorState(_savedStates[_currentState], _savedStates[index]);
+            ApplyRestoredState(_savedStates[index]);
 
             _currentState = index;
 
             _isRestoringPreviousState = false;
         }
 
-        protected abstract byte[] SerializeCurrentEditorState();
+        protected abstract T GetStateToSave();
 
-        // Pass both states. In case we'll need it in the future. Costs nothing anyway.
-        protected abstract void ApplyEditorState(byte[] previousState, byte[] newState);
+        // Since we don't know what T is,
+        // force whoever is writing the code to think about how equality between states is determined.
+        protected abstract bool CheckStateEquality(T a, T b);
+
+        protected abstract void ApplyRestoredState(T newState);
 
         public abstract string SerializeForExport();
-
-        public enum RestoreDirection
-        {
-            Previous = -1,
-            Next = 1
-        }
 
         #region Testing
 
@@ -96,7 +99,7 @@
         /// </summary>
         protected void PointToLatestState() => _currentState = _savedStates.Count - 1;
 
-        protected IReadOnlyList<byte[]> SavedStates => _savedStates;
+        protected IReadOnlyList<T> SavedStates => _savedStates;
 
         #endregion
     }

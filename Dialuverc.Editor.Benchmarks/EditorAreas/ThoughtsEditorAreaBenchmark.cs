@@ -30,9 +30,9 @@ namespace Dialuverc.Editor.Benchmarks.EditorAreas
         [Benchmark]
         public void UndoThenRedo()
         {
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Previous);
+            _area.RestorePreviousState(RestoreDirection.Previous);
 
-            _area.RestorePreviousState(EditorArea.RestoreDirection.Next);
+            _area.RestorePreviousState(RestoreDirection.Next);
         }
 
         int _stateSerializationCounter = 0;
@@ -40,7 +40,7 @@ namespace Dialuverc.Editor.Benchmarks.EditorAreas
         // All list operations in this area are similar.
         // This one is the easiest to use for benchmarking and still triggers a full state save.
         [Benchmark]
-        public void StateSerialization()
+        public void StateSave()
         {
             Guid guidToEdit = _area.Thoughts[0].Guid;
 
