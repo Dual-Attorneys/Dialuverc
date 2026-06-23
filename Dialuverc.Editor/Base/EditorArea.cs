@@ -21,6 +21,11 @@
         public bool CanRedo => _currentState < _savedStates.Count - 1;
 
         /// <summary>
+        /// Invoked when state is saved or restored.
+        /// </summary>
+        public event Action? OnStateChanged;
+
+        /// <summary>
         /// Begins a transaction and makes sure a base state to undo towards exists.
         /// </summary>
         public override void BeginChange()
@@ -58,6 +63,9 @@
             _savedStates.Add(stateToSave);
 
             _currentState = _savedStates.Count - 1;
+
+            // This will get called twice on the first commit (MakeSureBaseStateIsSaved forces a Commit).
+            OnStateChanged?.Invoke();
         }
 
         public void RestorePreviousState(RestoreDirection direction)
@@ -80,6 +88,8 @@
             _currentState = index;
 
             _isRestoringPreviousState = false;
+
+            OnStateChanged?.Invoke();
         }
 
         protected abstract T GetStateToSave();

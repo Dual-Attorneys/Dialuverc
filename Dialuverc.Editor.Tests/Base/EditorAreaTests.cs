@@ -115,6 +115,19 @@ namespace Dialuverc.Editor.Tests.Base
             Assert.That(_testArea.CurrentState, Is.EqualTo(states[0]));
         }
 
+        [Test]
+        public void CommitAndRestoreInvokeEvent()
+        {
+            int count = 0;
+
+            _testArea.OnStateChanged += () => { count++; };
+
+            _testArea.ChangeState("A");
+            _testArea.ChangeState("B");
+
+            Assert.That(count, Is.EqualTo(3));
+        }
+
         private class TestArea : EditorArea<byte[]>
         {
             public string CurrentState { get; private set; }
