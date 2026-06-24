@@ -1,4 +1,6 @@
-﻿namespace Dialuverc.Editor.Base
+﻿using Dialuverc.Editor.Base.Verifier;
+
+namespace Dialuverc.Editor.Base
 {
     /// <summary>
     /// An implementation of <see cref="IEditorArea"/>.
@@ -7,7 +9,7 @@
     /// This also applies to items inside collections.</para>
     /// </summary>
     /// <typeparam name="T">The object that represents the editor state.</typeparam>
-    public abstract class EditorArea<T> : TransactionalObject, IEditorArea
+    public abstract class EditorArea<T> : TransactionalObject, IEditorArea, IVerifiable
     {
         protected virtual int MaxStates => 50;
 
@@ -101,6 +103,8 @@
         protected abstract void ApplyRestoredState(T newState);
 
         public abstract string SerializeForExport();
+
+        public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
 
         #region Testing
 

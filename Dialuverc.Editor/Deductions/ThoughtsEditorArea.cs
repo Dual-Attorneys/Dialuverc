@@ -1,5 +1,6 @@
 ﻿using Dialuverc.Deductions;
 using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base.Verifier;
 using System.Collections.Immutable;
 using System.Text.Json;
 
@@ -162,6 +163,8 @@ namespace Dialuverc.Editor.Deductions
                 IncludeFields = true,
             });
         }
+
+        public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
 
         #endregion
     }

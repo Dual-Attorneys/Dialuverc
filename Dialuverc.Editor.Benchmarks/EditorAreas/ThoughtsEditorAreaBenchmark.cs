@@ -44,10 +44,19 @@ namespace Dialuverc.Editor.Benchmarks.EditorAreas
         {
             Guid guidToEdit = _area.Thoughts[0].Guid;
 
-            // Serialization still happens even if the new state is identical to the current one.
+            // Saving still happens even if the new state is identical to the current one.
             _area.EditThought(guidToEdit, "New thought name for the edit.", $"New thought description. Some meaningless text here to add some length. Added on iteration {_stateSerializationCounter}", CharacterSides.Any);
 
             _stateSerializationCounter++;
+        }
+
+        // Making enough Edits to make Verify have a significantly higher impact than it would with no problems found
+        // would likely take up most of the time and memory spent in the benchmark.
+        // 0-problem-verifies are the most common case and having more than a few issues is not realistic anyway.
+        [Benchmark]
+        public void Verify()
+        {
+            _area.Verify();
         }
     }
 }
