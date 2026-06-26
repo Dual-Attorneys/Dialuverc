@@ -1,9 +1,9 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Dialuverc.Deductions;
 using Dialuverc.Editor.Base;
-using Dialuverc.Editor.Deductions;
+using DualAttorneys.Dialuverc.Deductions;
+using DualAttorneys.Dialuverc.Editor.Deductions;
 
-namespace Dialuverc.Editor.Benchmarks.EditorAreas
+namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
 {
     [MemoryDiagnoser]
     public class ThoughtsEditorAreaBenchmark

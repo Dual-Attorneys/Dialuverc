@@ -1,6 +1,6 @@
-﻿using Dialuverc.Deductions;
+﻿using DualAttorneys.Dialuverc.Deductions;
 
-namespace Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     /// <summary>
     /// Defines a set of criteria against which a <see cref="Thought"/> can be tested.

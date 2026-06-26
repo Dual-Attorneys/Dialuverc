@@ -1,7 +1,7 @@
-﻿using Dialuverc.Deductions;
-using Dialuverc.Editor.Base.Verifier;
+﻿using Dialuverc.Editor.Base.Verifier;
+using DualAttorneys.Dialuverc.Deductions;
 
-namespace Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     internal static class ThoughtsEditorVerifier
     {

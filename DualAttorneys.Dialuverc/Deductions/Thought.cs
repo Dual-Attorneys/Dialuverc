@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Deductions
+﻿namespace DualAttorneys.Dialuverc.Deductions
 {
     public class Thought
     {

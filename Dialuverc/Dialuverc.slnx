@@ -1,6 +1,11 @@
 <Solution>
-  <Project Path="../Dialuverc.Editor.Benchmarks/Dialuverc.Editor.Benchmarks.csproj" Id="2823e634-156c-48d6-839a-6acb1775c4aa" />
-  <Project Path="../Dialuverc.Editor.Tests/Dialuverc.Editor.Tests.csproj" Id="b58ce0c7-0944-4732-83ab-145383bda4ee" />
-  <Project Path="../Dialuverc.Editor/Dialuverc.Editor.csproj" />
-  <Project Path="Dialuverc.csproj" />
+  <Folder Name="/DualAttorneys/">
+    <Project Path="../DualAttorneys.Dialuverc.Benchmarks/DualAttorneys.Dialuverc.Benchmarks.csproj"/>
+    <Project Path="../DualAttorneys.Dialuverc.Tests/DualAttorneys.Dialuverc.Tests.csproj"/>
+    <Project Path="../DualAttorneys.Dialuverc/DualAttorneys.Dialuverc.csproj"/>
+  </Folder>
+  <Project Path="../Dialuverc.Editor.Benchmarks/Dialuverc.Editor.Benchmarks.csproj"/>
+  <Project Path="../Dialuverc.Editor.Tests/Dialuverc.Editor.Tests.csproj"/>
+  <Project Path="../Dialuverc.Editor/Dialuverc.Editor.csproj"/>
+  <Project Path="Dialuverc.csproj"/>
 </Solution>

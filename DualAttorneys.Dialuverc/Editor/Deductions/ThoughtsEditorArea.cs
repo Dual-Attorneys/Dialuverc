@@ -1,10 +1,10 @@
-﻿using Dialuverc.Deductions;
-using Dialuverc.Editor.Base;
+﻿using Dialuverc.Editor.Base;
 using Dialuverc.Editor.Base.Verifier;
+using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
 
-namespace Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     public class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {

@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Deductions
+﻿namespace DualAttorneys.Dialuverc.Deductions
 {
     /// <summary>
     /// Represents which side (protagonist-wise) something belongs to. 

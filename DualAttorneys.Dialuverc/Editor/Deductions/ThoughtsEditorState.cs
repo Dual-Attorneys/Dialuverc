@@ -1,7 +1,7 @@
-﻿using Dialuverc.Deductions;
+﻿using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 
-namespace Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     /// <summary>
     /// Groups all of <see cref="ThoughtsEditorArea"/>'s state for history management.

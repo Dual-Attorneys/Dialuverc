@@ -1,7 +1,7 @@
-﻿using Dialuverc.Deductions;
-using Dialuverc.Editor.Deductions;
+﻿using DualAttorneys.Dialuverc.Deductions;
+using DualAttorneys.Dialuverc.Editor.Deductions;
 
-namespace Dialuverc.Editor.Tests.Deductions
+namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
     internal class ThoughtsFilterTests
     {
