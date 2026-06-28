@@ -8,6 +8,8 @@ This project is **very** early in its development, and as such, is constantly ch
 
 Examples of its current usage can be found in [DualAttorneys.Dialuverc](https://github.com/Dual-Attorneys/Dialuverc/tree/main/DualAttorneys.Dialuverc).
 
+Please note that currently this project is mostly unusable for it's intended purpose as it is still **incomplete**.
+
 ## Objective
 
 *Dialuverc* intends to be a one-stop-shop framework to be used with any C# project, attempting to best accommodate both writers and programmers.
