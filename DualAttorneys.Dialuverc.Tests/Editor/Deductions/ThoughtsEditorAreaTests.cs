@@ -462,7 +462,10 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             }
         }
 
-        bool ThoughtsAreEqual(Thought a, Thought b)
+        /// <summary>
+        /// Checks whether 2 <see cref="Thought"/>s have equal values, ignoring <see cref="Thought.Guid"/>.
+        /// </summary>
+        static bool ThoughtsAreEqual(Thought a, Thought b)
         {
             return a.NameKey == b.NameKey &&
                 a.DescriptionKey == b.DescriptionKey &&
