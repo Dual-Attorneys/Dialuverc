@@ -1,6 +1,6 @@
 # Dialuverc
 
-A narrative framework for games, written with [Dual Attorneys](discord.gg/phECHVHCDe) in mind.
+A narrative framework for games, written with [Dual Attorneys](https://discord.gg/phECHVHCDe) in mind.
 
 ## Status
 
