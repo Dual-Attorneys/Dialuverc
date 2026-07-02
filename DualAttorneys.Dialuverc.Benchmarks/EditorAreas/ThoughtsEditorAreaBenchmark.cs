@@ -42,7 +42,7 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         [Benchmark]
         public void StateSave()
         {
-            Guid guidToEdit = _area.Thoughts[0].Guid;
+            Guid guidToEdit = _area.Thoughts[0].RuntimeThought.Guid;
 
             // Saving still happens even if the new state is identical to the current one.
             _area.EditThought(guidToEdit, "New thought name for the edit.", $"New thought description. Some meaningless text here to add some length. Added on iteration {_stateSerializationCounter}", CharacterSides.Any);
