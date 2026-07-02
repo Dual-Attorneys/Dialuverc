@@ -8,18 +8,22 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     public class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {
-        ImmutableList<Thought> _thoughts = ImmutableList<Thought>.Empty;
-        public IReadOnlyList<Thought> Thoughts => _thoughts;
+        ImmutableList<EditorThought> _thoughts = ImmutableList<EditorThought>.Empty;
+        public IReadOnlyList<EditorThought> Thoughts => _thoughts;
 
-        // Used to compare Thought references so that selection events are not invoked
+        // Used to compare references so that selection events are not invoked
         // if no changes were made or we're deselecting twice.
-        Thought? _lastSelectedThought = null;
+        EditorThought? _lastSelectedThought = null;
 
         /// <summary>
-        /// Invoked when a <see cref="Thought"/> is selected or deselected.
-        /// <para>Deselecting passes a <see langword="null"/> <see cref="Thought"/>.</para>
+        /// Invoked when a <see cref="EditorThought"/> is selected or deselected.
+        /// <para>Deselecting passes a <see langword="null"/> <see cref="EditorThought"/>.</para>
         /// </summary>
-        public event Action<Thought?>? OnThoughtSelectionChanged;
+        public event Action<EditorThought?>? OnThoughtSelectionChanged;
+
+        // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
+        // They're editable using a single Edit method that can change everything at once.
+        // This assumes their structure is unlikely to change and will always need few parameters.
 
         public Guid AddThought(string nameKey, string descriptionKey, CharacterSides side)
         {
@@ -27,9 +31,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             Thought thought = new Thought(newGuid, nameKey, descriptionKey, side);
 
+            EditorThought editorThought = new EditorThought(thought);
+
             BeginChange();
 
-            _thoughts = _thoughts.Add(thought);
+            _thoughts = _thoughts.Add(editorThought);
 
             EndChange();
 
@@ -42,9 +48,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             Thought thought = new Thought(newGuid, nameKey, descriptionKey, side);
 
+            EditorThought editorThought = new EditorThought(thought);
+
             BeginChange();
 
-            _thoughts = _thoughts.Insert(index, thought);
+            _thoughts = _thoughts.Insert(index, editorThought);
 
             EndChange();
 
@@ -53,7 +61,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public bool RemoveThought(Guid guid)
         {
-            int foundThought = _thoughts.FindIndex(thought => thought.Guid == guid);
+            int foundThought = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
             // Don't throw if we remove a thought that doesn't exist
             // since it not existing results in the same state as it being removed.
@@ -71,27 +79,39 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void EditThought(Guid guid, string nameKey, string descriptionKey, CharacterSides side)
         {
-            int index = _thoughts.FindIndex(thought => thought.Guid == guid);
+            int index = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
             // An edit changes state in a way that failure doesn't match.
             if (index < 0)
                 throw new KeyNotFoundException($"No thoughts with id '{guid}'");
 
+            EditorThought currentThought = _thoughts[index];
+
+            Thought modifiedThought = new Thought(guid, nameKey, descriptionKey, side);
+
+            if (currentThought.RuntimeThought.Equals(modifiedThought))
+                return;
+
+            EditorThought modifiedEditorThought = _thoughts[index] with { RuntimeThought = modifiedThought };
+
             BeginChange();
 
-            _thoughts = _thoughts.SetItem(index, new Thought(guid, nameKey, descriptionKey, side));
+            _thoughts = _thoughts.SetItem(index, modifiedEditorThought);
 
             EndChange();
         }
 
         public void MoveThought(Guid guid, int newIndex)
         {
-            int oldIndex = _thoughts.FindIndex(thought => thought.Guid == guid);
+            int oldIndex = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
             if (oldIndex < 0)
                 throw new KeyNotFoundException($"No thoughts with id '{guid}'");
 
-            Thought thoughtToMove = _thoughts[oldIndex];
+            if (oldIndex == newIndex)
+                return;
+
+            EditorThought thoughtToMove = _thoughts[oldIndex];
 
             BeginChange();
 
@@ -102,19 +122,19 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         /// <summary>
         /// Selects the <see cref="Thought"/> corresponding to the given <paramref name="guid"/>.
-        /// <para>Pass <see cref="Guid.Empty"/> to deselect.</para>
+        /// <para>Pass <see langword="null"/> to deselect.</para>
         /// </summary>
-        public void SelectThought(Guid guid)
+        public void SelectThought(Guid? guid)
         {
-            Thought? foundThought;
+            EditorThought? foundThought;
 
-            if (guid == Guid.Empty)
+            if (!guid.HasValue)
             {
                 foundThought = null;
             }
             else
             {
-                foundThought = Thoughts.FirstOrDefault(t => t.Guid == guid);
+                foundThought = Thoughts.FirstOrDefault(t => t.RuntimeThought.Guid == guid);
 
                 if (foundThought is null)
                     throw new InvalidOperationException($"No thought with id '{guid}'");
@@ -128,16 +148,37 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             OnThoughtSelectionChanged?.Invoke(foundThought);
         }
 
+        public void SetEditorNote(Guid guid, string editorNote)
+        {
+            int index = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
+
+            if (index < 0)
+                throw new KeyNotFoundException($"No thoughts with id '{guid}'");
+
+            EditorThought currentThought = _thoughts[index];
+
+            if (currentThought.EditorNote == editorNote)
+                return;
+
+            EditorThought modifiedThought = currentThought with { EditorNote = editorNote };
+
+            BeginChange();
+
+            _thoughts = _thoughts.SetItem(index, modifiedThought);
+
+            EndChange();
+        }
+
         #region EditorArea
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            Guid toSave = Guid.Empty;
+            Guid? selection = null;
 
             if (_lastSelectedThought is not null)
-                toSave = _lastSelectedThought.Guid;
+                selection = _lastSelectedThought.RuntimeThought.Guid;
 
-            return new ThoughtsEditorState(_thoughts, toSave);
+            return new ThoughtsEditorState(_thoughts, selection);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
@@ -157,7 +198,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             // While we want to use as little space as possible while serializing editor state,
             // we prefer to have exports be as readable as possible.
-            return JsonSerializer.Serialize(Thoughts, new JsonSerializerOptions() 
+            return JsonSerializer.Serialize(Thoughts.Select(et => et.RuntimeThought), new JsonSerializerOptions() 
             { 
                 WriteIndented = true,
                 IncludeFields = true,

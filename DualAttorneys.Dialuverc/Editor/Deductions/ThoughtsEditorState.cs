@@ -8,14 +8,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
     /// </summary>
     public class ThoughtsEditorState
     {
-        public readonly ImmutableList<Thought> Thoughts;
+        public readonly ImmutableList<EditorThought> Thoughts;
 
         /// <summary>
         /// Which thought was selected at the time this state was saved.
         /// </summary>
-        public readonly Guid ThoughtSelection;
+        public readonly Guid? ThoughtSelection;
 
-        public ThoughtsEditorState(ImmutableList<Thought> thoughts, Guid thoughtSelection)
+        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, Guid? thoughtSelection)
         {
             Thoughts = thoughts;
             ThoughtSelection = thoughtSelection;

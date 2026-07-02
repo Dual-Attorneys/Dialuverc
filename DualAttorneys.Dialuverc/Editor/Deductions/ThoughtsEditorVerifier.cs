@@ -7,12 +7,12 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
     {
         const string _unformattedDuplicateMessage = "Duplicate {0} '{1}' at indices {2}.";
 
-        public static IReadOnlyList<Problem> Run(IReadOnlyList<Thought> thoughts)
+        public static IReadOnlyList<Problem> Run(IReadOnlyList<EditorThought> thoughts)
         {
             List<Problem> allProblems = new List<Problem>();
 
-            DuplicatesInfo[] nameDuplicates = GetDuplicates(thoughts, t => t.NameKey);
-            DuplicatesInfo[] descriptionDuplicates = GetDuplicates(thoughts, t => t.DescriptionKey);
+            DuplicatesInfo[] nameDuplicates = GetDuplicates(thoughts, t => t.RuntimeThought.NameKey);
+            DuplicatesInfo[] descriptionDuplicates = GetDuplicates(thoughts, t => t.RuntimeThought.DescriptionKey);
 
             // Names may be used as a human-readable way to get to a GUID.
             // Descriptions can "safely" be duplicate.
@@ -22,10 +22,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             return allProblems;
         }
 
-        static DuplicatesInfo[] GetDuplicates(IReadOnlyList<Thought> thoughts, Func<Thought, string> criteria)
+        static DuplicatesInfo[] GetDuplicates(IReadOnlyList<EditorThought> thoughts, Func<EditorThought, string> criteria)
         {
             DuplicatesInfo[] duplicatesInfo =
-                thoughts.Select((t, i) => new ValueTuple<Thought, int>(t, i))
+                thoughts.Select((t, i) => new ValueTuple<EditorThought, int>(t, i))
                 .GroupBy(a => criteria(a.Item1))
                 .Where(g => g.Count() > 1)
                 .Select(g => new DuplicatesInfo(

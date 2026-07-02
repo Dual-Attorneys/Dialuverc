@@ -102,6 +102,8 @@ namespace Dialuverc.Editor.Base
 
         protected abstract void ApplyRestoredState(T newState);
 
+        // TODO: This should be split in a way that allows the "editor project" to be saved
+        // separately from the output that will be used by the game.
         public abstract string SerializeForExport();
 
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
