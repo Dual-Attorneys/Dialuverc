@@ -1,6 +1,6 @@
 ﻿namespace DualAttorneys.Dialuverc.Deductions
 {
-    public class Thought : IEquatable<Thought>
+    public class Thought
     {
         public readonly Guid Guid;
 
@@ -31,7 +31,7 @@
         /// <summary>
         /// Checks whether this <see cref="Thought"/> has the same values as another, ignoring <see cref="Guid"/>.
         /// </summary>
-        public bool Equals(Thought? other) => other is not null && 
+        public bool HasSameValues(Thought? other) => other is not null && 
             NameKey == other.NameKey && DescriptionKey == other.DescriptionKey && Side == other.Side;
     }
 }

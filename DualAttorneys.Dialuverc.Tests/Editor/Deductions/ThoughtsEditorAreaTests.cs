@@ -96,16 +96,16 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 "thought4",
             ];
 
-            Guid guid = _area.AddThought("starterNameKey", "starterDescriptionKey", CharacterSides.Tychon);
+            Guid toEdit = _area.AddThought("starterNameKey", "starterDescriptionKey", CharacterSides.Tychon);
             _area.AddThought("thought2", "description2", CharacterSides.Any);
             _area.AddThought("thought3", "description3", CharacterSides.Any);
             _area.AddThought("thought4", "description4", CharacterSides.Any);
 
-            _area.EditThought(guid, "newNameKey", "newDescriptionKey", CharacterSides.Forger);
+            _area.EditThought(toEdit, "newNameKey", "newDescriptionKey", CharacterSides.Forger);
 
             Assert.That(_area.Thoughts.Count, Is.EqualTo(4));
 
-            Assert.That(_area.Thoughts[0].RuntimeThought.Guid, Is.EqualTo(guid));
+            Assert.That(_area.Thoughts[0].RuntimeThought.Guid, Is.EqualTo(toEdit));
             Assert.That(_area.Thoughts[0].RuntimeThought.NameKey, Is.EqualTo("newNameKey"));
             Assert.That(_area.Thoughts[0].RuntimeThought.DescriptionKey, Is.EqualTo("newDescriptionKey"));
             Assert.That(_area.Thoughts[0].RuntimeThought.Side, Is.EqualTo(CharacterSides.Forger));
@@ -146,9 +146,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                     continue;
 
                 if (i < indexToInsert)
-                    Assert.That(ThoughtsAreEqual(_thoughtTemplates[i], _area.Thoughts[i].RuntimeThought));
+                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i].RuntimeThought), Is.True);
                 else
-                    Assert.That(ThoughtsAreEqual(_thoughtTemplates[i], _area.Thoughts[i + 1].RuntimeThought));
+                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i + 1].RuntimeThought), Is.True);
             }
 
             Assert.That(_area.Thoughts[indexToInsert].RuntimeThought.NameKey, Is.EqualTo("insertedName"));
@@ -161,14 +161,15 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             AppendTemplatesToList();
 
+            int originalIndex = 0;
             int newIndex = 1;
 
-            Guid toMove = _area.Thoughts[0].RuntimeThought.Guid;
+            Guid toMove = _area.Thoughts[originalIndex].RuntimeThought.Guid;
             Guid previousAtIndex = _area.Thoughts[newIndex].RuntimeThought.Guid;
 
             _area.MoveThought(toMove, newIndex);
 
-            Assert.That(_area.Thoughts[newIndex - 1].RuntimeThought.Guid, Is.EqualTo(previousAtIndex));
+            Assert.That(_area.Thoughts[originalIndex].RuntimeThought.Guid, Is.EqualTo(previousAtIndex));
             Assert.That(_area.Thoughts[newIndex].RuntimeThought.Guid, Is.EqualTo(toMove));
 
             // Check whether the number of possible Undos is correct.
@@ -200,7 +201,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             for (int i = 0; i < startingCount; i++)
             {
-                Assert.That(ThoughtsAreEqual(_area.Thoughts[i].RuntimeThought, _thoughtTemplates[i]), Is.True);
+                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
             }
 
             while (_area.CanUndo)
@@ -216,7 +217,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
                 Thought b = _thoughtTemplates[indexToCheck];
 
-                Assert.That(ThoughtsAreEqual(a, b), Is.True);
+                Assert.That(a.HasSameValues(b), Is.True);
             }
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(0));
@@ -230,7 +231,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
                 Thought b = _thoughtTemplates[indexToCheck];
 
-                Assert.That(ThoughtsAreEqual(a, b), Is.True);
+                Assert.That(a.HasSameValues(b), Is.True);
             }
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(startingCount));
@@ -268,7 +269,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
                 Thought b = _thoughtTemplates[indexToCheck];
 
-                Assert.That(ThoughtsAreEqual(a, b), Is.True);
+                Assert.That(a.HasSameValues(b), Is.True);
             }
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(starterCount));
@@ -286,7 +287,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
                 Thought b = _thoughtTemplates[indexToCheck];
 
-                Assert.That(ThoughtsAreEqual(a, b), Is.True);
+                Assert.That(a.HasSameValues(b), Is.True);
             }
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(0));
@@ -297,13 +298,13 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             AppendTemplatesToList();
 
-            int indexToEdit = (int)(_thoughtTemplates.Length / 2f);
+            int indexToEdit = _thoughtTemplates.Length / 2;
 
-            Guid guid = _area.Thoughts.First(t => t.RuntimeThought.NameKey == _thoughtTemplates[indexToEdit].NameKey).RuntimeThought.Guid;
+            Guid toEdit = _area.Thoughts.First(t => t.RuntimeThought.NameKey == _thoughtTemplates[indexToEdit].NameKey).RuntimeThought.Guid;
 
             Thought newTemplate = new Thought(new Guid(), "NewKey", "NewDescription", CharacterSides.Any);
 
-            _area.EditThought(guid, newTemplate.NameKey, newTemplate.DescriptionKey, newTemplate.Side);
+            _area.EditThought(toEdit, newTemplate.NameKey, newTemplate.DescriptionKey, newTemplate.Side);
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
@@ -311,7 +312,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             for (int i = 0; i < _thoughtTemplates.Length; i++)
             {
-                Assert.That(ThoughtsAreEqual(_area.Thoughts[i].RuntimeThought, _thoughtTemplates[i]));
+                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
             }
 
             _area.RestorePreviousState(RestoreDirection.Next);
@@ -321,9 +322,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             for (int i = 0; i < _thoughtTemplates.Length; i++)
             {
                 if (i != indexToEdit)
-                    Assert.That(ThoughtsAreEqual(_area.Thoughts[i].RuntimeThought, _thoughtTemplates[i]));
+                    Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
                 else
-                    Assert.That(ThoughtsAreEqual(_area.Thoughts[i].RuntimeThought, newTemplate));
+                    Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(newTemplate), Is.True);
 
                 checksCount++;
             }
@@ -346,7 +347,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             for (int i = 0; i < _thoughtTemplates.Length; i++)
             {
-                Assert.That(ThoughtsAreEqual(_area.Thoughts[i].RuntimeThought, _thoughtTemplates[i]));
+                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
             }
 
             _area.RestorePreviousState(RestoreDirection.Next);
@@ -359,9 +360,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                     continue;
 
                 if (i < indexToInsert)
-                    Assert.That(ThoughtsAreEqual(_thoughtTemplates[i], _area.Thoughts[i].RuntimeThought));
+                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i].RuntimeThought), Is.True);
                 else
-                    Assert.That(ThoughtsAreEqual(_thoughtTemplates[i], _area.Thoughts[i + 1].RuntimeThought));
+                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i + 1].RuntimeThought), Is.True);
             }
         }
 
@@ -382,7 +383,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             for (int i = 0; i < _thoughtTemplates.Length; i++)
             {
-                Assert.That(ThoughtsAreEqual(_area.Thoughts[i].RuntimeThought, _thoughtTemplates[i]));
+                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
             }
 
             _area.RestorePreviousState(RestoreDirection.Next);
@@ -410,7 +411,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.SelectThought(_area.Thoughts[0].RuntimeThought.Guid);
 
-            Assert.That(ThoughtsAreEqual(selected!.RuntimeThought, _area.Thoughts[0].RuntimeThought), Is.True);
+            Assert.That(selected!.RuntimeThought.HasSameValues(_area.Thoughts[0].RuntimeThought), Is.True);
 
             _area.SelectThought(null);
 
@@ -463,7 +464,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(ThoughtsAreEqual(selected!.RuntimeThought, _area.Thoughts[1].RuntimeThought), Is.True);
+            Assert.That(selected!.RuntimeThought.HasSameValues(_area.Thoughts[1].RuntimeThought), Is.True);
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
@@ -471,11 +472,11 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
-            Assert.That(ThoughtsAreEqual(selected!.RuntimeThought, _area.Thoughts[1].RuntimeThought), Is.True);
+            Assert.That(selected!.RuntimeThought.HasSameValues(_area.Thoughts[1].RuntimeThought), Is.True);
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
-            Assert.That(ThoughtsAreEqual(selected!.RuntimeThought, _area.Thoughts[0].RuntimeThought), Is.True);
+            Assert.That(selected!.RuntimeThought.HasSameValues(_area.Thoughts[0].RuntimeThought), Is.True);
         }
 
         [Test]
@@ -518,9 +519,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         Thought[] _thoughtTemplates =
         [
             // Guids from the templates are ignored.
-            new Thought(new Guid(), "thought1", "description1", CharacterSides.Tychon),
-            new Thought(new Guid(), "thought2", "description2", CharacterSides.Forger),
-            new Thought(new Guid(), "thought3", "description3", CharacterSides.Any),
+            new Thought(Guid.Empty, "thought1", "description1", CharacterSides.Tychon),
+            new Thought(Guid.Empty, "thought2", "description2", CharacterSides.Forger),
+            new Thought(Guid.Empty, "thought3", "description3", CharacterSides.Any),
         ];
 
         void AppendTemplatesToList()
@@ -529,17 +530,6 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             {
                 _area.AddThought(thought.NameKey, thought.DescriptionKey, thought.Side);
             }
-        }
-
-        /// <summary>
-        /// Checks whether 2 <see cref="Thought"/>s have equal values, ignoring <see cref="Thought.Guid"/>.
-        /// </summary>
-        // TODO: This is now in Thought as well. Remove this from here.
-        static bool ThoughtsAreEqual(Thought a, Thought b)
-        {
-            return a.NameKey == b.NameKey &&
-                a.DescriptionKey == b.DescriptionKey &&
-                a.Side == b.Side;
         }
 
         /// <summary>
