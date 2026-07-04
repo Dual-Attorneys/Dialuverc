@@ -27,11 +27,5 @@
 
             Side = side;
         }
-
-        /// <summary>
-        /// Checks whether this <see cref="Thought"/> has the same values as another, ignoring <see cref="Guid"/>.
-        /// </summary>
-        public bool HasSameValues(Thought? other) => other is not null && 
-            NameKey == other.NameKey && DescriptionKey == other.DescriptionKey && Side == other.Side;
     }
 }

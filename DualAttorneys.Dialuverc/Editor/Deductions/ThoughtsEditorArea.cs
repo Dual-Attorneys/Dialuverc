@@ -87,10 +87,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             EditorThought currentThought = _thoughts[index];
 
-            Thought modifiedThought = new Thought(guid, nameKey, descriptionKey, side);
-
-            if (currentThought.RuntimeThought.HasSameValues(modifiedThought))
+            if (currentThought.RuntimeThought.HasSameValues(nameKey, descriptionKey, side))
                 return;
+
+            Thought modifiedThought = new Thought(guid, nameKey, descriptionKey, side);
 
             EditorThought modifiedEditorThought = _thoughts[index] with { RuntimeThought = modifiedThought };
 
