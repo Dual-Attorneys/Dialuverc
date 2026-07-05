@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/DualAttorneys/">
+    <Project Path="DualAttorneys.Dialuverc.Benchmarks/DualAttorneys.Dialuverc.Benchmarks.csproj"/>
+    <Project Path="DualAttorneys.Dialuverc.Tests/DualAttorneys.Dialuverc.Tests.csproj"/>
+    <Project Path="DualAttorneys.Dialuverc/DualAttorneys.Dialuverc.csproj"/>
+  </Folder>
+  <Project Path="Dialuverc.Editor.Benchmarks/Dialuverc.Editor.Benchmarks.csproj"/>
+  <Project Path="Dialuverc.Editor.Tests/Dialuverc.Editor.Tests.csproj"/>
+  <Project Path="Dialuverc.Editor/Dialuverc.Editor.csproj"/>
+  <Project Path="Dialuverc/Dialuverc.csproj"/>
+</Solution>
