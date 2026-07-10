@@ -25,9 +25,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         // They're editable using a single Edit method that can change everything at once.
         // This assumes their structure is unlikely to change and will always need few parameters.
 
-        public Guid AddThought(string nameKey, string descriptionKey, CharacterSides side)
+        public ThoughtGuid AddThought(string nameKey, string descriptionKey, CharacterSides side)
         {
-            Guid newGuid = Guid.NewGuid();
+            ThoughtGuid newGuid = new ThoughtGuid();
 
             Thought thought = new Thought(newGuid, nameKey, descriptionKey, side);
 
@@ -42,9 +42,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             return newGuid;
         }
 
-        public Guid InsertThought(int index, string nameKey, string descriptionKey, CharacterSides side)
+        public ThoughtGuid InsertThought(int index, string nameKey, string descriptionKey, CharacterSides side)
         {
-            Guid newGuid = Guid.NewGuid();
+            ThoughtGuid newGuid = new ThoughtGuid();
 
             Thought thought = new Thought(newGuid, nameKey, descriptionKey, side);
 
@@ -59,7 +59,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             return newGuid;
         }
 
-        public bool RemoveThought(Guid guid)
+        public bool RemoveThought(ThoughtGuid guid)
         {
             int foundThought = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
@@ -77,7 +77,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             return true;
         }
 
-        public void EditThought(Guid guid, string nameKey, string descriptionKey, CharacterSides side)
+        public void EditThought(ThoughtGuid guid, string nameKey, string descriptionKey, CharacterSides side)
         {
             int index = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
@@ -101,7 +101,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             EndChange();
         }
 
-        public void MoveThought(Guid guid, int newIndex)
+        public void MoveThought(ThoughtGuid guid, int newIndex)
         {
             int oldIndex = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
@@ -124,7 +124,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// Selects the <see cref="Thought"/> corresponding to the given <paramref name="guid"/>.
         /// <para>Pass <see langword="null"/> to deselect.</para>
         /// </summary>
-        public void SelectThought(Guid? guid)
+        public void SelectThought(ThoughtGuid? guid)
         {
             EditorThought? foundThought;
 
@@ -148,7 +148,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             OnThoughtSelectionChanged?.Invoke(foundThought);
         }
 
-        public void SetEditorNote(Guid guid, string editorNote)
+        public void SetEditorNote(ThoughtGuid guid, string editorNote)
         {
             int index = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
@@ -173,7 +173,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            Guid? selection = null;
+            ThoughtGuid? selection = null;
 
             if (_lastSelectedThought is not null)
                 selection = _lastSelectedThought.RuntimeThought.Guid;

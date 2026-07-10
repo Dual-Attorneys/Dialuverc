@@ -33,11 +33,11 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
   }}
 ]";
 
-            Thought thought1 = new Thought(new Guid(), "thought1", "description1", CharacterSides.Tychon);
-            Thought thought2 = new Thought(new Guid(), "thought2", "description2", CharacterSides.Forger);
+            Thought thought1 = new Thought(new ThoughtGuid(), "thought1", "description1", CharacterSides.Tychon);
+            Thought thought2 = new Thought(new ThoughtGuid(), "thought2", "description2", CharacterSides.Forger);
 
-            Guid guid1 = _area.AddThought(thought1.NameKey, thought1.DescriptionKey, thought1.Side);
-            Guid guid2 = _area.AddThought(thought2.NameKey, thought2.DescriptionKey, thought2.Side);
+            ThoughtGuid guid1 = _area.AddThought(thought1.NameKey, thought1.DescriptionKey, thought1.Side);
+            ThoughtGuid guid2 = _area.AddThought(thought2.NameKey, thought2.DescriptionKey, thought2.Side);
 
             expectedJson = String.Format(expectedJson, guid1, guid2);
 
@@ -74,7 +74,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         public void RemoveThought()
         {
             _area.AddThought("thought1", "description1", CharacterSides.Tychon);
-            Guid guidToRemove = _area.AddThought("thought2", "description2", CharacterSides.Forger);
+            ThoughtGuid guidToRemove = _area.AddThought("thought2", "description2", CharacterSides.Forger);
             _area.AddThought("thought3", "description3", CharacterSides.Any);
 
             _area.RemoveThought(guidToRemove);
@@ -96,7 +96,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 "thought4",
             ];
 
-            Guid toEdit = _area.AddThought("starterNameKey", "starterDescriptionKey", CharacterSides.Tychon);
+            ThoughtGuid toEdit = _area.AddThought("starterNameKey", "starterDescriptionKey", CharacterSides.Tychon);
             _area.AddThought("thought2", "description2", CharacterSides.Any);
             _area.AddThought("thought3", "description3", CharacterSides.Any);
             _area.AddThought("thought4", "description4", CharacterSides.Any);
@@ -121,9 +121,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void EditThoughtNoChangeNoStateSave()
         {
-            Thought template = new Thought(Guid.Empty, "nameKey", "descriptionKey", CharacterSides.Any);
+            Thought template = new Thought(new ThoughtGuid(), "nameKey", "descriptionKey", CharacterSides.Any);
 
-            Guid toEdit = _area.AddThought(template.NameKey, template.DescriptionKey, template.Side);
+            ThoughtGuid toEdit = _area.AddThought(template.NameKey, template.DescriptionKey, template.Side);
             _area.EditThought(toEdit, template.NameKey, template.DescriptionKey, template.Side);
 
             Assert.That(RestorePreviousUntilPossible, Is.EqualTo(1));
@@ -136,7 +136,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             int indexToInsert = 1;
 
-            Guid inserted = _area.InsertThought(indexToInsert, "insertedName", "insertedDescription", CharacterSides.Any);
+            ThoughtGuid inserted = _area.InsertThought(indexToInsert, "insertedName", "insertedDescription", CharacterSides.Any);
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length + 1));
 
@@ -164,8 +164,8 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             int originalIndex = 0;
             int newIndex = 1;
 
-            Guid toMove = _area.Thoughts[originalIndex].RuntimeThought.Guid;
-            Guid previousAtIndex = _area.Thoughts[newIndex].RuntimeThought.Guid;
+            ThoughtGuid toMove = _area.Thoughts[originalIndex].RuntimeThought.Guid;
+            ThoughtGuid previousAtIndex = _area.Thoughts[newIndex].RuntimeThought.Guid;
 
             _area.MoveThought(toMove, newIndex);
 
@@ -184,7 +184,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             int index = 1;
 
-            Guid toMove = _area.Thoughts[index].RuntimeThought.Guid;
+            ThoughtGuid toMove = _area.Thoughts[index].RuntimeThought.Guid;
 
             _area.MoveThought(toMove, index);
 
@@ -300,9 +300,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             int indexToEdit = _thoughtTemplates.Length / 2;
 
-            Guid toEdit = _area.Thoughts.First(t => t.RuntimeThought.NameKey == _thoughtTemplates[indexToEdit].NameKey).RuntimeThought.Guid;
+            ThoughtGuid toEdit = _area.Thoughts.First(t => t.RuntimeThought.NameKey == _thoughtTemplates[indexToEdit].NameKey).RuntimeThought.Guid;
 
-            Thought newTemplate = new Thought(new Guid(), "NewKey", "NewDescription", CharacterSides.Any);
+            Thought newTemplate = new Thought(new ThoughtGuid(), "NewKey", "NewDescription", CharacterSides.Any);
 
             _area.EditThought(toEdit, newTemplate.NameKey, newTemplate.DescriptionKey, newTemplate.Side);
 
@@ -372,10 +372,10 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             AppendTemplatesToList();
 
             int indexToMove = 0;
-            int targetIndex = 1; 
+            int targetIndex = 1;
 
-            Guid previousAtIndex = _area.Thoughts[targetIndex].RuntimeThought.Guid;
-            Guid toMove = _area.Thoughts[indexToMove].RuntimeThought.Guid;
+            ThoughtGuid previousAtIndex = _area.Thoughts[targetIndex].RuntimeThought.Guid;
+            ThoughtGuid toMove = _area.Thoughts[indexToMove].RuntimeThought.Guid;
 
             _area.MoveThought(toMove, 1);
 
@@ -425,7 +425,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.OnThoughtSelectionChanged += (_) => { selections++; };
 
-            Guid toSelect = _area.AddThought("name", "desc", CharacterSides.Any);
+            ThoughtGuid toSelect = _area.AddThought("name", "desc", CharacterSides.Any);
 
             _area.SelectThought(toSelect);
 
@@ -482,7 +482,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void SetEditorNote()
         {
-            Guid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
+            ThoughtGuid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
 
             _area.SetEditorNote(toEdit, "changed note");
 
@@ -494,7 +494,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void SetEditorNoteNoChangeNoStateSave()
         {
-            Guid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
+            ThoughtGuid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
 
             _area.SetEditorNote(toEdit, "changed note");
             _area.SetEditorNote(toEdit, "changed note");
@@ -505,7 +505,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void RestoreAfterSetEditorNote()
         {
-            Guid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
+            ThoughtGuid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
 
             _area.SetEditorNote(toEdit, "changed note");
 
@@ -519,9 +519,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         Thought[] _thoughtTemplates =
         [
             // Guids from the templates are ignored.
-            new Thought(Guid.Empty, "thought1", "description1", CharacterSides.Tychon),
-            new Thought(Guid.Empty, "thought2", "description2", CharacterSides.Forger),
-            new Thought(Guid.Empty, "thought3", "description3", CharacterSides.Any),
+            new Thought(new ThoughtGuid(), "thought1", "description1", CharacterSides.Tychon),
+            new Thought(new ThoughtGuid(), "thought2", "description2", CharacterSides.Forger),
+            new Thought(new ThoughtGuid(), "thought3", "description3", CharacterSides.Any),
         ];
 
         void AppendTemplatesToList()

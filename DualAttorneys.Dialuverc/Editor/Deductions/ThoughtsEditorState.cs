@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using DualAttorneys.Dialuverc.Deductions;
+using System.Collections.Immutable;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
@@ -12,9 +13,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// <summary>
         /// Which thought was selected at the time this state was saved.
         /// </summary>
-        public readonly Guid? ThoughtSelection;
+        public readonly ThoughtGuid? ThoughtSelection;
 
-        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, Guid? thoughtSelection)
+        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, ThoughtGuid? thoughtSelection)
         {
             Thoughts = thoughts;
             ThoughtSelection = thoughtSelection;

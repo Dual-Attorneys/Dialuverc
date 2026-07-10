@@ -2,7 +2,7 @@
 {
     public class Thought
     {
-        public readonly Guid Guid;
+        public readonly ThoughtGuid Guid;
 
         public readonly string NameKey;
         public readonly string DescriptionKey;
@@ -12,7 +12,7 @@
         /// </summary>
         public readonly CharacterSides Side;
 
-        public Thought(Guid guid, string nameKey, string descriptionKey, CharacterSides side)
+        public Thought(ThoughtGuid guid, string nameKey, string descriptionKey, CharacterSides side)
         {
             if (nameKey is null)
                 throw new ArgumentNullException(nameof(nameKey), "Name can't be null");
