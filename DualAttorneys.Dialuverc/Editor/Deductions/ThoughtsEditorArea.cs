@@ -11,9 +11,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         ImmutableList<EditorThought> _thoughts = ImmutableList<EditorThought>.Empty;
         public IReadOnlyList<EditorThought> Thoughts => _thoughts;
 
-        // Used to compare references so that selection events are not invoked
-        // if no changes were made or we're deselecting twice.
-        EditorThought? _lastSelectedThought = null;
+        ThoughtGuid? _selectionGuid = null;
 
         /// <summary>
         /// Invoked when a <see cref="EditorThought"/> is selected or deselected.
@@ -126,6 +124,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public void SelectThought(ThoughtGuid? guid)
         {
+            if (_selectionGuid == guid)
+                return;
+
             EditorThought? foundThought;
 
             if (!guid.HasValue)
@@ -140,10 +141,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     throw new InvalidOperationException($"No thought with id '{guid}'");
             }
 
-            if (ReferenceEquals(_lastSelectedThought, foundThought))
-                return;
-
-            _lastSelectedThought = foundThought;
+            _selectionGuid = guid;
 
             OnThoughtSelectionChanged?.Invoke(foundThought);
         }
@@ -173,12 +171,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            ThoughtGuid? selection = null;
-
-            if (_lastSelectedThought is not null)
-                selection = _lastSelectedThought.RuntimeThought.Guid;
-
-            return new ThoughtsEditorState(_thoughts, selection);
+            return new ThoughtsEditorState(_thoughts, _selectionGuid);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
@@ -198,8 +191,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             // While we want to use as little space as possible while serializing editor state,
             // we prefer to have exports be as readable as possible.
-            return JsonSerializer.Serialize(Thoughts.Select(et => et.RuntimeThought), new JsonSerializerOptions() 
-            { 
+            return JsonSerializer.Serialize(Thoughts.Select(et => et.RuntimeThought), new JsonSerializerOptions()
+            {
                 WriteIndented = true,
                 IncludeFields = true,
             });

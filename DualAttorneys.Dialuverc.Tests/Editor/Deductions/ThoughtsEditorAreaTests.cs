@@ -480,6 +480,24 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         }
 
         [Test]
+        public void SelectionAfterEditOnSameIsNoOp()
+        {
+            int selections = 0;
+
+            _area.OnThoughtSelectionChanged += (_) => { selections++; };
+
+            ThoughtGuid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
+
+            _area.SelectThought(toEdit);
+
+            _area.EditThought(toEdit, "changedNameKey", "descriptionKey2", CharacterSides.Tychon);
+
+            _area.SelectThought(toEdit);
+
+            Assert.That(selections, Is.EqualTo(1));
+        }
+
+        [Test]
         public void SetEditorNote()
         {
             ThoughtGuid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
