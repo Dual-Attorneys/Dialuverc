@@ -110,10 +110,7 @@ namespace Dialuverc.Editor.Base
 
         #region Testing
 
-        /// <summary>
-        /// Moves <see cref="_currentState"/> to the latest saved state WITHOUT applying it.
-        /// </summary>
-        protected void PointToLatestState() => _currentState = _savedStates.Count - 1;
+        protected int CurrentStateIndex => _currentState;
 
         protected IReadOnlyList<T> SavedStates => _savedStates;
 

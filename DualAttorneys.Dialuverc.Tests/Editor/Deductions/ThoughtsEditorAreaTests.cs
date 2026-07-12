@@ -6,12 +6,12 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
     internal class ThoughtsEditorAreaTests
     {
-        ThoughtsEditorArea _area;
+        TestThoughtsEditorArea _area;
 
         [SetUp]
         public void SetUp()
         {
-            _area = new ThoughtsEditorArea();
+            _area = new TestThoughtsEditorArea();
         }
 
         [Test]
@@ -115,7 +115,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 Assert.That(_area.Thoughts[i].RuntimeThought.NameKey == thoughtNames[i]);
             }
 
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(5));
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(5));
         }
 
         [Test]
@@ -126,29 +126,29 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             ThoughtGuid toEdit = _area.AddThought(template.NameKey, template.DescriptionKey, template.Side);
             _area.EditThought(toEdit, template.NameKey, template.DescriptionKey, template.Side);
 
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(1));
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(1));
         }
 
         [Test]
         public void InsertThought()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             int indexToInsert = 1;
 
             ThoughtGuid inserted = _area.InsertThought(indexToInsert, "insertedName", "insertedDescription", CharacterSides.Any);
 
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length + 1));
+            Assert.That(_area.Thoughts, Has.Count.EqualTo(_dummyThoughts.Length + 1));
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
+            for (int i = 0; i < _dummyThoughts.Length; i++)
             {
                 if (i == indexToInsert)
                     continue;
 
                 if (i < indexToInsert)
-                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i].RuntimeThought), Is.True);
+                    Assert.That(_dummyThoughts[i].HasSameValues(_area.Thoughts[i].RuntimeThought), Is.True);
                 else
-                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i + 1].RuntimeThought), Is.True);
+                    Assert.That(_dummyThoughts[i].HasSameValues(_area.Thoughts[i + 1].RuntimeThought), Is.True);
             }
 
             Assert.That(_area.Thoughts[indexToInsert].RuntimeThought.NameKey, Is.EqualTo("insertedName"));
@@ -159,7 +159,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void MoveThought()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             int originalIndex = 0;
             int newIndex = 1;
@@ -174,13 +174,13 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             // Check whether the number of possible Undos is correct.
             // Needed for the test that checks whether moving to same index does not save state.
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(4));
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(4));
         }
 
         [Test]
         public void MoveThoughtToSameNoStateSave()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             int index = 1;
 
@@ -188,20 +188,20 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.MoveThought(toMove, index);
 
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(3));
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(3));
         }
 
 
         [Test]
         public void RestoreAfterAppend()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             int startingCount = _area.Thoughts.Count;
 
             for (int i = 0; i < startingCount; i++)
             {
-                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
+                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_dummyThoughts[i]), Is.True);
             }
 
             while (_area.CanUndo)
@@ -215,7 +215,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                     continue;
 
                 Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
-                Thought b = _thoughtTemplates[indexToCheck];
+                Thought b = _dummyThoughts[indexToCheck];
 
                 Assert.That(a.HasSameValues(b), Is.True);
             }
@@ -229,7 +229,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 int indexToCheck = _area.Thoughts.Count - 1;
 
                 Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
-                Thought b = _thoughtTemplates[indexToCheck];
+                Thought b = _dummyThoughts[indexToCheck];
 
                 Assert.That(a.HasSameValues(b), Is.True);
             }
@@ -240,7 +240,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void RestoreAfterRemoveFromFront()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             int starterCount = _area.Thoughts.Count;
 
@@ -248,10 +248,10 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             // Count how many undos are needed to ONLY undo the removes.
             int amountToRedo = 0;
 
-            for (int i = _thoughtTemplates.Length - 1; i >= 0; i--)
+            for (int i = _dummyThoughts.Length - 1; i >= 0; i--)
             {
                 _area.RemoveThought(
-                    _area.Thoughts.First(t => t.RuntimeThought.NameKey == _thoughtTemplates[i].NameKey).RuntimeThought.Guid);
+                    _area.Thoughts.First(t => t.RuntimeThought.NameKey == _dummyThoughts[i].NameKey).RuntimeThought.Guid);
 
                 amountToRedo++;
             }
@@ -267,7 +267,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 int indexToCheck =  _area.Thoughts.Count - 1;
 
                 Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
-                Thought b = _thoughtTemplates[indexToCheck];
+                Thought b = _dummyThoughts[indexToCheck];
 
                 Assert.That(a.HasSameValues(b), Is.True);
             }
@@ -285,7 +285,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                     continue;
 
                 Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
-                Thought b = _thoughtTemplates[indexToCheck];
+                Thought b = _dummyThoughts[indexToCheck];
 
                 Assert.That(a.HasSameValues(b), Is.True);
             }
@@ -296,11 +296,11 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void RestoreAfterEdit()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
-            int indexToEdit = _thoughtTemplates.Length / 2;
+            int indexToEdit = _dummyThoughts.Length / 2;
 
-            ThoughtGuid toEdit = _area.Thoughts.First(t => t.RuntimeThought.NameKey == _thoughtTemplates[indexToEdit].NameKey).RuntimeThought.Guid;
+            ThoughtGuid toEdit = _area.Thoughts.First(t => t.RuntimeThought.NameKey == _dummyThoughts[indexToEdit].NameKey).RuntimeThought.Guid;
 
             Thought newTemplate = new Thought(new ThoughtGuid(), "NewKey", "NewDescription", CharacterSides.Any);
 
@@ -308,34 +308,34 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length));
+            Assert.That(_area.Thoughts, Has.Count.EqualTo(_dummyThoughts.Length));
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
+            for (int i = 0; i < _dummyThoughts.Length; i++)
             {
-                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
+                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_dummyThoughts[i]), Is.True);
             }
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
             int checksCount = 0;
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
+            for (int i = 0; i < _dummyThoughts.Length; i++)
             {
                 if (i != indexToEdit)
-                    Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
+                    Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_dummyThoughts[i]), Is.True);
                 else
                     Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(newTemplate), Is.True);
 
                 checksCount++;
             }
 
-            Assert.That(checksCount, Is.EqualTo(_thoughtTemplates.Length));
+            Assert.That(checksCount, Is.EqualTo(_dummyThoughts.Length));
         }
 
         [Test]
         public void RestoreAfterInsert()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             int indexToInsert = 1;
 
@@ -343,33 +343,33 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length));
+            Assert.That(_area.Thoughts, Has.Count.EqualTo(_dummyThoughts.Length));
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
+            for (int i = 0; i < _dummyThoughts.Length; i++)
             {
-                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
+                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_dummyThoughts[i]), Is.True);
             }
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length + 1));
+            Assert.That(_area.Thoughts, Has.Count.EqualTo(_dummyThoughts.Length + 1));
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
+            for (int i = 0; i < _dummyThoughts.Length; i++)
             {
                 if (i == indexToInsert)
                     continue;
 
                 if (i < indexToInsert)
-                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i].RuntimeThought), Is.True);
+                    Assert.That(_dummyThoughts[i].HasSameValues(_area.Thoughts[i].RuntimeThought), Is.True);
                 else
-                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i + 1].RuntimeThought), Is.True);
+                    Assert.That(_dummyThoughts[i].HasSameValues(_area.Thoughts[i + 1].RuntimeThought), Is.True);
             }
         }
 
         [Test]
         public void RestoreAfterMove()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             int indexToMove = 0;
             int targetIndex = 1;
@@ -381,14 +381,14 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
+            for (int i = 0; i < _dummyThoughts.Length; i++)
             {
-                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
+                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_dummyThoughts[i]), Is.True);
             }
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
+            for (int i = 0; i < _dummyThoughts.Length; i++)
             {
                 if (i == indexToMove)
                     Assert.That(_area.Thoughts[i].RuntimeThought.Guid, Is.EqualTo(previousAtIndex));
@@ -396,14 +396,14 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                     Assert.That(_area.Thoughts[i].RuntimeThought.Guid, Is.EqualTo(toMove));
                 else
                     // Guids in templates will never match, so compare keys.
-                    Assert.That(_area.Thoughts[i].RuntimeThought.NameKey, Is.EqualTo(_thoughtTemplates[i].NameKey));
+                    Assert.That(_area.Thoughts[i].RuntimeThought.NameKey, Is.EqualTo(_dummyThoughts[i].NameKey));
             }
         }
 
         [Test]
         public void SelectionReturnsCorrectThought()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             EditorThought? selected = null;
 
@@ -447,7 +447,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void SelectionRestored()
         {
-            AppendTemplatesToList();
+            AppendDummyThoughts();
 
             EditorThought? selected = null;
 
@@ -480,7 +480,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         }
 
         [Test]
-        public void SelectionAfterEditOnSameIsNoOp()
+        public void SelectingSameAfterEditIsNoOp()
         {
             int selections = 0;
 
@@ -506,7 +506,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo("changed note"));
 
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(2));
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(2));
         }
 
         [Test]
@@ -517,7 +517,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.SetEditorNote(toEdit, "changed note");
             _area.SetEditorNote(toEdit, "changed note");
 
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(2));
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(2));
         }
 
         [Test]
@@ -534,36 +534,25 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo(string.Empty));
         }
 
-        Thought[] _thoughtTemplates =
+        Thought[] _dummyThoughts =
         [
-            // Guids from the templates are ignored.
+            // Guids from these are ignored.
             new Thought(new ThoughtGuid(), "thought1", "description1", CharacterSides.Tychon),
             new Thought(new ThoughtGuid(), "thought2", "description2", CharacterSides.Forger),
             new Thought(new ThoughtGuid(), "thought3", "description3", CharacterSides.Any),
         ];
 
-        void AppendTemplatesToList()
+        void AppendDummyThoughts()
         {
-            foreach (Thought thought in _thoughtTemplates)
+            foreach (Thought thought in _dummyThoughts)
             {
                 _area.AddThought(thought.NameKey, thought.DescriptionKey, thought.Side);
             }
         }
 
-        /// <summary>
-        /// Restores states with <see cref="RestoreDirection.Previous"/> until possible and returns the amount of times it was done.
-        /// </summary>
-        int RestorePreviousUntilPossible()
+        private class TestThoughtsEditorArea : ThoughtsEditorArea
         {
-            int undosDid = 0;
-
-            while (_area.CanUndo)
-            {
-                _area.RestorePreviousState(RestoreDirection.Previous);
-                undosDid++;
-            }
-
-            return undosDid;
+            public new int CurrentStateIndex => base.CurrentStateIndex;
         }
     }
 }
