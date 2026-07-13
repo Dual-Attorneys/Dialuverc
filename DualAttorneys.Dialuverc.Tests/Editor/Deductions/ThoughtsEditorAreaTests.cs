@@ -498,6 +498,27 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         }
 
         [Test]
+        public void RemoveDeselects()
+        {
+            EditorThought? selected = null;
+
+            _area.OnThoughtSelectionChanged += (t) => { selected = t; };
+
+            ThoughtGuid toRemove = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
+
+            _area.SelectThought(toRemove);
+
+            Assert.That(selected!.RuntimeThought.Guid, Is.EqualTo(toRemove));
+
+            _area.RemoveThought(toRemove);
+
+            Assert.That(selected, Is.Null);
+        }
+
+        // TODO: Restoring the previous selection after undoing a Remove needs more thinking (if needed).
+        // Easiest way would be making selections save state. Do we even want that?
+
+        [Test]
         public void SetEditorNote()
         {
             ThoughtGuid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);

@@ -70,6 +70,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _thoughts = _thoughts.RemoveAt(foundThought);
 
+            if (guid == _selectionGuid)
+                SelectThought(null);
+
             EndChange();
 
             return true;
