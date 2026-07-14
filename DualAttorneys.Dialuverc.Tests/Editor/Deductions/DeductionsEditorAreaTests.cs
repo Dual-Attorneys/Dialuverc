@@ -157,6 +157,37 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Add));
         }
 
+        [Test]
+        public void SelectDeduction()
+        {
+            EditorDeduction? selectedDeduction = null;
+
+            _area.OnDeductionSelectionChanged += (d) => selectedDeduction = d;
+
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            Guid toSelect = _area.FinishBuilding();
+
+            _area.SelectDeduction(toSelect);
+
+            Assert.That(selectedDeduction!.Guid, Is.EqualTo(toSelect));
+        }
+
+        [Test]
+        public void RemoveDeselects()
+        {
+            EditorDeduction? selectedDeduction = null;
+
+            _area.OnDeductionSelectionChanged += (d) => selectedDeduction = d;
+
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            Guid toSelect = _area.FinishBuilding();
+
+            _area.SelectDeduction(toSelect);
+            _area.RemoveDeduction(toSelect);
+
+            Assert.That(selectedDeduction, Is.Null);
+        }
+
         private class TestDeductionsEditorArea : DeductionsEditorArea
         {
             public new int CurrentStateIndex => base.CurrentStateIndex;

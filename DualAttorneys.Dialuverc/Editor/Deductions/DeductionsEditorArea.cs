@@ -74,6 +74,12 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public IReadOnlyList<EditorDeduction> Deductions => _deductions;
 
         /// <summary>
+        /// Invoked when an <see cref="EditorDeduction"/> is selected or deselected.
+        /// <para>Deselecting passes a <see langword="null"/> <see cref="EditorDeduction"/>.</para>
+        /// </summary>
+        public event Action<EditorDeduction?>? OnDeductionSelectionChanged;
+
+        /// <summary>
         /// Sets which deduction builder to use based on <paramref name="newMode"/>.<br/>
         /// All changes happen on the currently active builder.
         /// </summary>
@@ -106,7 +112,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _editingBuilder = foundDeduction;
             _selectionGuid = guid;
 
-            // TODO: Selection event.
+            OnDeductionSelectionChanged?.Invoke(foundDeduction);
         }
 
         public void SetAlias(string alias)
@@ -201,6 +207,25 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             EndChange();
 
             return addedGuid;
+        }
+
+        public bool RemoveDeduction(Guid guid)
+        {
+            int index = _deductions.FindIndex(d => d.Guid == guid);
+
+            if (index < 0)
+                return false;
+
+            BeginChange();
+
+            _deductions = _deductions.RemoveAt(index);
+
+            if (guid == _selectionGuid)
+                SelectDeduction(null);
+
+            EndChange();
+
+            return true;
         }
 
         static EditorDeduction CreateDefaultDeduction() => new EditorDeduction(
