@@ -150,7 +150,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// <summary>
         /// Applies all changes done so far to the active builder to the <see cref="Deductions"/> list.
         /// </summary>
-        public void FinishBuilding()
+        public Guid FinishBuilding()
         {
             if (_currentMode == Mode.Edit)
             {
@@ -160,12 +160,16 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                 int index = _deductions.FindIndex(d => d.Guid == _editingBuilder.Guid);
 
                 _deductions = _deductions.SetItem(index, _editingBuilder!);
-                return;
+                return _editingBuilder.Guid;
             }
+
+            Guid addedGuid = _addingBuilder.Guid;
 
             _deductions = _deductions.Add(_addingBuilder);
 
             _addingBuilder = CreateDefaultDeduction();
+
+            return addedGuid;
         }
 
         static EditorDeduction CreateDefaultDeduction() => new EditorDeduction(
