@@ -1,15 +1,18 @@
-﻿using DualAttorneys.Dialuverc.Deductions;
+﻿using Dialuverc.Editor.Base;
+using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
-    internal class DeductionsEditorArea
+    public class DeductionsEditorArea : EditorArea<DeductionsEditorState>
     {
         // This area uses 2 builders, 1 for adding, 1 for editing.
         // Deductions need to be built progressively rather than completely at once (the needed params are too complex).
         // The builders allow us to save history for both and only modify the deductions list when done.
         // Note that UI is responsible for appropriately updating (e.g. on undo/redo, when done building and so on).
-        Mode _currentMode = Mode.Add;
+
+        // TODO: Use an event to notify mode changes?
+        public Mode CurrentMode { get; private set; } = Mode.Add;
 
         /// <summary>
         /// Builder to be used for Add/Insert operations.
@@ -25,14 +28,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         Guid? _selectionGuid;
 
         /// <summary>
-        /// The appropriate deduction builder based on the <see cref="_currentMode"/>.<br/>
+        /// The appropriate deduction builder based on the <see cref="CurrentMode"/>.<br/>
         /// Guaranteed to never be <see langword="null"/>.
         /// </summary>
         EditorDeduction _activeBuilder
         {
             get
             {
-                switch (_currentMode)
+                switch (CurrentMode)
                 {
                     case Mode.Add:
                         return _addingBuilder;
@@ -50,7 +53,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             set
             {
-                switch (_currentMode)
+                switch (CurrentMode)
                 {
                     case Mode.Add:
 
@@ -74,7 +77,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// Sets which deduction builder to use based on <paramref name="newMode"/>.<br/>
         /// All changes happen on the currently active builder.
         /// </summary>
-        public void ChangeMode(Mode newMode) => _currentMode = newMode;
+        public void ChangeMode(Mode newMode) => CurrentMode = newMode;
 
         /// <summary>
         /// Selects the <see cref="EditorDeduction"/> corresponding to the given <paramref name="guid"/>.
@@ -108,17 +111,27 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetAlias(string alias)
         {
+            BeginChange();
+
             _activeBuilder = _activeBuilder with { Alias = alias };
+
+            EndChange();
         }
 
         public void SetEditorNote(string editorNote)
         {
+            BeginChange();
+
             _activeBuilder = _activeBuilder with { EditorNote = editorNote };
+
+            EndChange();
         }
 
         public void AddOutputThought(ThoughtGuid guid)
         {
             // TODO: Maybe check for duplicates?
+
+            BeginChange();
 
             _activeBuilder = _activeBuilder with
             {
@@ -127,6 +140,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     Thoughts = _activeBuilder.Outputs.Thoughts.Add(guid)
                 }
             };
+
+            EndChange();
         }
 
         public void RemoveOutputThought(ThoughtGuid guid)
@@ -138,6 +153,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             if (_activeBuilder.Outputs.Thoughts == newArray)
                 return;
 
+            BeginChange();
+
             _activeBuilder = _activeBuilder with
             {
                 Outputs = _activeBuilder.Outputs with
@@ -145,6 +162,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     Thoughts = newArray
                 }
             };
+
+            EndChange();
         }
 
         /// <summary>
@@ -152,22 +171,34 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public Guid FinishBuilding()
         {
-            if (_currentMode == Mode.Edit)
+            if (CurrentMode == Mode.Edit)
             {
                 if (_editingBuilder is null)
                     throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Edit} mode with null {_editingBuilder}");
 
                 int index = _deductions.FindIndex(d => d.Guid == _editingBuilder.Guid);
 
+                if (index < 0)
+                    throw new InvalidOperationException($"No deduction with id '{_editingBuilder.Guid}'");
+
+                BeginChange();
+
                 _deductions = _deductions.SetItem(index, _editingBuilder!);
+
+                EndChange();
+
                 return _editingBuilder.Guid;
             }
 
             Guid addedGuid = _addingBuilder.Guid;
 
+            BeginChange();
+
             _deductions = _deductions.Add(_addingBuilder);
 
             _addingBuilder = CreateDefaultDeduction();
+
+            EndChange();
 
             return addedGuid;
         }
@@ -176,6 +207,35 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             Guid.NewGuid(),
             new ThoughtCombination(null, null, null),
             new DeductionOutputs());
+
+        #region EditorArea
+
+        protected override DeductionsEditorState GetStateToSave() 
+            => new DeductionsEditorState(_deductions, _addingBuilder, _editingBuilder, CurrentMode, _selectionGuid);
+
+        // Changing mode or selecting a deduction are not state changes by themselves.
+        protected override bool CheckStateEquality(DeductionsEditorState a, DeductionsEditorState b) 
+            => a.Deductions == b.Deductions && 
+            a.AddBuilder == b.AddBuilder && 
+            a.EditBuilder == b.EditBuilder;
+
+        protected override void ApplyRestoredState(DeductionsEditorState newState)
+        {
+            _deductions = newState.Deductions;
+            _addingBuilder = newState.AddBuilder;
+            _editingBuilder = newState.EditBuilder;
+
+            ChangeMode(newState.Mode);
+            
+            SelectDeduction(newState.DeductionSelection);
+        }
+
+        public override string SerializeForExport()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
 
         public enum Mode
         {

@@ -1,16 +1,17 @@
-﻿using DualAttorneys.Dialuverc.Deductions;
+﻿using Dialuverc.Editor.Base;
+using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
     internal class DeductionsEditorAreaTests
     {
-        DeductionsEditorArea _area;
+        TestDeductionsEditorArea _area;
 
         [SetUp]
         public void SetUp()
         {
-            _area = new DeductionsEditorArea();
+            _area = new TestDeductionsEditorArea();
         }
 
         // TODO: This also checks whether FinishBuilding in Add mode actually appends to the list.
@@ -115,6 +116,50 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             Assert.That(_area.Deductions[0].Outputs.Thoughts, Has.Length.EqualTo(1));
             Assert.That(_area.Deductions[0].Outputs.Thoughts[0], Is.EqualTo(second));
+        }
+
+        [Test]
+        public void RemoveNonExistingOutputThoughtIsNoOp()
+        {
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+
+            ThoughtGuid thought = new ThoughtGuid();
+
+            _area.AddOutputThought(thought);
+            _area.RemoveOutputThought(new ThoughtGuid());
+
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ChangeMode()
+        {
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+
+            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Add));
+
+            _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
+
+            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Edit));
+        }
+
+        [Test]
+        public void UndoRestoresMode()
+        {
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+
+            _area.SetEditorNote("something");
+
+            _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Add));
+        }
+
+        private class TestDeductionsEditorArea : DeductionsEditorArea
+        {
+            public new int CurrentStateIndex => base.CurrentStateIndex;
         }
     }
 }
