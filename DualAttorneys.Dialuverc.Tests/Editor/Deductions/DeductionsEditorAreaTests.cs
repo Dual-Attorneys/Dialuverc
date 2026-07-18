@@ -134,6 +134,10 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void ChangeMode()
         {
+            bool eventInvoked = false;
+
+            _area.OnModeChanged += (_) => eventInvoked = true;
+
             _area.ChangeMode(DeductionsEditorArea.Mode.Add);
 
             Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Add));
@@ -141,6 +145,22 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
 
             Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Edit));
+
+            Assert.That(eventInvoked, Is.True);
+        }
+
+        [Test]
+        public void ChangeModeToSameIsNoOp()
+        {
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+
+            bool eventInvoked = false;
+
+            _area.OnModeChanged += (_) => eventInvoked = true;
+
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+
+            Assert.That(eventInvoked, Is.False);
         }
 
         [Test]
@@ -170,6 +190,18 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.SelectDeduction(toSelect);
 
             Assert.That(selectedDeduction!.Guid, Is.EqualTo(toSelect));
+        }
+
+        [Test]
+        public void SelectChangesModeToEdit()
+        {
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+
+            Guid toSelect = _area.FinishBuilding();
+
+            _area.SelectDeduction(toSelect);
+
+            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Edit));
         }
 
         [Test]

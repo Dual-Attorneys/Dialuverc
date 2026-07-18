@@ -4,27 +4,29 @@ using System.Collections.Immutable;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
+    /// <summary>
+    /// This <see cref="EditorArea{T}"/> allows progressive creation and editing of <see cref="EditorDeduction"/>s.
+    /// <para>
+    /// Creation and editing happen (possibly at the same time) respectively in <see cref="Mode.Add"/> and <see cref="Mode.Edit"/> mode.<br/>
+    /// Each mode uses its own builder (with undo/redo support).
+    /// </para>
+    /// </summary>
+    /// <remarks>The UI is responsible for appropriately initializing and updating based on this.</remarks>
     public class DeductionsEditorArea : EditorArea<DeductionsEditorState>
     {
-        // This area uses 2 builders, 1 for adding, 1 for editing.
-        // Deductions need to be built progressively rather than completely at once (the needed params are too complex).
-        // The builders allow us to save history for both and only modify the deductions list when done.
-        // Note that UI is responsible for appropriately updating (e.g. on undo/redo, when done building and so on).
-
-        // TODO: Use an event to notify mode changes?
+        // Add is currently assumed to be the default mode.
         public Mode CurrentMode { get; private set; } = Mode.Add;
 
         /// <summary>
-        /// Builder to be used for Add/Insert operations.
+        /// Builder to be used for Add/Insert operations (new and possibly empty deductions).
         /// </summary>
         EditorDeduction _addingBuilder = CreateDefaultDeduction();
 
         /// <summary>
-        /// Builder to be used for any operation that modifies elements that already exist in the list.
+        /// Builder to be used for any operation that modifies deductions that already exist in the list.
         /// </summary>
         EditorDeduction? _editingBuilder;
 
-        // Since the values and reference the editing builder holds can change, use this as a stable identifier.
         Guid? _selectionGuid;
 
         /// <summary>
@@ -79,17 +81,27 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public event Action<EditorDeduction?>? OnDeductionSelectionChanged;
 
+        public event Action<Mode>? OnModeChanged;
+
         /// <summary>
-        /// Sets which deduction builder to use based on <paramref name="newMode"/>.<br/>
+        /// Sets which deduction builder to use based on the passed <paramref name="newMode"/>.<br/>
         /// All changes happen on the currently active builder.
+        /// <para></para>
         /// </summary>
-        public void ChangeMode(Mode newMode) => CurrentMode = newMode;
+        public void ChangeMode(Mode newMode)
+        {
+            if (newMode == CurrentMode)
+                return;
+
+            CurrentMode = newMode;
+
+            OnModeChanged?.Invoke(CurrentMode);
+        }
 
         /// <summary>
         /// Selects the <see cref="EditorDeduction"/> corresponding to the given <paramref name="guid"/>.
         /// <para>Pass <see langword="null"/> to deselect.</para>
         /// </summary>
-        // Note: Currently, selecting doesn't change mode to Edit. Do we want that?
         public void SelectDeduction(Guid? guid)
         {
             if (_selectionGuid == guid)
@@ -113,6 +125,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _selectionGuid = guid;
 
             OnDeductionSelectionChanged?.Invoke(foundDeduction);
+
+            ChangeMode(Mode.Edit);
         }
 
         public void SetAlias(string alias)
@@ -173,7 +187,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         }
 
         /// <summary>
-        /// Applies all changes done so far to the active builder to the <see cref="Deductions"/> list.
+        /// Applies all changes done so far on the active builder to the <see cref="Deductions"/> list.
+        /// <para>If <see cref="CurrentMode"/> is <see cref="Mode.Add"/>, its builder is also reset.</para>
         /// </summary>
         public Guid FinishBuilding()
         {
