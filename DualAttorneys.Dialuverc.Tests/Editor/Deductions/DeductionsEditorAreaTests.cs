@@ -204,6 +204,23 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Edit));
         }
 
+        // Note: This test only exists because selecting (happens as part of undo/redo) always changes mode to Edit.
+        // This makes sure mode is properly restored. If that ever changes, this probably becomes unnecessary.
+        [Test]
+        public void UndoOverwritesMode()
+        {
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+
+            Guid toSelect = _area.FinishBuilding();
+
+            _area.SelectDeduction(toSelect);
+            _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Add));
+        }
+
         [Test]
         public void RemoveDeselects()
         {

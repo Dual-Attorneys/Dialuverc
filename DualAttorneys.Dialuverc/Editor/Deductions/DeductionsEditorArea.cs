@@ -111,6 +111,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             if (!guid.HasValue)
             {
+                // TODO: Maybe make deselecting keep the current mode instead of changing to Edit?
                 foundDeduction = null;
             }
             else
@@ -264,10 +265,13 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _deductions = newState.Deductions;
             _addingBuilder = newState.AddBuilder;
             _editingBuilder = newState.EditBuilder;
-
-            ChangeMode(newState.Mode);
             
             SelectDeduction(newState.DeductionSelection);
+
+            // Currently, selecting always changes mode to Edit.
+            // In case the previous mode was Add, change it again to Add.
+            // Not the happiest with this solution since ChangeMode is called twice.
+            ChangeMode(newState.Mode);
         }
 
         public override string SerializeForExport()
