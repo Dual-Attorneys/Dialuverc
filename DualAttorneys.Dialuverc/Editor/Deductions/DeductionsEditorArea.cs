@@ -265,12 +265,12 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _deductions = newState.Deductions;
             _addingBuilder = newState.AddBuilder;
             _editingBuilder = newState.EditBuilder;
-            
-            SelectDeduction(newState.DeductionSelection);
 
-            // Currently, selecting always changes mode to Edit.
-            // In case the previous mode was Add, change it again to Add.
-            // Not the happiest with this solution since ChangeMode is called twice.
+            // If a state was saved at all, something has changed and the UI needs to update.
+            // SelectChange would not invoke the event in cases where Guids are equal.
+            _selectionGuid = newState.DeductionSelection;
+            OnDeductionSelectionChanged?.Invoke(newState.EditBuilder);
+
             ChangeMode(newState.Mode);
         }
 

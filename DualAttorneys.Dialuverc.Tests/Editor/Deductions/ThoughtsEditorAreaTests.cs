@@ -555,6 +555,26 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo(string.Empty));
         }
 
+        [Test]
+        public void RestoreInvokesSelectionChangedEvent()
+        {
+            ThoughtGuid toSelect = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
+
+            _area.SelectThought(toSelect);
+
+            // Whatever triggers a state save works.
+            _area.SetEditorNote(toSelect, "note1");
+            _area.SetEditorNote(toSelect, "note2");
+
+            bool eventInvoked = false;
+
+            _area.OnThoughtSelectionChanged += (_) => eventInvoked = true;
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(eventInvoked, Is.True);
+        }
+
         Thought[] _dummyThoughts =
         [
             // Guids from these are ignored.

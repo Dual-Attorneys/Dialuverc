@@ -237,6 +237,23 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(selectedDeduction, Is.Null);
         }
 
+        [Test]
+        public void RestoreInvokesSelectionChangedEvent()
+        {
+            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+
+            _area.SetAlias("alias");
+            Guid toSelect = _area.FinishBuilding();
+
+            bool eventInvoked = false;
+
+            _area.OnDeductionSelectionChanged += (_) => eventInvoked = true;
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(eventInvoked, Is.True);
+        }
+
         private class TestDeductionsEditorArea : DeductionsEditorArea
         {
             public new int CurrentStateIndex => base.CurrentStateIndex;

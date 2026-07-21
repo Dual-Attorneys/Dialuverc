@@ -187,7 +187,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             _thoughts = newState.Thoughts;
 
-            SelectThought(newState.ThoughtSelection);
+            // Should be safe to assume the ThoughtGuid will always exist in the list.
+            _selectionGuid = newState.ThoughtSelection;
+            OnThoughtSelectionChanged?.Invoke(newState.Thoughts.FirstOrDefault(t => t.RuntimeThought.Guid == newState.ThoughtSelection));
         }
 
         public override string SerializeForExport()
