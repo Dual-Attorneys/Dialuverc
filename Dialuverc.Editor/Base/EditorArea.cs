@@ -9,7 +9,7 @@ namespace Dialuverc.Editor.Base
     /// This also applies to items inside collections.</para>
     /// </summary>
     /// <typeparam name="T">The object that represents the editor state.</typeparam>
-    public abstract class EditorArea<T> : TransactionalObject, IEditorArea, IVerifiable
+    public abstract class EditorArea<T> : TransactionalObject, IEditorArea
     {
         protected virtual int MaxStates => 50;
 
@@ -102,8 +102,6 @@ namespace Dialuverc.Editor.Base
 
         protected abstract void ApplyRestoredState(T newState);
 
-        // TODO: This should be split in a way that allows the "editor project" to be saved
-        // separately from the output that will be used by the game.
         public abstract string SerializeForExport();
 
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
