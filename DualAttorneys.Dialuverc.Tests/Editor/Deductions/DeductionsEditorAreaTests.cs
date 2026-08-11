@@ -2,6 +2,8 @@
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 
+using static Dialuverc.Editor.Base.EditorScratchpadManager;
+
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
     internal class DeductionsEditorAreaTests
@@ -19,7 +21,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void AddAlias()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             _area.SetAlias("alias");
             _area.FinishBuilding();
@@ -31,7 +33,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void AddEditorNote()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             _area.SetEditorNote("editor note");
             _area.FinishBuilding();
@@ -42,7 +44,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void FinishAddResetsBuilder()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             _area.SetAlias("first");
             Guid first = _area.FinishBuilding();
@@ -56,7 +58,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void EditThrowsWithNoSelection()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
+            _area.ModeManager.ChangeMode(Mode.Edit);
 
             Assert.That(_area.FinishBuilding, Throws.InvalidOperationException);
         }
@@ -66,12 +68,12 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void EditAlias()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             _area.SetAlias("alias");
             Guid toEdit = _area.FinishBuilding();
 
-            _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
+            _area.ModeManager.ChangeMode(Mode.Edit);
 
             _area.SelectDeduction(toEdit);
             _area.SetAlias("changedAlias");
@@ -85,7 +87,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void AddOutputThought()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             ThoughtGuid first = new ThoughtGuid();
             ThoughtGuid second = new ThoughtGuid();
@@ -102,7 +104,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void RemoveOutputThought()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             ThoughtGuid first = new ThoughtGuid();
             ThoughtGuid second = new ThoughtGuid();
@@ -121,7 +123,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void RemoveNonExistingOutputThoughtIsNoOp()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             ThoughtGuid thought = new ThoughtGuid();
 
@@ -136,15 +138,15 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             bool eventInvoked = false;
 
-            _area.OnModeChanged += (_) => eventInvoked = true;
+            _area.ModeManager.OnModeChanged += (_) => eventInvoked = true;
 
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
-            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Add));
+            Assert.That(_area.ModeManager.CurrentMode, Is.EqualTo(Mode.Add));
 
-            _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
+            _area.ModeManager.ChangeMode(Mode.Edit);
 
-            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Edit));
+            Assert.That(_area.ModeManager.CurrentMode, Is.EqualTo(Mode.Edit));
 
             Assert.That(eventInvoked, Is.True);
         }
@@ -152,13 +154,13 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void ChangeModeToSameIsNoOp()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             bool eventInvoked = false;
 
-            _area.OnModeChanged += (_) => eventInvoked = true;
+            _area.ModeManager.OnModeChanged += (_) => eventInvoked = true;
 
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             Assert.That(eventInvoked, Is.False);
         }
@@ -166,15 +168,15 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void UndoRestoresMode()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             _area.SetEditorNote("something");
 
-            _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
+            _area.ModeManager.ChangeMode(Mode.Edit);
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Add));
+            Assert.That(_area.ModeManager.CurrentMode, Is.EqualTo(Mode.Add));
         }
 
         [Test]
@@ -184,7 +186,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.OnDeductionSelectionChanged += (d) => selectedDeduction = d;
 
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
             Guid toSelect = _area.FinishBuilding();
 
             _area.SelectDeduction(toSelect);
@@ -195,13 +197,13 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void SelectChangesModeToEdit()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             Guid toSelect = _area.FinishBuilding();
 
             _area.SelectDeduction(toSelect);
 
-            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Edit));
+            Assert.That(_area.ModeManager.CurrentMode, Is.EqualTo(Mode.Edit));
         }
 
         // Note: This test only exists because selecting (happens as part of undo/redo) always changes mode to Edit.
@@ -209,16 +211,16 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void UndoOverwritesMode()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             Guid toSelect = _area.FinishBuilding();
 
             _area.SelectDeduction(toSelect);
-            _area.ChangeMode(DeductionsEditorArea.Mode.Edit);
+            _area.ModeManager.ChangeMode(Mode.Edit);
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_area.CurrentMode, Is.EqualTo(DeductionsEditorArea.Mode.Add));
+            Assert.That(_area.ModeManager.CurrentMode, Is.EqualTo(Mode.Add));
         }
 
         [Test]
@@ -228,7 +230,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.OnDeductionSelectionChanged += (d) => selectedDeduction = d;
 
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
             Guid toSelect = _area.FinishBuilding();
 
             _area.SelectDeduction(toSelect);
@@ -240,7 +242,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void RestoreInvokesSelectionChangedEvent()
         {
-            _area.ChangeMode(DeductionsEditorArea.Mode.Add);
+            _area.ModeManager.ChangeMode(Mode.Add);
 
             _area.SetAlias("alias");
             Guid toSelect = _area.FinishBuilding();

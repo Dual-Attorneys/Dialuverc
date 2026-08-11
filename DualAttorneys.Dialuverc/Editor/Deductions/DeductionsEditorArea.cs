@@ -2,12 +2,14 @@
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 
+using static Dialuverc.Editor.Base.EditorScratchpadManager;
+
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     /// <summary>
     /// This <see cref="EditorArea{T}"/> allows progressive creation and editing of <see cref="EditorDeduction"/>s.
     /// </summary>
-    public class DeductionsEditorArea : ModeEditorArea<EditorDeduction, DeductionsEditorState>
+    public class DeductionsEditorArea : EditorArea<DeductionsEditorState>
     {
         Guid? _selectionGuid;
 
@@ -19,6 +21,16 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// <para>Deselecting passes a <see langword="null"/> <see cref="EditorDeduction"/>.</para>
         /// </summary>
         public event Action<EditorDeduction?>? OnDeductionSelectionChanged;
+
+        readonly EditorScratchpadManager<EditorDeduction> _modeManager;
+        public EditorScratchpadManager ModeManager => _modeManager;
+
+        public DeductionsEditorArea()
+        {
+            _modeManager = new EditorScratchpadManager<EditorDeduction>();
+
+            _modeManager.AddBuilder = CreateDefaultEditorDeduction();
+        }
 
         /// <summary>
         /// Selects the <see cref="EditorDeduction"/> corresponding to the given <paramref name="guid"/>.
@@ -44,19 +56,19 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     throw new InvalidOperationException($"No deduction with id '{guid}'");
             }
 
-            _editingBuilder = foundDeduction;
+            _modeManager.EditBuilder = foundDeduction;
             _selectionGuid = guid;
 
             OnDeductionSelectionChanged?.Invoke(foundDeduction);
 
-            ChangeMode(Mode.Edit);
+            _modeManager.ChangeMode(Mode.Edit);
         }
 
         public void SetAlias(string alias)
         {
             BeginChange();
 
-            ActiveBuilder = ActiveBuilder with { Alias = alias };
+            _modeManager.ActiveBuilder = _modeManager.ActiveBuilder with { Alias = alias };
 
             EndChange();
         }
@@ -65,7 +77,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             BeginChange();
 
-            ActiveBuilder = ActiveBuilder with { EditorNote = editorNote };
+            _modeManager.ActiveBuilder = _modeManager.ActiveBuilder with { EditorNote = editorNote };
 
             EndChange();
         }
@@ -76,11 +88,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             BeginChange();
 
-            ActiveBuilder = ActiveBuilder with
+            _modeManager.ActiveBuilder = _modeManager.ActiveBuilder with
             {
-                Outputs = ActiveBuilder.Outputs with
+                Outputs = _modeManager.ActiveBuilder.Outputs with
                 {
-                    Thoughts = ActiveBuilder.Outputs.Thoughts.Add(guid)
+                    Thoughts = _modeManager.ActiveBuilder.Outputs.Thoughts.Add(guid)
                 }
             };
 
@@ -89,18 +101,18 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void RemoveOutputThought(ThoughtGuid guid)
         {
-            ImmutableArray<ThoughtGuid> newArray = ActiveBuilder.Outputs.Thoughts.Remove(guid);
+            ImmutableArray<ThoughtGuid> newArray = _modeManager.ActiveBuilder.Outputs.Thoughts.Remove(guid);
 
             // Don't save history if we try removing a non-existing thought.
             // Failure results in the same state as success anyway.
-            if (ActiveBuilder.Outputs.Thoughts == newArray)
+            if (_modeManager.ActiveBuilder.Outputs.Thoughts == newArray)
                 return;
 
             BeginChange();
 
-            ActiveBuilder = ActiveBuilder with
+            _modeManager.ActiveBuilder = _modeManager.ActiveBuilder with
             {
-                Outputs = ActiveBuilder.Outputs with
+                Outputs = _modeManager.ActiveBuilder.Outputs with
                 {
                     Thoughts = newArray
                 }
@@ -115,32 +127,32 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public Guid FinishBuilding()
         {
-            if (CurrentMode == Mode.Edit)
+            if (_modeManager.CurrentMode == Mode.Edit)
             {
-                if (_editingBuilder is null)
-                    throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Edit} mode with null {_editingBuilder}");
+                if (_modeManager.EditBuilder is null)
+                    throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Edit} mode with null {_modeManager.EditBuilder}");
 
-                int index = _deductions.FindIndex(d => d.Guid == _editingBuilder.Guid);
+                int index = _deductions.FindIndex(d => d.Guid == _modeManager.EditBuilder.Guid);
 
                 if (index < 0)
-                    throw new InvalidOperationException($"No deduction with id '{_editingBuilder.Guid}'");
+                    throw new InvalidOperationException($"No deduction with id '{_modeManager.EditBuilder.Guid}'");
 
                 BeginChange();
 
-                _deductions = _deductions.SetItem(index, _editingBuilder!);
+                _deductions = _deductions.SetItem(index, _modeManager.EditBuilder!);
 
                 EndChange();
 
-                return _editingBuilder.Guid;
+                return _modeManager.EditBuilder.Guid;
             }
 
-            Guid addedGuid = _addingBuilder.Guid;
+            Guid addedGuid = _modeManager.AddBuilder.Guid;
 
             BeginChange();
 
-            _deductions = _deductions.Add(_addingBuilder);
+            _deductions = _deductions.Add(_modeManager.AddBuilder);
 
-            _addingBuilder = CreateDefaultBuilder();
+            _modeManager.AddBuilder = CreateDefaultEditorDeduction();
 
             EndChange();
 
@@ -166,7 +178,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             return true;
         }
 
-        protected override EditorDeduction CreateDefaultBuilder() => new EditorDeduction(
+        EditorDeduction CreateDefaultEditorDeduction() => new EditorDeduction(
             Guid.NewGuid(),
             new ThoughtCombination(null, null, null),
             new DeductionOutputs());
@@ -174,7 +186,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         #region EditorArea
 
         protected override DeductionsEditorState GetStateToSave() 
-            => new DeductionsEditorState(_deductions, _addingBuilder, _editingBuilder, CurrentMode, _selectionGuid);
+            => new DeductionsEditorState(_deductions, _modeManager.AddBuilder, _modeManager.EditBuilder, _modeManager.CurrentMode, _selectionGuid);
 
         // Changing mode or selecting a deduction are not state changes by themselves.
         protected override bool CheckStateEquality(DeductionsEditorState a, DeductionsEditorState b) 
@@ -185,15 +197,15 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         protected override void ApplyRestoredState(DeductionsEditorState newState)
         {
             _deductions = newState.Deductions;
-            _addingBuilder = newState.AddBuilder;
-            _editingBuilder = newState.EditBuilder;
+            _modeManager.AddBuilder = newState.AddBuilder;
+            _modeManager.EditBuilder = newState.EditBuilder;
 
             // If a state was saved at all, something has changed and the UI needs to update.
             // SelectChange would not invoke the event in cases where Guids are equal.
             _selectionGuid = newState.DeductionSelection;
             OnDeductionSelectionChanged?.Invoke(newState.EditBuilder);
 
-            ChangeMode(newState.Mode);
+            _modeManager.ChangeMode(newState.Mode);
         }
 
         public override string SerializeForExport()
