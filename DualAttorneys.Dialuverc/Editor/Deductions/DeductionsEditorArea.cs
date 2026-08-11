@@ -1,8 +1,9 @@
 ﻿using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base.Modes;
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 
-using static Dialuverc.Editor.Base.EditorScratchpadManager;
+using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
@@ -23,7 +24,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public event Action<EditorDeduction?>? OnDeductionSelectionChanged;
 
         readonly EditorScratchpadManager<EditorDeduction> _modeManager;
-        public EditorScratchpadManager ModeManager => _modeManager;
+        public EditorModeManager ModeManager => _modeManager;
 
         public DeductionsEditorArea()
         {

@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base;
+﻿using Dialuverc.Editor.Base.Modes;
 using System.Collections.Immutable;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
@@ -10,11 +10,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public readonly EditorDeduction AddBuilder;
         public readonly EditorDeduction? EditBuilder;
 
-        public readonly EditorScratchpadManager.Mode Mode;
+        public readonly EditorModeManager.Mode Mode;
 
         public readonly Guid? DeductionSelection;
 
-        public DeductionsEditorState(ImmutableList<EditorDeduction> deductions, EditorDeduction addBuilder, EditorDeduction? editBuilder, EditorScratchpadManager.Mode mode, Guid? deductionSelection)
+        public DeductionsEditorState(ImmutableList<EditorDeduction> deductions, EditorDeduction addBuilder, EditorDeduction? editBuilder, EditorModeManager.Mode mode, Guid? deductionSelection)
         {
             Deductions = deductions;
             AddBuilder = addBuilder;

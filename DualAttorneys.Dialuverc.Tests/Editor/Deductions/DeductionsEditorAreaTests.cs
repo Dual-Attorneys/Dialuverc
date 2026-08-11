@@ -2,7 +2,7 @@
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 
-using static Dialuverc.Editor.Base.EditorScratchpadManager;
+using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {

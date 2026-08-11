@@ -1,13 +1,13 @@
-﻿namespace Dialuverc.Editor.Base
+﻿namespace Dialuverc.Editor.Base.Modes
 {
     /// <summary>
     /// A component which manages temporary scratchpad objects of type <typeparamref name="T"/> for an <see cref="EditorArea{T}"/> to work on.
     /// <para>
-    /// To safely expose this to other systems, go through the base <see cref="EditorScratchpadManager"/>.
+    /// To safely expose this to other systems, go through the base <see cref="EditorModeManager"/>.
     /// </para>
     /// </summary>
     /// <typeparam name="T">The type the associated <see cref="EditorArea{T}"/> works on.</typeparam>
-    public class EditorScratchpadManager<T> : EditorScratchpadManager
+    public class EditorScratchpadManager<T> : EditorModeManager
     {
         /// <summary>
         /// Builder to be used for Add/Insert operations.
@@ -20,7 +20,7 @@
         public T? EditBuilder;
 
         /// <summary>
-        /// The appropriate builder based on the <see cref="EditorScratchpadManager.CurrentMode"/>.<br/>
+        /// The appropriate builder based on the <see cref="EditorModeManager.CurrentMode"/>.<br/>
         /// Guaranteed to never be <see langword="null"/>.
         /// </summary>
         public T ActiveBuilder
@@ -60,40 +60,6 @@
                     default: throw new NotImplementedException();
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// An abstract component which manages temporary scratchpad objects for an <see cref="EditorArea{T}"/> to work on.
-    /// <para>Can be used to safely expose a concrete implementation.</para>
-    /// </summary>
-    // Note: This can later be refactored to take in an arbitrary enum as <T>.
-    // Implementations would then inherit from this<ArbitraryEnum>.
-    public abstract class EditorScratchpadManager
-    {
-        // Add is currently assumed to be the default mode.
-        public Mode CurrentMode { get; private set; } = Mode.Add;
-
-        public event Action<Mode>? OnModeChanged;
-
-        /// <summary>
-        /// Sets which builder to use based on the passed <paramref name="newMode"/>.<br/>
-        /// All changes happen on the currently active builder.
-        /// </summary>
-        public void ChangeMode(Mode newMode)
-        {
-            if (newMode == CurrentMode)
-                return;
-
-            CurrentMode = newMode;
-
-            OnModeChanged?.Invoke(CurrentMode);
-        }
-
-        public enum Mode
-        {
-            Add,
-            Edit
         }
     }
 }
