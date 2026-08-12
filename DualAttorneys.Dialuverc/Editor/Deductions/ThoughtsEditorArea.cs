@@ -1,8 +1,11 @@
 ﻿using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base.Modes;
 using Dialuverc.Editor.Base.Verifier;
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
+
+using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
@@ -19,48 +22,124 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public event Action<EditorThought?>? OnThoughtSelectionChanged;
 
+        readonly EditorScratchpadManager<EditorThought> _scratchpadManager;
+        public EditorModeManager ScratchpadManager => _scratchpadManager;
+
         // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
-        // They're editable using a single Edit method that can change everything at once.
         // This assumes their structure is unlikely to change and will always need few parameters.
 
-        public ThoughtGuid AddThought(string nameKey, string descriptionKey, CharacterSides side)
+        public ThoughtsEditorArea()
         {
-            ThoughtGuid newGuid = new ThoughtGuid();
+            _scratchpadManager = new EditorScratchpadManager<EditorThought>();
 
-            Thought thought = new Thought(newGuid, nameKey, descriptionKey, side);
-
-            EditorThought editorThought = new EditorThought(thought);
-
-            BeginChange();
-
-            _thoughts = _thoughts.Add(editorThought);
-
-            EndChange();
-
-            return newGuid;
+            _scratchpadManager.AddBuilder = CreateDefaultEditorThought();
         }
 
-        public ThoughtGuid InsertThought(int index, string nameKey, string descriptionKey, CharacterSides side)
+        public void SetNameKey(string nameKey)
         {
-            ThoughtGuid newGuid = new ThoughtGuid();
-
-            Thought thought = new Thought(newGuid, nameKey, descriptionKey, side);
-
-            EditorThought editorThought = new EditorThought(thought);
+            Thought currentRuntimeThought = _scratchpadManager.ActiveBuilder.RuntimeThought;
 
             BeginChange();
 
-            _thoughts = _thoughts.Insert(index, editorThought);
+            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with
+            {
+                RuntimeThought = new Thought(
+                    currentRuntimeThought.Guid,
+                    nameKey,
+                    currentRuntimeThought.DescriptionKey,
+                    currentRuntimeThought.Side)
+            };
+
+            EndChange();
+        }
+
+        public void SetDescriptionKey(string descriptionKey)
+        {
+            Thought currentRuntimeThought = _scratchpadManager.ActiveBuilder.RuntimeThought;
+
+            BeginChange();
+
+            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with
+            {
+                RuntimeThought = new Thought(
+                    currentRuntimeThought.Guid,
+                    currentRuntimeThought.NameKey,
+                    descriptionKey,
+                    currentRuntimeThought.Side)
+            };
+
+            EndChange();
+        }
+
+        public void SetSide(CharacterSides side)
+        {
+            Thought currentRuntimeThought = _scratchpadManager.ActiveBuilder.RuntimeThought;
+
+            BeginChange();
+
+            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with
+            {
+                RuntimeThought = new Thought(
+                    currentRuntimeThought.Guid,
+                    currentRuntimeThought.NameKey,
+                    currentRuntimeThought.DescriptionKey,
+                    side)
+            };
+
+            EndChange();
+        }
+
+        public void SetEditorNote(string editorNote)
+        {
+            BeginChange();
+
+            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with { EditorNote = editorNote };
+
+            EndChange();
+        }
+
+        /// <summary>
+        /// Applies all changes done so far on the active builder to the <see cref="Thoughts"/> list.
+        /// <para>If <see cref="EditorModeManager.CurrentMode"/> is <see cref="Mode.Add"/>, its builder is also reset.</para>
+        /// </summary>
+        public ThoughtGuid FinishBuilding()
+        {
+            if (_scratchpadManager.CurrentMode == Mode.Edit)
+            {
+                if (_scratchpadManager.EditBuilder is null)
+                    throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Edit} mode with null {_scratchpadManager.EditBuilder}");
+
+                int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _scratchpadManager.EditBuilder.RuntimeThought.Guid);
+
+                if (index < 0)
+                    throw new InvalidOperationException($"No thought with id '{_scratchpadManager.EditBuilder.RuntimeThought.Guid}'");
+
+                BeginChange();
+
+                _thoughts = _thoughts.SetItem(index, _scratchpadManager.EditBuilder!);
+
+                EndChange();
+
+                return _scratchpadManager.EditBuilder.RuntimeThought.Guid;
+            }
+
+            ThoughtGuid addedGuid = _scratchpadManager.AddBuilder.RuntimeThought.Guid;
+
+            BeginChange();
+
+            _thoughts = _thoughts.Add(_scratchpadManager.AddBuilder);
+
+            _scratchpadManager.AddBuilder = CreateDefaultEditorThought();
 
             EndChange();
 
-            return newGuid;
+            return addedGuid;
         }
 
         public bool RemoveThought(ThoughtGuid guid)
         {
             int foundThought = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
-
+            
             // Don't throw if we remove a thought that doesn't exist
             // since it not existing results in the same state as it being removed.
             if (foundThought < 0)
@@ -76,30 +155,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             EndChange();
 
             return true;
-        }
-
-        public void EditThought(ThoughtGuid guid, string nameKey, string descriptionKey, CharacterSides side)
-        {
-            int index = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
-
-            // An edit changes state in a way that failure doesn't match.
-            if (index < 0)
-                throw new KeyNotFoundException($"No thoughts with id '{guid}'");
-
-            EditorThought currentThought = _thoughts[index];
-
-            if (currentThought.RuntimeThought.HasSameValues(nameKey, descriptionKey, side))
-                return;
-
-            Thought modifiedThought = new Thought(guid, nameKey, descriptionKey, side);
-
-            EditorThought modifiedEditorThought = _thoughts[index] with { RuntimeThought = modifiedThought };
-
-            BeginChange();
-
-            _thoughts = _thoughts.SetItem(index, modifiedEditorThought);
-
-            EndChange();
         }
 
         public void MoveThought(ThoughtGuid guid, int newIndex)
@@ -149,26 +204,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             OnThoughtSelectionChanged?.Invoke(foundThought);
         }
 
-        public void SetEditorNote(ThoughtGuid guid, string editorNote)
-        {
-            int index = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
-
-            if (index < 0)
-                throw new KeyNotFoundException($"No thoughts with id '{guid}'");
-
-            EditorThought currentThought = _thoughts[index];
-
-            if (currentThought.EditorNote == editorNote)
-                return;
-
-            EditorThought modifiedThought = currentThought with { EditorNote = editorNote };
-
-            BeginChange();
-
-            _thoughts = _thoughts.SetItem(index, modifiedThought);
-
-            EndChange();
-        }
+        EditorThought CreateDefaultEditorThought() => new EditorThought(new Thought(
+            new ThoughtGuid(),
+            string.Empty,
+            string.Empty,
+            CharacterSides.Any));
 
         #region EditorArea
 
@@ -187,6 +227,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             _thoughts = newState.Thoughts;
 
+            // If a state was saved at all, something has changed and the UI needs to update.
+            // SelectThought would not invoke the event in cases where ThoughtGuids are equal.
             // Should be safe to assume the ThoughtGuid will always exist in the list.
             _selectionGuid = newState.ThoughtSelection;
             OnThoughtSelectionChanged?.Invoke(newState.Thoughts.FirstOrDefault(t => t.RuntimeThought.Guid == newState.ThoughtSelection));

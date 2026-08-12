@@ -124,7 +124,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         /// <summary>
         /// Applies all changes done so far on the active builder to the <see cref="Deductions"/> list.
-        /// <para>If <see cref="CurrentMode"/> is <see cref="Mode.Add"/>, its builder is also reset.</para>
+        /// <para>If <see cref="EditorModeManager.CurrentMode"/> is <see cref="Mode.Add"/>, its builder is also reset.</para>
         /// </summary>
         public Guid FinishBuilding()
         {
@@ -202,7 +202,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager.EditBuilder = newState.EditBuilder;
 
             // If a state was saved at all, something has changed and the UI needs to update.
-            // SelectChange would not invoke the event in cases where Guids are equal.
+            // SelectDeduction would not invoke the event in cases where Guids are equal.
             _selectionGuid = newState.DeductionSelection;
             OnDeductionSelectionChanged?.Invoke(newState.EditBuilder);
 
