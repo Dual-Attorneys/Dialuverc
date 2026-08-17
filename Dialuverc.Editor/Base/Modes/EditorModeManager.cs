@@ -13,14 +13,24 @@
 
         public event Action<Mode>? OnModeChanged;
 
-        public void ChangeMode(Mode newMode)
+        /// <summary>
+        /// Attempts to change the <see cref="CurrentMode"/>.<br/>
+        /// No-op if <paramref name="newMode"/> is equal to <see cref="CurrentMode"/>.
+        /// </summary>
+        /// <param name="newMode"></param>
+        /// <param name="invokeEvent">Whether to invoke <see cref="OnModeChanged"/> on success.</param>
+        /// <returns><see langword="true"/> if mode was changed, <see langword="false"/> otherwise.</returns>
+        public bool ChangeMode(Mode newMode, bool invokeEvent = true)
         {
             if (newMode == CurrentMode)
-                return;
+                return false;
 
             CurrentMode = newMode;
 
-            OnModeChanged?.Invoke(CurrentMode);
+            if (invokeEvent)
+                OnModeChanged?.Invoke(CurrentMode);
+
+            return true;
         }
 
         public enum Mode

@@ -61,9 +61,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager.EditScratchpad = foundDeduction;
             _selectionGuid = guid;
 
-            OnDeductionSelectionChanged?.Invoke(foundDeduction);
-
-            _scratchpadManager.ChangeMode(Mode.Edit);
+            if (!_scratchpadManager.ChangeMode(Mode.Edit))
+                OnDeductionSelectionChanged?.Invoke(foundDeduction);
         }
 
         public void SetAlias(string alias)
@@ -204,14 +203,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _deductions = newState.Deductions;
             _scratchpadManager.AddScratchpad = newState.AddBuilder;
             _scratchpadManager.EditScratchpad = newState.EditBuilder;
-
-            // If a state was saved at all, something has changed and the UI needs to update.
-            // SelectDeduction would not invoke the event in cases where Guids are equal.
-            // This is a convenience over manually checking last selection when state-restored event is invoked.
             _selectionGuid = newState.DeductionSelection;
-            OnDeductionSelectionChanged?.Invoke(newState.EditBuilder);
 
-            _scratchpadManager.ChangeMode(newState.Mode);
+            _scratchpadManager.ChangeMode(newState.Mode, invokeEvent: false);
         }
 
         public override string SerializeForExport()
