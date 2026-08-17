@@ -18,7 +18,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public IReadOnlyList<EditorDeduction> Deductions => _deductions;
 
         /// <summary>
-        /// Invoked when an <see cref="EditorDeduction"/> is selected or deselected.
+        /// Invoked when an <see cref="EditorDeduction"/> is selected or deselected while already in <see cref="Mode.Edit"/> mode.
         /// <para>Deselecting passes a <see langword="null"/> <see cref="EditorDeduction"/>.</para>
         /// </summary>
         public event Action<EditorDeduction?>? OnDeductionSelectionChanged;

@@ -17,7 +17,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         ThoughtGuid? _selectionGuid = null;
 
         /// <summary>
-        /// Invoked when a <see cref="EditorThought"/> is selected or deselected.
+        /// Invoked when a <see cref="EditorThought"/> is selected or deselected while already in <see cref="Mode.Edit"/> mode.
         /// <para>Deselecting passes a <see langword="null"/> <see cref="EditorThought"/>.</para>
         /// </summary>
         public event Action<EditorThought?>? OnThoughtSelectionChanged;
