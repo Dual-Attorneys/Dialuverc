@@ -203,9 +203,12 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     throw new InvalidOperationException($"No thought with id '{guid}'");
             }
 
+            _scratchpadManager.EditScratchpad = foundThought;
             _selectionGuid = guid;
 
             OnThoughtSelectionChanged?.Invoke(foundThought);
+
+            _scratchpadManager.ChangeMode(Mode.Edit);
         }
 
         EditorThought CreateDefaultEditorThought() => new EditorThought(new Thought(
