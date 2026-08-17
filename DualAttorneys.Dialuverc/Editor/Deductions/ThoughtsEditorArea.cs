@@ -218,24 +218,30 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            return new ThoughtsEditorState(_thoughts, _selectionGuid);
+            return new ThoughtsEditorState(_thoughts, _scratchpadManager.AddScratchpad, _scratchpadManager.EditScratchpad, _scratchpadManager.CurrentMode, _selectionGuid);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
         {
-            // Selecting a thought is not a state change.
-            return a.Thoughts == b.Thoughts;
+            // Selecting a thought or changing modes is not a state change.
+            return a.Thoughts == b.Thoughts &&
+                a.AddBuilder == b.AddBuilder &&
+                a.EditBuilder == b.EditBuilder;
         }
 
         protected override void ApplyRestoredState(ThoughtsEditorState newState)
         {
             _thoughts = newState.Thoughts;
+            _scratchpadManager.AddScratchpad = newState.AddBuilder;
+            _scratchpadManager.EditScratchpad = newState.EditBuilder;
 
             // If a state was saved at all, something has changed and the UI needs to update.
             // SelectThought would not invoke the event in cases where ThoughtGuids are equal.
             // Should be safe to assume the ThoughtGuid will always exist in the list.
             _selectionGuid = newState.ThoughtSelection;
             OnThoughtSelectionChanged?.Invoke(newState.Thoughts.FirstOrDefault(t => t.RuntimeThought.Guid == newState.ThoughtSelection));
+
+            _scratchpadManager.ChangeMode(newState.Mode);
         }
 
         public override string SerializeForExport()
