@@ -13,10 +13,6 @@
 
         public event Action<Mode>? OnModeChanged;
 
-        /// <summary>
-        /// Sets which builder to use based on the passed <paramref name="newMode"/>.<br/>
-        /// All changes happen on the currently active builder.
-        /// </summary>
         public void ChangeMode(Mode newMode)
         {
             if (newMode == CurrentMode)

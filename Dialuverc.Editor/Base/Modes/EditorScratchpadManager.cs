@@ -10,34 +10,37 @@
     public class EditorScratchpadManager<T> : EditorModeManager
     {
         /// <summary>
-        /// Builder to be used for Add/Insert operations.
+        /// Used for Add/Insert operations.
         /// </summary>
-        public T AddBuilder = default!;
+        public T? AddScratchpad;
 
         /// <summary>
-        /// Builder to be used for any operation that modifies items that already exist in the list.
+        /// Used for any operation that modifies items that already exist in the list.
         /// </summary>
-        public T? EditBuilder;
+        public T? EditScratchpad;
 
         /// <summary>
-        /// The appropriate builder based on the <see cref="EditorModeManager.CurrentMode"/>.<br/>
-        /// Guaranteed to never be <see langword="null"/>.
+        /// The appropriate scratchpad based on the <see cref="EditorModeManager.CurrentMode"/>.
         /// </summary>
-        public T ActiveBuilder
+        public T ActiveScratchpad
         {
             get
             {
                 switch (CurrentMode)
                 {
                     case Mode.Add:
-                        return AddBuilder;
+
+                        if (AddScratchpad is null)
+                            throw new InvalidOperationException($"Can't get {nameof(ActiveScratchpad)} in {Mode.Add} mode with null {nameof(AddScratchpad)}");
+
+                        return AddScratchpad;
 
                     case Mode.Edit:
 
-                        if (EditBuilder is null)
-                            throw new InvalidOperationException($"Can't get {nameof(ActiveBuilder)} in {Mode.Edit} mode with null {nameof(EditBuilder)}");
+                        if (EditScratchpad is null)
+                            throw new InvalidOperationException($"Can't get {nameof(ActiveScratchpad)} in {Mode.Edit} mode with null {nameof(EditScratchpad)}");
 
-                        return EditBuilder;
+                        return EditScratchpad;
 
                     default: throw new NotImplementedException();
                 }
@@ -49,12 +52,12 @@
                 {
                     case Mode.Add:
 
-                        AddBuilder = value!;
+                        AddScratchpad = value!;
                         break;
 
                     case Mode.Edit:
 
-                        EditBuilder = value;
+                        EditScratchpad = value;
                         break;
 
                     default: throw new NotImplementedException();

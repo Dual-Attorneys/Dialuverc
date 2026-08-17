@@ -24,6 +24,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         readonly EditorScratchpadManager<EditorThought> _scratchpadManager;
         public EditorModeManager ScratchpadManager => _scratchpadManager;
+        public EditorThought ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
         // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
         // This assumes their structure is unlikely to change and will always need few parameters.
@@ -32,16 +33,16 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             _scratchpadManager = new EditorScratchpadManager<EditorThought>();
 
-            _scratchpadManager.AddBuilder = CreateDefaultEditorThought();
+            _scratchpadManager.AddScratchpad = CreateDefaultEditorThought();
         }
 
         public void SetNameKey(string nameKey)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveBuilder.RuntimeThought;
+            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought;
 
             BeginChange();
 
-            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
             {
                 RuntimeThought = new Thought(
                     currentRuntimeThought.Guid,
@@ -55,11 +56,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetDescriptionKey(string descriptionKey)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveBuilder.RuntimeThought;
+            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought;
 
             BeginChange();
 
-            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
             {
                 RuntimeThought = new Thought(
                     currentRuntimeThought.Guid,
@@ -73,11 +74,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetSide(CharacterSides side)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveBuilder.RuntimeThought;
+            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought;
 
             BeginChange();
 
-            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
             {
                 RuntimeThought = new Thought(
                     currentRuntimeThought.Guid,
@@ -93,7 +94,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             BeginChange();
 
-            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with { EditorNote = editorNote };
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with { EditorNote = editorNote };
 
             EndChange();
         }
@@ -106,30 +107,33 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             if (_scratchpadManager.CurrentMode == Mode.Edit)
             {
-                if (_scratchpadManager.EditBuilder is null)
-                    throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Edit} mode with null {_scratchpadManager.EditBuilder}");
+                if (_scratchpadManager.EditScratchpad is null)
+                    throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Edit} mode with null {_scratchpadManager.EditScratchpad}");
 
-                int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _scratchpadManager.EditBuilder.RuntimeThought.Guid);
+                int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _scratchpadManager.EditScratchpad.RuntimeThought.Guid);
 
                 if (index < 0)
-                    throw new InvalidOperationException($"No thought with id '{_scratchpadManager.EditBuilder.RuntimeThought.Guid}'");
+                    throw new InvalidOperationException($"No thought with id '{_scratchpadManager.EditScratchpad.RuntimeThought.Guid}'");
 
                 BeginChange();
 
-                _thoughts = _thoughts.SetItem(index, _scratchpadManager.EditBuilder!);
+                _thoughts = _thoughts.SetItem(index, _scratchpadManager.EditScratchpad!);
 
                 EndChange();
 
-                return _scratchpadManager.EditBuilder.RuntimeThought.Guid;
+                return _scratchpadManager.EditScratchpad.RuntimeThought.Guid;
             }
 
-            ThoughtGuid addedGuid = _scratchpadManager.AddBuilder.RuntimeThought.Guid;
+            if (_scratchpadManager.AddScratchpad is null)
+                throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Add} mode with null {_scratchpadManager.AddScratchpad}");
+
+            ThoughtGuid addedGuid = _scratchpadManager.AddScratchpad.RuntimeThought.Guid;
 
             BeginChange();
 
-            _thoughts = _thoughts.Add(_scratchpadManager.AddBuilder);
+            _thoughts = _thoughts.Add(_scratchpadManager.AddScratchpad);
 
-            _scratchpadManager.AddBuilder = CreateDefaultEditorThought();
+            _scratchpadManager.AddScratchpad = CreateDefaultEditorThought();
 
             EndChange();
 

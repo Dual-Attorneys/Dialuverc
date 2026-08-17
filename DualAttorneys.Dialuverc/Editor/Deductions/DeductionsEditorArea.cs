@@ -25,12 +25,13 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         readonly EditorScratchpadManager<EditorDeduction> _scratchpadManager;
         public EditorModeManager ScratchpadManager => _scratchpadManager;
+        public EditorDeduction ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
         public DeductionsEditorArea()
         {
             _scratchpadManager = new EditorScratchpadManager<EditorDeduction>();
 
-            _scratchpadManager.AddBuilder = CreateDefaultEditorDeduction();
+            _scratchpadManager.AddScratchpad = CreateDefaultEditorDeduction();
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     throw new InvalidOperationException($"No deduction with id '{guid}'");
             }
 
-            _scratchpadManager.EditBuilder = foundDeduction;
+            _scratchpadManager.EditScratchpad = foundDeduction;
             _selectionGuid = guid;
 
             OnDeductionSelectionChanged?.Invoke(foundDeduction);
@@ -69,7 +70,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             BeginChange();
 
-            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with { Alias = alias };
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with { Alias = alias };
 
             EndChange();
         }
@@ -78,7 +79,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             BeginChange();
 
-            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with { EditorNote = editorNote };
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with { EditorNote = editorNote };
 
             EndChange();
         }
@@ -89,11 +90,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             BeginChange();
 
-            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
             {
-                Outputs = _scratchpadManager.ActiveBuilder.Outputs with
+                Outputs = _scratchpadManager.ActiveScratchpad.Outputs with
                 {
-                    Thoughts = _scratchpadManager.ActiveBuilder.Outputs.Thoughts.Add(guid)
+                    Thoughts = _scratchpadManager.ActiveScratchpad.Outputs.Thoughts.Add(guid)
                 }
             };
 
@@ -102,18 +103,18 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void RemoveOutputThought(ThoughtGuid guid)
         {
-            ImmutableArray<ThoughtGuid> newArray = _scratchpadManager.ActiveBuilder.Outputs.Thoughts.Remove(guid);
+            ImmutableArray<ThoughtGuid> newArray = _scratchpadManager.ActiveScratchpad.Outputs.Thoughts.Remove(guid);
 
             // Don't save history if we try removing a non-existing thought.
             // Failure results in the same state as success anyway.
-            if (_scratchpadManager.ActiveBuilder.Outputs.Thoughts == newArray)
+            if (_scratchpadManager.ActiveScratchpad.Outputs.Thoughts == newArray)
                 return;
 
             BeginChange();
 
-            _scratchpadManager.ActiveBuilder = _scratchpadManager.ActiveBuilder with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
             {
-                Outputs = _scratchpadManager.ActiveBuilder.Outputs with
+                Outputs = _scratchpadManager.ActiveScratchpad.Outputs with
                 {
                     Thoughts = newArray
                 }
@@ -130,30 +131,33 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             if (_scratchpadManager.CurrentMode == Mode.Edit)
             {
-                if (_scratchpadManager.EditBuilder is null)
-                    throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Edit} mode with null {_scratchpadManager.EditBuilder}");
+                if (_scratchpadManager.EditScratchpad is null)
+                    throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Edit} mode with null {_scratchpadManager.EditScratchpad}");
 
-                int index = _deductions.FindIndex(d => d.Guid == _scratchpadManager.EditBuilder.Guid);
+                int index = _deductions.FindIndex(d => d.Guid == _scratchpadManager.EditScratchpad.Guid);
 
                 if (index < 0)
-                    throw new InvalidOperationException($"No deduction with id '{_scratchpadManager.EditBuilder.Guid}'");
+                    throw new InvalidOperationException($"No deduction with id '{_scratchpadManager.EditScratchpad.Guid}'");
 
                 BeginChange();
 
-                _deductions = _deductions.SetItem(index, _scratchpadManager.EditBuilder!);
+                _deductions = _deductions.SetItem(index, _scratchpadManager.EditScratchpad!);
 
                 EndChange();
 
-                return _scratchpadManager.EditBuilder.Guid;
+                return _scratchpadManager.EditScratchpad.Guid;
             }
 
-            Guid addedGuid = _scratchpadManager.AddBuilder.Guid;
+            if (_scratchpadManager.AddScratchpad is null)
+                throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {Mode.Add} mode with null {_scratchpadManager.AddScratchpad}");
+
+            Guid addedGuid = _scratchpadManager.AddScratchpad.Guid;
 
             BeginChange();
 
-            _deductions = _deductions.Add(_scratchpadManager.AddBuilder);
+            _deductions = _deductions.Add(_scratchpadManager.AddScratchpad);
 
-            _scratchpadManager.AddBuilder = CreateDefaultEditorDeduction();
+            _scratchpadManager.AddScratchpad = CreateDefaultEditorDeduction();
 
             EndChange();
 
@@ -187,7 +191,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         #region EditorArea
 
         protected override DeductionsEditorState GetStateToSave() 
-            => new DeductionsEditorState(_deductions, _scratchpadManager.AddBuilder, _scratchpadManager.EditBuilder, _scratchpadManager.CurrentMode, _selectionGuid);
+            => new DeductionsEditorState(_deductions, _scratchpadManager.AddScratchpad, _scratchpadManager.EditScratchpad, _scratchpadManager.CurrentMode, _selectionGuid);
 
         // Changing mode or selecting a deduction are not state changes by themselves.
         protected override bool CheckStateEquality(DeductionsEditorState a, DeductionsEditorState b) 
@@ -198,8 +202,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         protected override void ApplyRestoredState(DeductionsEditorState newState)
         {
             _deductions = newState.Deductions;
-            _scratchpadManager.AddBuilder = newState.AddBuilder;
-            _scratchpadManager.EditBuilder = newState.EditBuilder;
+            _scratchpadManager.AddScratchpad = newState.AddBuilder;
+            _scratchpadManager.EditScratchpad = newState.EditBuilder;
 
             // If a state was saved at all, something has changed and the UI needs to update.
             // SelectDeduction would not invoke the event in cases where Guids are equal.
