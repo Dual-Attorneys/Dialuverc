@@ -207,6 +207,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             // If a state was saved at all, something has changed and the UI needs to update.
             // SelectDeduction would not invoke the event in cases where Guids are equal.
+            // This is a convenience over manually checking last selection when state-restored event is invoked.
             _selectionGuid = newState.DeductionSelection;
             OnDeductionSelectionChanged?.Invoke(newState.EditBuilder);
 

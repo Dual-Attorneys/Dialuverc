@@ -238,8 +238,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             // If a state was saved at all, something has changed and the UI needs to update.
             // SelectThought would not invoke the event in cases where ThoughtGuids are equal.
             // Should be safe to assume the ThoughtGuid will always exist in the list.
+            // This is a convenience over manually checking last selection when state-restored event is invoked.
             _selectionGuid = newState.ThoughtSelection;
-            OnThoughtSelectionChanged?.Invoke(newState.Thoughts.FirstOrDefault(t => t.RuntimeThought.Guid == newState.ThoughtSelection));
+            OnThoughtSelectionChanged?.Invoke(newState.EditBuilder);
 
             _scratchpadManager.ChangeMode(newState.Mode);
         }
