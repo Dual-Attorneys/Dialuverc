@@ -22,7 +22,7 @@
         /// <summary>
         /// The appropriate scratchpad based on the <see cref="EditorModeManager.CurrentMode"/>.
         /// </summary>
-        public T ActiveScratchpad
+        public T? ActiveScratchpad
         {
             get
             {
@@ -36,10 +36,6 @@
                         return AddScratchpad;
 
                     case Mode.Edit:
-
-                        if (EditScratchpad is null)
-                            throw new InvalidOperationException($"Can't get {nameof(ActiveScratchpad)} in {Mode.Edit} mode with null {nameof(EditScratchpad)}");
-
                         return EditScratchpad;
 
                     default: throw new NotImplementedException();

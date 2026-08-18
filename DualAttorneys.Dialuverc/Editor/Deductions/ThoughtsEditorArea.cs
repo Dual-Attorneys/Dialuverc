@@ -24,7 +24,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         readonly EditorScratchpadManager<EditorThought> _scratchpadManager;
         public EditorModeManager ScratchpadManager => _scratchpadManager;
-        public EditorThought ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
+        public EditorThought? ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
         // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
         // This assumes their structure is unlikely to change and will always need few parameters.
@@ -38,7 +38,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetNameKey(string nameKey)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought;
+            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
 
             BeginChange();
 
@@ -56,7 +56,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetDescriptionKey(string descriptionKey)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought;
+            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
 
             BeginChange();
 
@@ -74,7 +74,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetSide(CharacterSides side)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought;
+            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
 
             BeginChange();
 
@@ -94,7 +94,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             BeginChange();
 
-            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with { EditorNote = editorNote };
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad! with { EditorNote = editorNote };
 
             EndChange();
         }

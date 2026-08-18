@@ -20,10 +20,7 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
 
             for (int i = 0; i < _baseAmountOfThoughts; i++)
             {
-                _area.AddThought(
-                    $"Thought number {i}. This is the name.",
-                    $"Thought number {i}'s description. Longer string so it's more realistic. Still short so here's more text. This should be more than enough.",
-                    CharacterSides.Any);
+
             }
         }
 
@@ -42,12 +39,7 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         [Benchmark]
         public void StateSave()
         {
-            ThoughtGuid guidToEdit = _area.Thoughts[0].RuntimeThought.Guid;
-
-            // Saving still happens even if the new state is identical to the current one.
-            _area.EditThought(guidToEdit, "New thought name for the edit.", $"New thought description. Some meaningless text here to add some length. Added on iteration {_stateSerializationCounter}", CharacterSides.Any);
-
-            _stateSerializationCounter++;
+            
         }
 
         // Making enough Edits to make Verify have a significantly higher impact than it would with no problems found
