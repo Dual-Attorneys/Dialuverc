@@ -1,7 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Dialuverc.Editor.Base;
-using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
+
+using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 
 namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
 {
@@ -18,9 +19,14 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         {
             _area = new ThoughtsEditorArea();
 
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
+
             for (int i = 0; i < _baseAmountOfThoughts; i++)
             {
-
+                _area.SetNameKey($"nameKey{i}");
+                _area.SetDescriptionKey($"descKey{i}");
+                _area.SetEditorNote($"editorNote{i}");
+                _area.FinishBuilding();
             }
         }
 
