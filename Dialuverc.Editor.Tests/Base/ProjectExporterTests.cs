@@ -25,7 +25,7 @@ namespace Dialuverc.Editor.Tests.Base
 
                     for (int i = 0; i < toExport.Length; i++)
                     {
-                        Assert.That(readArchive.Entries[i].Name, Is.EqualTo(toExport[i].ExportName));
+                        Assert.That(readArchive.Entries[i].Name, Is.EqualTo(toExport[i].ExportPath));
 
                         using (Stream stream = readArchive.Entries[i].Open())
                         {
@@ -42,7 +42,7 @@ namespace Dialuverc.Editor.Tests.Base
         class TestExportableObject : IExportable
         {
             readonly string _exportName;
-            public string ExportName => _exportName;
+            public string ExportPath => _exportName;
 
             public readonly string Content;
 

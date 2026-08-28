@@ -20,7 +20,7 @@ namespace Dialuverc.Editor.Base.IO
             {
                 foreach (IExportable exportable in toExport)
                 {
-                    ZipArchiveEntry entry = archive.CreateEntry(exportable.ExportName);
+                    ZipArchiveEntry entry = archive.CreateEntry(exportable.ExportPath);
 
                     using (Stream entryStream = entry.Open())
                     {

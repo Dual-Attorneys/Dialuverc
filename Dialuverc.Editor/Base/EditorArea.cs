@@ -27,7 +27,7 @@ namespace Dialuverc.Editor.Base
         /// </summary>
         public event Action? OnStateChanged;
 
-        public abstract string ExportName { get; }
+        public abstract string ExportPath { get; }
 
         /// <summary>
         /// Begins a transaction and makes sure a base state to undo towards exists.

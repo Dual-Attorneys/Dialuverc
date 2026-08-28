@@ -6,9 +6,9 @@
     public interface IExportable
     {
         /// <summary>
-        /// File name used for exporting/importing.
+        /// File path used for exporting/importing. Can be used to group multiple files.
         /// </summary>
-        public string ExportName { get; }
+        public string ExportPath { get; }
 
         // TODO: This should be split in a way that allows the "editor project" to be saved
         // separately from the output that will be used by the game.
