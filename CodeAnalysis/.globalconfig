@@ -1,0 +1,4 @@
+is_global = true
+
+# BannedSymbols.txt
+dotnet_diagnostic.RS0030.severity = error

@@ -6,4 +6,9 @@
 		<PackageProjectUrl></PackageProjectUrl>
 		<RepositoryUrl></RepositoryUrl>
 	</PropertyGroup>
+
+	<ItemGroup>
+    	<AdditionalFiles Include="$(MSBuildThisFileDirectory)/CodeAnalysis/BannedSymbols.txt" />
+		<GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)/CodeAnalysis/.globalconfig" />
+  	</ItemGroup>
 </Project>
