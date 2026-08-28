@@ -27,6 +27,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public EditorModeManager ScratchpadManager => _scratchpadManager;
         public EditorDeduction ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
+        public override string ExportName => nameof(DeductionsEditorArea);
+
         public DeductionsEditorArea()
         {
             _scratchpadManager = new EditorScratchpadManager<EditorDeduction>();

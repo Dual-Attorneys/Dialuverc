@@ -29,6 +29,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
         // This assumes their structure is unlikely to change and will always need few parameters.
 
+        public override string ExportName => nameof(ThoughtsEditorArea);
+
         public ThoughtsEditorArea()
         {
             _scratchpadManager = new EditorScratchpadManager<EditorThought>();
