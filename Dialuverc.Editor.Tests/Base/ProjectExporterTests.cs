@@ -15,21 +15,24 @@ namespace Dialuverc.Editor.Tests.Base
                 new TestExportableObject("file3", "content3"),
             };
 
-            MemoryStream result = ProjectExporter.CreateZip(toExport.AsEnumerable());
-
-            using (ZipArchive readArchive = new ZipArchive(result))
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                Assert.That(readArchive.Entries, Has.Count.EqualTo(toExport.Length));
+                ProjectExporter.CreateZip(toExport.AsEnumerable(), memoryStream, true);
 
-                for (int i = 0; i < toExport.Length; i++)
+                using (ZipArchive readArchive = new ZipArchive(memoryStream))
                 {
-                    Assert.That(readArchive.Entries[i].Name, Is.EqualTo(toExport[i].ExportName));
+                    Assert.That(readArchive.Entries, Has.Count.EqualTo(toExport.Length));
 
-                    using (Stream stream = readArchive.Entries[i].Open())
+                    for (int i = 0; i < toExport.Length; i++)
                     {
-                        using (StreamReader reader = new StreamReader(stream))
+                        Assert.That(readArchive.Entries[i].Name, Is.EqualTo(toExport[i].ExportName));
+
+                        using (Stream stream = readArchive.Entries[i].Open())
                         {
-                            Assert.That(reader.ReadToEnd(), Is.EqualTo(toExport[i].Content));
+                            using (StreamReader reader = new StreamReader(stream))
+                            {
+                                Assert.That(reader.ReadToEnd(), Is.EqualTo(toExport[i].Content));
+                            }
                         }
                     }
                 }

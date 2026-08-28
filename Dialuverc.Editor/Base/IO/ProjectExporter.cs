@@ -11,11 +11,12 @@ namespace Dialuverc.Editor.Base.IO
         /// Creates a <see cref="ZipArchive"/> containing a <see cref="ZipArchiveEntry"/> for each <see cref="IExportable"/> in <paramref name="toExport"/>.
         /// </summary>
         /// <returns>An open <see cref="MemoryStream"/> at position 0.</returns>
-        public static MemoryStream CreateZip(IEnumerable<IExportable> toExport)
+        /// <param name="toExport"></param>
+        /// <param name="stream"></param>
+        /// <param name="resetStreamPosition">Whether to reset <see cref="Stream.Position"/> to 0.</param>
+        public static void CreateZip(IEnumerable<IExportable> toExport, Stream stream, bool resetStreamPosition)
         {
-            MemoryStream memoryStream = new MemoryStream();
-
-            using (ZipArchive archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
             {
                 foreach (IExportable exportable in toExport)
                 {
@@ -32,9 +33,8 @@ namespace Dialuverc.Editor.Base.IO
             }
             // Disposing the ZipArchive is needed to produce a valid object.
 
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            return memoryStream;
+            if (resetStreamPosition)
+                stream.Seek(0, SeekOrigin.Begin);
         }
     }
 }
