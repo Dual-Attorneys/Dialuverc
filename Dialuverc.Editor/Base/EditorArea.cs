@@ -104,7 +104,7 @@ namespace Dialuverc.Editor.Base
 
         protected abstract void ApplyRestoredState(T newState);
 
-        public abstract string SerializeForExport();
+        public abstract void SerializeForExport(Stream stream);
 
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
 

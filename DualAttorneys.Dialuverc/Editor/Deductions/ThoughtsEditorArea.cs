@@ -243,11 +243,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager.ChangeMode(newState.Mode, invokeEvent: false);
         }
 
-        public override string SerializeForExport()
+        public override void SerializeForExport(Stream stream)
         {
             // While we want to use as little space as possible while serializing editor state,
             // we prefer to have exports be as readable as possible.
-            return JsonSerializer.Serialize(Thoughts.Select(et => et.RuntimeThought), new JsonSerializerOptions()
+            JsonSerializer.Serialize(stream, Thoughts.Select(et => et.RuntimeThought), new JsonSerializerOptions()
             {
                 WriteIndented = true,
                 IncludeFields = true,

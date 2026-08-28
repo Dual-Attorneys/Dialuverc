@@ -24,10 +24,7 @@ namespace Dialuverc.Editor.Base.IO
 
                     using (Stream entryStream = entry.Open())
                     {
-                        using (StreamWriter writer = new StreamWriter(entryStream))
-                        {
-                            writer.Write(exportable.SerializeForExport());
-                        }
+                        exportable.SerializeForExport(entryStream);
                     }
                 }
             }

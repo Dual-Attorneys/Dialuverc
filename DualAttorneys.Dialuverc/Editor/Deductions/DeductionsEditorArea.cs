@@ -210,7 +210,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager.ChangeMode(newState.Mode, invokeEvent: false);
         }
 
-        public override string SerializeForExport()
+        public override void SerializeForExport(Stream stream)
         {
             throw new NotImplementedException();
         }

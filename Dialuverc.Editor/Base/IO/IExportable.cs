@@ -12,6 +12,6 @@
 
         // TODO: This should be split in a way that allows the "editor project" to be saved
         // separately from the output that will be used by the game.
-        public string SerializeForExport();
+        public void SerializeForExport(Stream stream);
     }
 }

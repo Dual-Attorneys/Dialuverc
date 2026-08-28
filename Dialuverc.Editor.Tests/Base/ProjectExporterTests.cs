@@ -53,7 +53,13 @@ namespace Dialuverc.Editor.Tests.Base
                 Content = content;
             }
 
-            public string SerializeForExport() => Content;
+            public void SerializeForExport(Stream stream)
+            {
+                using (StreamWriter writer = new StreamWriter(stream))
+                {
+                    writer.Write(Content);
+                }
+            }
         }
     }
 }
