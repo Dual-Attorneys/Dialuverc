@@ -9,12 +9,12 @@ namespace Dialuverc.Editor.Base.IO
     {
         /// <summary>
         /// Creates a <see cref="ZipArchive"/> containing a <see cref="ZipArchiveEntry"/> for each <see cref="IExportable"/> in <paramref name="toExport"/>.
+        /// <para>The <paramref name="stream"/> is left open.</para>
         /// </summary>
-        /// <returns>An open <see cref="MemoryStream"/> at position 0.</returns>
         /// <param name="toExport"></param>
         /// <param name="stream"></param>
         /// <param name="resetStreamPosition">Whether to reset <see cref="Stream.Position"/> to 0.</param>
-        public static void CreateZip(IEnumerable<IExportable> toExport, Stream stream, bool resetStreamPosition)
+        public static void CreateZip(IEnumerable<IExportable> toExport, Stream stream, bool resetStreamPosition = true)
         {
             using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
             {
