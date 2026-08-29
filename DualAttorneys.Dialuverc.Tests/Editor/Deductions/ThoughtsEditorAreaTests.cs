@@ -2,550 +2,355 @@
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 
+using static Dialuverc.Editor.Base.Modes.EditorModeManager;
+
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
     internal class ThoughtsEditorAreaTests
     {
-        ThoughtsEditorArea _area;
+        TestThoughtsEditorArea _area;
 
         [SetUp]
         public void SetUp()
         {
-            _area = new ThoughtsEditorArea();
+            _area = new TestThoughtsEditorArea();
         }
 
         [Test]
-        public void JsonSerializationFormat()
+        // Should be enough to test both Add and Edit scratchpads, assuming ActiveScratchpad works properly.
+        public void SetProperties()
         {
-            string expectedJson =
-@"[
-  {{
-    ""Guid"": ""{0}"",
-    ""NameKey"": ""thought1"",
-    ""DescriptionKey"": ""description1"",
-    ""Side"": 0
-  }},
-  {{
-    ""Guid"": ""{1}"",
-    ""NameKey"": ""thought2"",
-    ""DescriptionKey"": ""description2"",
-    ""Side"": 1
-  }}
-]";
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
 
-            Thought thought1 = new Thought(new Guid(), "thought1", "description1", CharacterSides.Tychon);
-            Thought thought2 = new Thought(new Guid(), "thought2", "description2", CharacterSides.Forger);
+            Assert.That(_area.ActiveScratchpad!.RuntimeThought.NameKey, Is.Empty);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.Empty);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.Side, Is.EqualTo(CharacterSides.Any));
+            Assert.That(_area.ActiveScratchpad.EditorNote, Is.Empty);
 
-            Guid guid1 = _area.AddThought(thought1.NameKey, thought1.DescriptionKey, thought1.Side);
-            Guid guid2 = _area.AddThought(thought2.NameKey, thought2.DescriptionKey, thought2.Side);
+            _area.SetNameKey("nameKey");
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.NameKey, Is.EqualTo("nameKey"));
 
-            expectedJson = String.Format(expectedJson, guid1, guid2);
+            _area.SetDescriptionKey("descriptionKey");
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.EqualTo("descriptionKey"));
 
-            Assert.That(_area.Thoughts.Count, Is.EqualTo(2));
+            _area.SetSide(CharacterSides.Tychon);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.Side, Is.EqualTo(CharacterSides.Tychon));
 
-            Assert.That(_area.SerializeForExport(), Is.EqualTo(expectedJson));
+            _area.SetEditorNote("editorNote");
+            Assert.That(_area.ActiveScratchpad.EditorNote, Is.EqualTo("editorNote"));
         }
 
         [Test]
-        public void AppendThought()
+        public void SetPropertiesHistory()
         {
-            _area.AddThought("thought1", "description1", CharacterSides.Tychon);
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
 
-            Assert.That(_area.Thoughts.Count, Is.EqualTo(1));
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+            _area.SetSide(CharacterSides.Tychon);
+            _area.SetEditorNote("editorNote");
 
-            Thought firstThought = _area.Thoughts[0].RuntimeThought;
+            _area.RestorePreviousState(RestoreDirection.Previous);
+            Assert.That(_area.ActiveScratchpad!.EditorNote, Is.Empty);
 
-            Assert.That(firstThought.NameKey, Is.EqualTo("thought1"));
-            Assert.That(firstThought.DescriptionKey, Is.EqualTo("description1"));
-            Assert.That(firstThought.Side, Is.EqualTo(CharacterSides.Tychon));
+            _area.RestorePreviousState(RestoreDirection.Previous);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.Side, Is.EqualTo(CharacterSides.Any));
 
-            _area.AddThought("thought2", "description2", CharacterSides.Forger);
+            _area.RestorePreviousState(RestoreDirection.Previous);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.Empty);
 
-            Assert.That(_area.Thoughts.Count, Is.EqualTo(2));
+            _area.RestorePreviousState(RestoreDirection.Previous);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.NameKey, Is.Empty);
 
-            Thought _secondThought = _area.Thoughts[1].RuntimeThought;
+            _area.RestorePreviousState(RestoreDirection.Next);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.NameKey, Is.EqualTo("nameKey"));
 
-            Assert.That(_secondThought.NameKey, Is.EqualTo("thought2"));
-            Assert.That(_secondThought.DescriptionKey, Is.EqualTo("description2"));
-            Assert.That(_secondThought.Side, Is.EqualTo(CharacterSides.Forger));
+            _area.RestorePreviousState(RestoreDirection.Next);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.EqualTo("descriptionKey"));
+
+            _area.RestorePreviousState(RestoreDirection.Next);
+            Assert.That(_area.ActiveScratchpad.RuntimeThought.Side, Is.EqualTo(CharacterSides.Tychon));
+
+            _area.RestorePreviousState(RestoreDirection.Next);
+            Assert.That(_area.ActiveScratchpad.EditorNote, Is.EqualTo("editorNote"));
         }
 
         [Test]
-        public void RemoveThought()
+        public void AddThoughtToList()
         {
-            _area.AddThought("thought1", "description1", CharacterSides.Tychon);
-            Guid guidToRemove = _area.AddThought("thought2", "description2", CharacterSides.Forger);
-            _area.AddThought("thought3", "description3", CharacterSides.Any);
+            Assert.That(_area.Thoughts, Is.Empty);
 
-            _area.RemoveThought(guidToRemove);
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
 
-            Assert.That(_area.Thoughts.Count, Is.EqualTo(2));
+            PopulateSampleThought();
 
-            Assert.That(_area.Thoughts[0].RuntimeThought.NameKey, Is.EqualTo("thought1"));
-            Assert.That(_area.Thoughts[1].RuntimeThought.NameKey, Is.EqualTo("thought3"));
+            EditorThought lastThought = _area.ActiveScratchpad!;
+
+            _area.FinishBuilding();
+
+            Assert.That(_area.Thoughts, Has.Count.EqualTo(1));
+            Assert.That(_area.Thoughts[0], Is.EqualTo(lastThought));
+
+            Assert.That(_area.ActiveScratchpad, Is.Not.EqualTo(lastThought));
         }
 
         [Test]
-        public void EditThought()
+        public void AddThoughtToListHistory()
         {
-            string[] thoughtNames =
-            [
-                "starterNameKey",
-                "thought2",
-                "thought3",
-                "thought4",
-            ];
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
 
-            Guid toEdit = _area.AddThought("starterNameKey", "starterDescriptionKey", CharacterSides.Tychon);
-            _area.AddThought("thought2", "description2", CharacterSides.Any);
-            _area.AddThought("thought3", "description3", CharacterSides.Any);
-            _area.AddThought("thought4", "description4", CharacterSides.Any);
+            PopulateSampleThought();
 
-            _area.EditThought(toEdit, "newNameKey", "newDescriptionKey", CharacterSides.Forger);
+            EditorThought lastThought = _area.ActiveScratchpad!;
 
-            Assert.That(_area.Thoughts.Count, Is.EqualTo(4));
+            _area.FinishBuilding();
 
-            Assert.That(_area.Thoughts[0].RuntimeThought.Guid, Is.EqualTo(toEdit));
-            Assert.That(_area.Thoughts[0].RuntimeThought.NameKey, Is.EqualTo("newNameKey"));
-            Assert.That(_area.Thoughts[0].RuntimeThought.DescriptionKey, Is.EqualTo("newDescriptionKey"));
-            Assert.That(_area.Thoughts[0].RuntimeThought.Side, Is.EqualTo(CharacterSides.Forger));
-        
-            for (int i = 1; i < _area.Thoughts.Count; i++)
-            {
-                Assert.That(_area.Thoughts[i].RuntimeThought.NameKey == thoughtNames[i]);
-            }
+            _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(5));
+            Assert.That(_area.Thoughts, Is.Empty);
+            Assert.That(_area.ActiveScratchpad, Is.EqualTo(lastThought));
+
+            _area.RestorePreviousState(RestoreDirection.Next);
+
+            Assert.That(_area.Thoughts, Has.Count.EqualTo(1));
+            Assert.That(_area.Thoughts[0], Is.EqualTo(lastThought));
         }
 
         [Test]
-        public void EditThoughtNoChangeNoStateSave()
+        public void GuidsAreDifferent()
         {
-            Thought template = new Thought(Guid.Empty, "nameKey", "descriptionKey", CharacterSides.Any);
+            ThoughtGuid guid1 = AddSampleThoughtToList(0);
+            ThoughtGuid guid2 = AddSampleThoughtToList(1);
 
-            Guid toEdit = _area.AddThought(template.NameKey, template.DescriptionKey, template.Side);
-            _area.EditThought(toEdit, template.NameKey, template.DescriptionKey, template.Side);
-
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(1));
+            Assert.That(guid1, Is.Not.EqualTo(guid2));
         }
 
         [Test]
-        public void InsertThought()
+        public void RemoveThoughtFromList()
         {
-            AppendTemplatesToList();
+            ThoughtGuid guid = AddSampleThoughtToList();
 
-            int indexToInsert = 1;
+            Assert.That(_area.RemoveThought(guid), Is.True);
+            Assert.That(_area.RemoveThought(guid), Is.False);
 
-            Guid inserted = _area.InsertThought(indexToInsert, "insertedName", "insertedDescription", CharacterSides.Any);
+            Assert.That(_area.Thoughts, Is.Empty);
+        }
 
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length + 1));
+        [Test]
+        public void RemoveThoughtFromListHistory()
+        {
+            ThoughtGuid guid = AddSampleThoughtToList();
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
-            {
-                if (i == indexToInsert)
-                    continue;
+            _area.RemoveThought(guid);
+            _area.RestorePreviousState(RestoreDirection.Previous);
 
-                if (i < indexToInsert)
-                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i].RuntimeThought), Is.True);
-                else
-                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i + 1].RuntimeThought), Is.True);
-            }
+            Assert.That(_area.Thoughts, Has.Count.EqualTo(1));
+            Assert.That(_area.Thoughts[0].RuntimeThought.Guid, Is.EqualTo(guid));
 
-            Assert.That(_area.Thoughts[indexToInsert].RuntimeThought.NameKey, Is.EqualTo("insertedName"));
-            Assert.That(_area.Thoughts[indexToInsert].RuntimeThought.DescriptionKey, Is.EqualTo("insertedDescription"));
-            Assert.That(_area.Thoughts[indexToInsert].RuntimeThought.Side, Is.EqualTo(CharacterSides.Any));
+            _area.RestorePreviousState(RestoreDirection.Next);
+
+            Assert.That(_area.Thoughts, Is.Empty);
         }
 
         [Test]
         public void MoveThought()
         {
-            AppendTemplatesToList();
+            ThoughtGuid guid1 = AddSampleThoughtToList(0);
+            ThoughtGuid guid2 = AddSampleThoughtToList(1);
 
-            int originalIndex = 0;
-            int newIndex = 1;
+            _area.MoveThought(guid2, 0);
 
-            Guid toMove = _area.Thoughts[originalIndex].RuntimeThought.Guid;
-            Guid previousAtIndex = _area.Thoughts[newIndex].RuntimeThought.Guid;
-
-            _area.MoveThought(toMove, newIndex);
-
-            Assert.That(_area.Thoughts[originalIndex].RuntimeThought.Guid, Is.EqualTo(previousAtIndex));
-            Assert.That(_area.Thoughts[newIndex].RuntimeThought.Guid, Is.EqualTo(toMove));
-
-            // Check whether the number of possible Undos is correct.
-            // Needed for the test that checks whether moving to same index does not save state.
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(4));
+            Assert.That(_area.Thoughts[0].RuntimeThought.Guid, Is.EqualTo(guid2));
+            Assert.That(_area.Thoughts[1].RuntimeThought.Guid, Is.EqualTo(guid1));
         }
 
         [Test]
-        public void MoveThoughtToSameNoStateSave()
+        public void MoveThoughtHistory()
         {
-            AppendTemplatesToList();
+            ThoughtGuid guid1 = AddSampleThoughtToList(0);
+            ThoughtGuid guid2 = AddSampleThoughtToList(1);
 
-            int index = 1;
-
-            Guid toMove = _area.Thoughts[index].RuntimeThought.Guid;
-
-            _area.MoveThought(toMove, index);
-
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(3));
-        }
-
-
-        [Test]
-        public void RestoreAfterAppend()
-        {
-            AppendTemplatesToList();
-
-            int startingCount = _area.Thoughts.Count;
-
-            for (int i = 0; i < startingCount; i++)
-            {
-                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
-            }
-
-            while (_area.CanUndo)
-            {
-                _area.RestorePreviousState(RestoreDirection.Previous);
-
-                int indexToCheck = _area.Thoughts.Count - 1;
-
-                // We'll hit an empty list on the last undo.
-                if (_area.Thoughts.Count < 1)
-                    continue;
-
-                Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
-                Thought b = _thoughtTemplates[indexToCheck];
-
-                Assert.That(a.HasSameValues(b), Is.True);
-            }
-
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(0));
-
-            while (_area.CanRedo)
-            {
-                _area.RestorePreviousState(RestoreDirection.Next);
-
-                int indexToCheck = _area.Thoughts.Count - 1;
-
-                Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
-                Thought b = _thoughtTemplates[indexToCheck];
-
-                Assert.That(a.HasSameValues(b), Is.True);
-            }
-
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(startingCount));
-        }
-
-        [Test]
-        public void RestoreAfterRemoveFromFront()
-        {
-            AppendTemplatesToList();
-
-            int starterCount = _area.Thoughts.Count;
-
-            // Undoing until we can't anymore will include the template appends.
-            // Count how many undos are needed to ONLY undo the removes.
-            int amountToRedo = 0;
-
-            for (int i = _thoughtTemplates.Length - 1; i >= 0; i--)
-            {
-                _area.RemoveThought(
-                    _area.Thoughts.First(t => t.RuntimeThought.NameKey == _thoughtTemplates[i].NameKey).RuntimeThought.Guid);
-
-                amountToRedo++;
-            }
-
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(0));
-
-            Assert.That(amountToRedo, Is.EqualTo(3));
-
-            for (int i = 0; i < amountToRedo; i++) 
-            {
-                _area.RestorePreviousState(RestoreDirection.Previous);
-
-                int indexToCheck =  _area.Thoughts.Count - 1;
-
-                Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
-                Thought b = _thoughtTemplates[indexToCheck];
-
-                Assert.That(a.HasSameValues(b), Is.True);
-            }
-
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(starterCount));
-
-            while (_area.CanRedo)
-            {
-                _area.RestorePreviousState(RestoreDirection.Next);
-
-                int indexToCheck = _area.Thoughts.Count - 1;
-
-                // We'll hit an empty list on the last redo.
-                if (_area.Thoughts.Count < 1)
-                    continue;
-
-                Thought a = _area.Thoughts[indexToCheck].RuntimeThought;
-                Thought b = _thoughtTemplates[indexToCheck];
-
-                Assert.That(a.HasSameValues(b), Is.True);
-            }
-
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(0));
-        }
-
-        [Test]
-        public void RestoreAfterEdit()
-        {
-            AppendTemplatesToList();
-
-            int indexToEdit = _thoughtTemplates.Length / 2;
-
-            Guid toEdit = _area.Thoughts.First(t => t.RuntimeThought.NameKey == _thoughtTemplates[indexToEdit].NameKey).RuntimeThought.Guid;
-
-            Thought newTemplate = new Thought(new Guid(), "NewKey", "NewDescription", CharacterSides.Any);
-
-            _area.EditThought(toEdit, newTemplate.NameKey, newTemplate.DescriptionKey, newTemplate.Side);
-
+            _area.MoveThought(guid2, 0);
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length));
-
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
-            {
-                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
-            }
+            Assert.That(_area.Thoughts[0].RuntimeThought.Guid, Is.EqualTo(guid1));
+            Assert.That(_area.Thoughts[1].RuntimeThought.Guid, Is.EqualTo(guid2));
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
-            int checksCount = 0;
+            Assert.That(_area.Thoughts[0].RuntimeThought.Guid, Is.EqualTo(guid2));
+            Assert.That(_area.Thoughts[1].RuntimeThought.Guid, Is.EqualTo(guid1));
+        }
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
-            {
-                if (i != indexToEdit)
-                    Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
-                else
-                    Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(newTemplate), Is.True);
+        // Moving to same index is effectively untestable as it is a no-op path which has the same result as it running.
 
-                checksCount++;
-            }
+        [Test]
+        public void SelectInvokesCorrectEvent()
+        {
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
 
-            Assert.That(checksCount, Is.EqualTo(_thoughtTemplates.Length));
+            int changeModeInvokations = 0;
+            int changeSelectInvokations = 0;
+            EditorThought? currentSelection = null;
+
+            _area.ScratchpadManager.OnModeChanged += (_) => { changeModeInvokations++; };
+            _area.OnThoughtSelectionChanged += (selection) => 
+            { 
+                changeSelectInvokations++;
+                currentSelection = selection;
+            };
+
+            ThoughtGuid guid1 = AddSampleThoughtToList(0);
+            ThoughtGuid guid2 = AddSampleThoughtToList(1);
+
+            _area.SelectThought(guid1);
+
+            Assert.That(_area.ScratchpadManager.CurrentMode, Is.EqualTo(Mode.Edit));
+            Assert.That(_area.ActiveScratchpad, Is.EqualTo(_area.Thoughts[0]));
+            Assert.That(changeModeInvokations, Is.EqualTo(1));
+            Assert.That(changeSelectInvokations, Is.Zero);
+            // When in Add, only OnModeChanged is invoked, which leaves currentSelection null.
+
+            _area.SelectThought(guid2);
+
+            Assert.That(_area.ScratchpadManager.CurrentMode, Is.EqualTo(Mode.Edit));
+            Assert.That(changeModeInvokations, Is.EqualTo(1));
+            Assert.That(changeSelectInvokations, Is.EqualTo(1));
+            Assert.That(currentSelection, Is.EqualTo(_area.Thoughts[1]));
+            Assert.That(currentSelection, Is.EqualTo(_area.ActiveScratchpad));
         }
 
         [Test]
-        public void RestoreAfterInsert()
+        public void SelectSameIsNoOp()
         {
-            AppendTemplatesToList();
+            ThoughtGuid guid = AddSampleThoughtToList();
 
-            int indexToInsert = 1;
+            _area.ScratchpadManager.ChangeMode(Mode.Edit);
 
-            _area.InsertThought(indexToInsert, "insteredName", "insertedDescription", CharacterSides.Any);
+            int eventInvokations = 0;
 
-            _area.RestorePreviousState(RestoreDirection.Previous);
+            _area.OnThoughtSelectionChanged += (selection) => { eventInvokations++; };
 
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length));
+            _area.SelectThought(guid);
+            _area.SelectThought(guid);
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
-            {
-                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
-            }
-
-            _area.RestorePreviousState(RestoreDirection.Next);
-
-            Assert.That(_area.Thoughts, Has.Count.EqualTo(_thoughtTemplates.Length + 1));
-
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
-            {
-                if (i == indexToInsert)
-                    continue;
-
-                if (i < indexToInsert)
-                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i].RuntimeThought), Is.True);
-                else
-                    Assert.That(_thoughtTemplates[i].HasSameValues(_area.Thoughts[i + 1].RuntimeThought), Is.True);
-            }
+            Assert.That(eventInvokations, Is.EqualTo(1));
         }
 
         [Test]
-        public void RestoreAfterMove()
+        public void RemoveSelection()
         {
-            AppendTemplatesToList();
+            EditorThought? currentSelection = null;
 
-            int indexToMove = 0;
-            int targetIndex = 1; 
+            _area.OnThoughtSelectionChanged += (selection) => { currentSelection = selection; };
 
-            Guid previousAtIndex = _area.Thoughts[targetIndex].RuntimeThought.Guid;
-            Guid toMove = _area.Thoughts[indexToMove].RuntimeThought.Guid;
+            ThoughtGuid guid = AddSampleThoughtToList();
 
-            _area.MoveThought(toMove, 1);
+            _area.ScratchpadManager.ChangeMode(Mode.Edit);
 
-            _area.RestorePreviousState(RestoreDirection.Previous);
+            _area.SelectThought(guid);
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
-            {
-                Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(_thoughtTemplates[i]), Is.True);
-            }
+            Assert.That(currentSelection, Is.EqualTo(_area.Thoughts[0]));
 
-            _area.RestorePreviousState(RestoreDirection.Next);
+            _area.RemoveThought(guid);
 
-            for (int i = 0; i < _thoughtTemplates.Length; i++)
-            {
-                if (i == indexToMove)
-                    Assert.That(_area.Thoughts[i].RuntimeThought.Guid, Is.EqualTo(previousAtIndex));
-                else if (i == targetIndex)
-                    Assert.That(_area.Thoughts[i].RuntimeThought.Guid, Is.EqualTo(toMove));
-                else
-                    // Guids in templates will never match, so compare keys.
-                    Assert.That(_area.Thoughts[i].RuntimeThought.NameKey, Is.EqualTo(_thoughtTemplates[i].NameKey));
-            }
+            Assert.That(currentSelection, Is.Null);
+            Assert.That(_area.ActiveScratchpad, Is.Null);
         }
 
         [Test]
-        public void SelectionReturnsCorrectThought()
+        public void Deselect()
         {
-            AppendTemplatesToList();
+            ThoughtGuid guid = AddSampleThoughtToList();
 
-            EditorThought? selected = null;
+            _area.ScratchpadManager.ChangeMode(Mode.Edit);
 
-            _area.OnThoughtSelectionChanged += (t) => { selected = t; };
+            int eventInvokations = 0;
+            EditorThought? currentSelection = null;
 
-            _area.SelectThought(_area.Thoughts[0].RuntimeThought.Guid);
+            _area.OnThoughtSelectionChanged += (selection) => 
+            { 
+                eventInvokations++;
+                currentSelection = selection;
+            };
 
-            Assert.That(selected!.RuntimeThought.HasSameValues(_area.Thoughts[0].RuntimeThought), Is.True);
-
+            _area.SelectThought(guid);
             _area.SelectThought(null);
 
-            Assert.That(selected, Is.Null);
+            Assert.That(currentSelection, Is.Null);
+            Assert.That(_area.ActiveScratchpad, Is.Null);
         }
 
         [Test]
-        public void SelectingSameIsNoOp()
+        public void EditThoughtInList()
         {
-            int selections = 0;
+            ThoughtGuid guid = AddSampleThoughtToList();
 
-            _area.OnThoughtSelectionChanged += (_) => { selections++; };
+            _area.SelectThought(guid);
+            _area.SetNameKey("editedNameKey");
+            _area.SetDescriptionKey("editedDescriptionKey");
+            _area.SetSide(CharacterSides.Forger);
+            _area.SetEditorNote("editedEditorNote");
+            _area.FinishBuilding();
 
-            Guid toSelect = _area.AddThought("name", "desc", CharacterSides.Any);
+            Assert.That(_area.Thoughts[0].RuntimeThought.NameKey, Is.EqualTo("editedNameKey"));
+            Assert.That(_area.Thoughts[0].RuntimeThought.DescriptionKey, Is.EqualTo("editedDescriptionKey"));
+            Assert.That(_area.Thoughts[0].RuntimeThought.Side, Is.EqualTo(CharacterSides.Forger));
+            Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo("editedEditorNote"));
 
-            _area.SelectThought(toSelect);
-
-            Assert.That(selections, Is.EqualTo(1));
-
-            _area.SelectThought(toSelect);
-
-            Assert.That(selections, Is.EqualTo(1));
-
-            _area.SelectThought(null);
-
-            Assert.That(selections, Is.EqualTo(2));
-
-            _area.SelectThought(null);
-
-            Assert.That(selections, Is.EqualTo(2));
+            Assert.That(_area.Thoughts[0], Is.EqualTo(_area.ActiveScratchpad));
         }
 
         [Test]
-        public void SelectionRestored()
+        public void EditThoughtInListHistory()
         {
-            AppendTemplatesToList();
+            ThoughtGuid guid = AddSampleThoughtToList();
 
-            EditorThought? selected = null;
-
-            _area.OnThoughtSelectionChanged += (t) => { selected = t; };
-
-            _area.SelectThought(_area.Thoughts[0].RuntimeThought.Guid);
-            _area.SelectThought(_area.Thoughts[1].RuntimeThought.Guid);
-
-            _area.EditThought(_area.Thoughts[2].RuntimeThought.Guid, "editedName1", "editedDesc1", CharacterSides.Any);
-
-            _area.SelectThought(_area.Thoughts[0].RuntimeThought.Guid);
-
-            _area.EditThought(_area.Thoughts[2].RuntimeThought.Guid, "editedName2", "editedDesc2", CharacterSides.Any);
-
+            _area.SelectThought(guid);
+            _area.SetNameKey("editedNameKey");
+            _area.SetDescriptionKey("editedDescriptionKey");
+            _area.SetSide(CharacterSides.Forger);
+            _area.SetEditorNote("editedEditorNote");
+            _area.FinishBuilding();
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(selected!.RuntimeThought.HasSameValues(_area.Thoughts[1].RuntimeThought), Is.True);
-
-            _area.RestorePreviousState(RestoreDirection.Previous);
-
-            Assert.That(selected, Is.Null);
+            Assert.That(_area.Thoughts[0], Is.Not.EqualTo(_area.ActiveScratchpad));
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
-            Assert.That(selected!.RuntimeThought.HasSameValues(_area.Thoughts[1].RuntimeThought), Is.True);
-
-            _area.RestorePreviousState(RestoreDirection.Next);
-
-            Assert.That(selected!.RuntimeThought.HasSameValues(_area.Thoughts[0].RuntimeThought), Is.True);
+            Assert.That(_area.Thoughts[0], Is.EqualTo(_area.ActiveScratchpad));
         }
 
-        [Test]
-        public void SetEditorNote()
+        #region Helpers
+
+        void PopulateSampleThought(int offset = 0)
         {
-            Guid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
-
-            _area.SetEditorNote(toEdit, "changed note");
-
-            Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo("changed note"));
-
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(2));
+            _area.SetNameKey($"nameKey{offset}");
+            _area.SetDescriptionKey($"descriptionKey{offset}");
+            _area.SetSide(CharacterSides.Tychon);
+            _area.SetEditorNote($"editorNote{offset}");
         }
 
-        [Test]
-        public void SetEditorNoteNoChangeNoStateSave()
+        ThoughtGuid AddSampleThoughtToList(int offset = 0)
         {
-            Guid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
+            Mode previousMode = _area.ScratchpadManager.CurrentMode;
 
-            _area.SetEditorNote(toEdit, "changed note");
-            _area.SetEditorNote(toEdit, "changed note");
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
 
-            Assert.That(RestorePreviousUntilPossible, Is.EqualTo(2));
+            PopulateSampleThought(offset);
+
+            ThoughtGuid guid = _area.FinishBuilding();
+
+            _area.ScratchpadManager.ChangeMode(previousMode);
+
+            return guid;
         }
 
-        [Test]
-        public void RestoreAfterSetEditorNote()
+        private class TestThoughtsEditorArea : ThoughtsEditorArea
         {
-            Guid toEdit = _area.AddThought("nameKey", "descriptionKey", CharacterSides.Any);
-
-            _area.SetEditorNote(toEdit, "changed note");
-
-            Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo("changed note"));
-
-            _area.RestorePreviousState(RestoreDirection.Previous);
-
-            Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo(string.Empty));
+            public new int CurrentStateIndex => base.CurrentStateIndex;
         }
 
-        Thought[] _thoughtTemplates =
-        [
-            // Guids from the templates are ignored.
-            new Thought(Guid.Empty, "thought1", "description1", CharacterSides.Tychon),
-            new Thought(Guid.Empty, "thought2", "description2", CharacterSides.Forger),
-            new Thought(Guid.Empty, "thought3", "description3", CharacterSides.Any),
-        ];
-
-        void AppendTemplatesToList()
-        {
-            foreach (Thought thought in _thoughtTemplates)
-            {
-                _area.AddThought(thought.NameKey, thought.DescriptionKey, thought.Side);
-            }
-        }
-
-        /// <summary>
-        /// Restores states with <see cref="RestoreDirection.Previous"/> until possible and returns the amount of times it was done.
-        /// </summary>
-        int RestorePreviousUntilPossible()
-        {
-            int undosDid = 0;
-
-            while (_area.CanUndo)
-            {
-                _area.RestorePreviousState(RestoreDirection.Previous);
-                undosDid++;
-            }
-
-            return undosDid;
-        }
+        #endregion
     }
 }

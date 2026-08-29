@@ -2,7 +2,7 @@
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
-    internal static class EditorThoughtExtensions
+    public static class EditorThoughtExtensions
     {
         /// <summary>
         /// Checks whether this <see cref="Thought"/> has the same values as another, ignoring <see cref="Thought.Guid"/>.
