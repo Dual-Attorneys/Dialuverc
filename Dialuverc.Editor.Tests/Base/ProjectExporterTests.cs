@@ -1,4 +1,5 @@
 ﻿using Dialuverc.Editor.Base.IO;
+using Dialuverc.Editor.Tests.Utils;
 using System.IO.Compression;
 
 namespace Dialuverc.Editor.Tests.Base
@@ -35,6 +36,31 @@ namespace Dialuverc.Editor.Tests.Base
                             }
                         }
                     }
+                }
+            }
+        }
+
+        [Test]
+        public void ExportToFolder()
+        {
+            TestExportableObject[] toExport = new TestExportableObject[]
+            {
+                new TestExportableObject("file1", "content1"),
+                new TestExportableObject("file2", "content2"),
+                new TestExportableObject("folder/file3", "content3"),
+            };
+
+            using (TemporaryFileStorage storage = new TemporaryFileStorage(
+                Path.Combine(Path.GetTempPath(), $"Dialuverc{nameof(ProjectExporterTests)}{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}")))
+            {
+                ProjectExporter.ExportToFolder(toExport.AsEnumerable(), storage.FolderPath);
+
+                for (int i = 0; i < toExport.Length; i++)
+                {
+                    string filePath = Path.Combine(storage.FolderPath, toExport[i].ExportPath);
+
+                    Assert.That(File.Exists(filePath), Is.True);
+                    Assert.That(File.ReadAllText(filePath), Is.EqualTo(toExport[i].Content));
                 }
             }
         }
