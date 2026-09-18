@@ -242,7 +242,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _scratchpadManager.ChangeMode(newState.Mode, invokeEvent: false);
         }
-
+/* 
         public override void SerializeForExport(Stream stream)
         {
             // While we want to use as little space as possible while serializing editor state,
@@ -253,7 +253,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                 IncludeFields = true,
             });
         }
-
+ */
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
 
         #endregion

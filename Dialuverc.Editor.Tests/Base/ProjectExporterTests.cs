@@ -86,6 +86,11 @@ namespace Dialuverc.Editor.Tests.Base
                     writer.Write(Content);
                 }
             }
+
+            public void DeserializeForImport(Stream stream)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

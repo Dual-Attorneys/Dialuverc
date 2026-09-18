@@ -166,11 +166,12 @@ namespace Dialuverc.Editor.Tests.Base
             {
                 return Encoding.UTF8.GetBytes(CurrentState);
             }
-
+/* 
             public override void SerializeForExport(Stream stream)
             {
                 throw new NotImplementedException();
             }
+ */            
         }
     }
 }
