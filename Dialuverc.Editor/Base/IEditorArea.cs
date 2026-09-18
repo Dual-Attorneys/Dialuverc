@@ -15,5 +15,7 @@ namespace Dialuverc.Editor.Base
         public event Action? OnStateChanged;
 
         public void RestorePreviousState(RestoreDirection direction);
+
+        public IEnumerable<IExportable> GetExportablesForTarget(ExportTarget exportTarget);
     }
 }
