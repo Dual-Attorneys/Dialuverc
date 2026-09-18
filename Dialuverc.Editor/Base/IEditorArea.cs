@@ -7,7 +7,7 @@ namespace Dialuverc.Editor.Base
     /// Represents one of multiple editor areas, each allowing to work on a specific part of the narrative system.
     /// <para>Implementations provide basic undo/redo, verification and exporting/importing functionality.</para>
     /// </summary>
-    public interface IEditorArea : IVerifiable, IExportable
+    public interface IEditorArea : IVerifiable
     {
         public bool CanUndo { get; }
         public bool CanRedo { get; }
@@ -15,5 +15,7 @@ namespace Dialuverc.Editor.Base
         public event Action? OnStateChanged;
 
         public void RestorePreviousState(RestoreDirection direction);
+
+        public IEnumerable<IExportable> GetExportablesForTarget(ExportTarget exportTarget);
     }
 }

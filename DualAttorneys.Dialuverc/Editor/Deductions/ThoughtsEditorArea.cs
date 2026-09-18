@@ -1,4 +1,5 @@
 ﻿using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base.IO;
 using Dialuverc.Editor.Base.Modes;
 using Dialuverc.Editor.Base.Verifier;
 using DualAttorneys.Dialuverc.Deductions;
@@ -26,16 +27,22 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public EditorModeManager ScratchpadManager => _scratchpadManager;
         public EditorThought? ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
+        ThoughtsEditorExportable _editorExportable;
+
         // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
         // This assumes their structure is unlikely to change and will always need few parameters.
-
-        public override string ExportPath => nameof(ThoughtsEditorArea);
 
         public ThoughtsEditorArea()
         {
             _scratchpadManager = new EditorScratchpadManager<EditorThought>();
 
             _scratchpadManager.AddScratchpad = CreateDefaultEditorThought();
+
+            _editorExportable = new ThoughtsEditorExportable(() => Thoughts, OnEditorThoughtsImported, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                IncludeFields = true,
+            });
         }
 
         public void SetNameKey(string nameKey)
@@ -218,6 +225,24 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             string.Empty,
             CharacterSides.Any));
 
+        #region Exportables
+
+        void OnEditorThoughtsImported(ImmutableList<EditorThought> importedEditorThoughts)
+        {
+            // TODO: Some thinking has to go into this.
+            // If we didn't do anything before importing, we may not want to allow Undo.
+            // Possibly we may want importing to clear the history.
+            // For now, the safest option is to just handle it as any other change.
+
+            BeginChange();
+
+            _thoughts = importedEditorThoughts;
+
+            EndChange();
+        }
+
+        #endregion
+
         #region EditorArea
 
         protected override ThoughtsEditorState GetStateToSave()
@@ -243,18 +268,22 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager.ChangeMode(newState.Mode, invokeEvent: false);
         }
 
-        public override void SerializeForExport(Stream stream)
-        {
-            // While we want to use as little space as possible while serializing editor state,
-            // we prefer to have exports be as readable as possible.
-            JsonSerializer.Serialize(stream, Thoughts.Select(et => et.RuntimeThought), new JsonSerializerOptions()
-            {
-                WriteIndented = true,
-                IncludeFields = true,
-            });
-        }
-
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
+
+        public override IEnumerable<IExportable> GetExportablesForTarget(ExportTarget exportTarget)
+        {
+            switch (exportTarget)
+            {
+                case ExportTarget.Editor:
+                    return new IExportable[] { _editorExportable };
+
+                case ExportTarget.Game:
+                    throw new NotImplementedException();
+
+                default:
+                    throw new InvalidOperationException($"No exportable defined for target {exportTarget}");
+            }
+        }
 
         #endregion
     }

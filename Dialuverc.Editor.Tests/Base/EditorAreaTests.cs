@@ -136,8 +136,6 @@ namespace Dialuverc.Editor.Tests.Base
 
             new public IReadOnlyList<byte[]> SavedStates => base.SavedStates;
 
-            public override string ExportPath => nameof(TestArea);
-
             public TestArea(string baseState)
             {
                 CurrentState = baseState;
@@ -166,11 +164,12 @@ namespace Dialuverc.Editor.Tests.Base
             {
                 return Encoding.UTF8.GetBytes(CurrentState);
             }
-
+/* 
             public override void SerializeForExport(Stream stream)
             {
                 throw new NotImplementedException();
             }
+ */            
         }
     }
 }

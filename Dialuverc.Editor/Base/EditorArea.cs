@@ -1,4 +1,5 @@
-﻿using Dialuverc.Editor.Base.Verifier;
+﻿using Dialuverc.Editor.Base.IO;
+using Dialuverc.Editor.Base.Verifier;
 
 namespace Dialuverc.Editor.Base
 {
@@ -26,8 +27,6 @@ namespace Dialuverc.Editor.Base
         /// Invoked when state is saved or restored.
         /// </summary>
         public event Action? OnStateChanged;
-
-        public abstract string ExportPath { get; }
 
         /// <summary>
         /// Begins a transaction and makes sure a base state to undo towards exists.
@@ -104,9 +103,9 @@ namespace Dialuverc.Editor.Base
 
         protected abstract void ApplyRestoredState(T newState);
 
-        public abstract void SerializeForExport(Stream stream);
-
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
+
+        public virtual IEnumerable<IExportable> GetExportablesForTarget(ExportTarget exportTarget) { return Array.Empty<IExportable>(); }
 
         #region Testing
 

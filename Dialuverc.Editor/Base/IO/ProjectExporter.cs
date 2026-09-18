@@ -63,5 +63,55 @@ namespace Dialuverc.Editor.Base.IO
                 }
             }
         }
+
+        /// <summary>
+        /// Provides each <see cref="IExportable"/> with a readable <see cref="FileStream"/> of the <see cref="ZipArchiveEntry"/> in the <see cref="ZipArchive"/> corresponding to its <see cref="IExportable.ExportPath"/>.
+        /// </summary>
+        public static void ImportFromZip(IEnumerable<IExportable> toImport, Stream stream)
+        {
+            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read, true))
+            {
+                foreach (IExportable exportable in toImport)
+                {
+                    ZipArchiveEntry? entry = archive.GetEntry(exportable.ExportPath);
+
+                    // TODO: Proper error handling.
+                    if (entry is null)
+                        continue;
+
+                    using (Stream entryStream = entry.Open())
+                    {
+                        exportable.DeserializeForImport(entryStream);
+                    }
+                }
+            }
+            // Disposing the ZipArchive is needed to produce a valid object.
+        }
+
+        /// <summary>
+        /// Provides each <see cref="IExportable"/> with a readable <see cref="FileStream"/> of the <see cref="File"/> in the <see cref="Directory"/> corresponding to its <see cref="IExportable.ExportPath"/>.
+        /// </summary>
+        public static void ImportFromFolder(IEnumerable<IExportable> toImport, string folderPath)
+        {
+            if (string.IsNullOrWhiteSpace(folderPath))
+                throw new ArgumentException($"Folder path can't be null or white space", nameof(folderPath));
+
+            if (!Directory.Exists(folderPath))
+                throw new DirectoryNotFoundException($"Folder path '{folderPath}' points to a non-existing folder");
+
+            foreach (IExportable exportable in toImport)
+            {
+                string fullPath = Path.Combine(folderPath, exportable.ExportPath);
+                string? nestedFolderPath = Path.GetDirectoryName(fullPath);
+
+                if (nestedFolderPath is not null && !Directory.Exists(nestedFolderPath))
+                    throw new DirectoryNotFoundException($"Exportable's {nameof(IExportable.ExportPath)} '{folderPath}' points to a non-existing folder");
+
+                using (FileStream fileStream = File.Open(fullPath, FileMode.Open, FileAccess.Read))
+                {
+                    exportable.DeserializeForImport(fileStream);
+                }
+            }
+        }
     }
 }

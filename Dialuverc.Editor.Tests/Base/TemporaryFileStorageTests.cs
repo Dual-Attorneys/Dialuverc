@@ -1,4 +1,6 @@
-﻿namespace Dialuverc.Editor.Tests.Utils
+﻿using Dialuverc.Editor.Base.IO;
+
+namespace Dialuverc.Editor.Tests.Base
 {
     internal class TemporaryFileStorageTests
     {
