@@ -65,6 +65,33 @@ namespace Dialuverc.Editor.Tests.Base
         }
 
         [Test]
+        public void ImportFromZip()
+        {
+            TestExportableObject first = new TestExportableObject("firstFile", "firstContent");
+            TestExportableObject second = new TestExportableObject("secondFile", "secondContent");
+            TestExportableObject third = new TestExportableObject("folder/thirdFile", "thirdContent");
+
+            TestExportableObject[] exportables = new TestExportableObject[] { first, second, third };
+
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                ProjectExporter.CreateZip(exportables, memoryStream, true);
+
+                foreach (TestExportableObject exportable in exportables)
+                {
+                    Assert.That(exportable.ImportedContent, Is.Null);
+                }
+
+                ProjectExporter.ImportFromZip(exportables, memoryStream);
+
+                foreach (TestExportableObject exportable in exportables)
+                {
+                    Assert.That(exportable.ImportedContent, Is.EqualTo(exportable.Content));
+                }
+            }
+        }
+
+        [Test]
         public void ImportFromFolder()
         {
             TestExportableObject first = new TestExportableObject("firstFile", "firstContent");
@@ -124,7 +151,7 @@ namespace Dialuverc.Editor.Tests.Base
                 {
                     string result = reader.ReadToEnd();
 
-                    if (result is null)
+                    if (string.IsNullOrWhiteSpace(result))
                         result = ImportFailedContent;
 
                     ImportedContent = result;

@@ -64,6 +64,33 @@ namespace Dialuverc.Editor.Base.IO
             }
         }
 
+        /// <summary>
+        /// Provides each <see cref="IExportable"/> with a readable <see cref="FileStream"/> of the <see cref="ZipArchiveEntry"/> in the <see cref="ZipArchive"/> corresponding to its <see cref="IExportable.ExportPath"/>.
+        /// </summary>
+        public static void ImportFromZip(IEnumerable<IExportable> toImport, Stream stream)
+        {
+            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read, true))
+            {
+                foreach (IExportable exportable in toImport)
+                {
+                    ZipArchiveEntry? entry = archive.GetEntry(exportable.ExportPath);
+
+                    // TODO: Proper error handling.
+                    if (entry is null)
+                        continue;
+
+                    using (Stream entryStream = entry.Open())
+                    {
+                        exportable.DeserializeForImport(entryStream);
+                    }
+                }
+            }
+            // Disposing the ZipArchive is needed to produce a valid object.
+        }
+
+        /// <summary>
+        /// Provides each <see cref="IExportable"/> with a readable <see cref="FileStream"/> of the <see cref="File"/> in the <see cref="Directory"/> corresponding to its <see cref="IExportable.ExportPath"/>.
+        /// </summary>
         public static void ImportFromFolder(IEnumerable<IExportable> toImport, string folderPath)
         {
             if (string.IsNullOrWhiteSpace(folderPath))
