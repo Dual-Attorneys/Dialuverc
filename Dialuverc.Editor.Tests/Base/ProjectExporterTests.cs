@@ -1,5 +1,4 @@
 ﻿using Dialuverc.Editor.Base.IO;
-using Dialuverc.Editor.Tests.Utils;
 using System.IO.Compression;
 
 namespace Dialuverc.Editor.Tests.Base
