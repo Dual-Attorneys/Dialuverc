@@ -325,7 +325,13 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void ExportAndImportForEditor()
         {
-            ThoughtGuid addedThought = AddSampleThoughtToList();
+            ThoughtGuid firstThoughtGuid = AddSampleThoughtToList();
+            ThoughtGuid secondThoughtGuid = AddSampleThoughtToList();
+
+            EditorThought firstThoughtInfo = _area.Thoughts[0];
+            EditorThought secondThoughtInfo = _area.Thoughts[1];
+
+            EditorThought[] thoughtInfos = new EditorThought[] { firstThoughtInfo, secondThoughtInfo };
 
             using (TemporaryFileStorage fileStorage = new TemporaryFileStorage(
                 Path.Combine(Path.GetTempPath(), nameof(ThoughtsEditorAreaTests))))
@@ -333,15 +339,26 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 IEnumerable<IExportable> exportables = _area.GetExportablesForTarget(ExportTarget.Editor);
 
                 // Can export either to Zip or folder.
+                // Picked folder because importing from it happened to be implemented before Zip.
                 ProjectExporter.ExportToFolder(exportables, fileStorage.FolderPath);
 
                 Assert.That(File.Exists(Path.Combine(fileStorage.FolderPath, exportables.First().ExportPath)), Is.True);
 
-                _area.RemoveThought(addedThought);
+                _area.RemoveThought(firstThoughtGuid);
+                _area.RemoveThought(secondThoughtGuid);
 
                 Assert.That(_area.Thoughts, Is.Empty);
 
-                // TODO: Importing.
+                ProjectExporter.ImportFromFolder(exportables, fileStorage.FolderPath);
+
+                Assert.That(_area.Thoughts, Has.Count.EqualTo(thoughtInfos.Length));
+
+                for (int i = 0; i < thoughtInfos.Length; i++)
+                {
+                    Assert.That(_area.Thoughts[i].RuntimeThought.HasSameValues(thoughtInfos[i].RuntimeThought), Is.True);
+                    Assert.That(_area.Thoughts[i].RuntimeThought.Guid, Is.EqualTo(thoughtInfos[i].RuntimeThought.Guid));
+                    Assert.That(_area.Thoughts[i].EditorNote, Is.EqualTo(thoughtInfos[i].EditorNote));
+                }
             }
         }
 
