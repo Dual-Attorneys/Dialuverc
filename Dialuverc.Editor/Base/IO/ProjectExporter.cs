@@ -63,5 +63,28 @@ namespace Dialuverc.Editor.Base.IO
                 }
             }
         }
+
+        public static void ImportFromFolder(IEnumerable<IExportable> toImport, string folderPath)
+        {
+            if (string.IsNullOrWhiteSpace(folderPath))
+                throw new ArgumentException($"Folder path can't be null or white space", nameof(folderPath));
+
+            if (!Directory.Exists(folderPath))
+                throw new DirectoryNotFoundException($"Folder path '{folderPath}' points to a non-existing folder");
+
+            foreach (IExportable exportable in toImport)
+            {
+                string fullPath = Path.Combine(folderPath, exportable.ExportPath);
+                string? nestedFolderPath = Path.GetDirectoryName(fullPath);
+
+                if (nestedFolderPath is not null && !Directory.Exists(nestedFolderPath))
+                    throw new DirectoryNotFoundException($"Exportable's {nameof(IExportable.ExportPath)} '{folderPath}' points to a non-existing folder");
+
+                using (FileStream fileStream = File.Open(fullPath, FileMode.Open, FileAccess.Read))
+                {
+                    exportable.DeserializeForImport(fileStream);
+                }
+            }
+        }
     }
 }

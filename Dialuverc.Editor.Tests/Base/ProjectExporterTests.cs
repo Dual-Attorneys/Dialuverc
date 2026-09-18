@@ -64,12 +64,44 @@ namespace Dialuverc.Editor.Tests.Base
             }
         }
 
+        [Test]
+        public void ImportFromFolder()
+        {
+            TestExportableObject first = new TestExportableObject("firstFile", "firstContent");
+            TestExportableObject second = new TestExportableObject("secondFile", "secondContent");
+            TestExportableObject third = new TestExportableObject("folder/thirdFile", "thirdContent");
+
+            TestExportableObject[] exportables = new TestExportableObject[] { first, second, third };
+
+            using (TemporaryFileStorage storage = new TemporaryFileStorage(
+                Path.Combine(Path.GetTempPath(), $"Dialuverc{nameof(ProjectExporterTests)}{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}")))
+            {
+                ProjectExporter.ExportToFolder(exportables, storage.FolderPath);
+
+                foreach (TestExportableObject exportable in exportables)
+                {
+                    Assert.That(exportable.ImportedContent, Is.Null);
+                }
+
+                ProjectExporter.ImportFromFolder(exportables, storage.FolderPath);
+
+                foreach (TestExportableObject exportable in exportables)
+                {
+                    Assert.That(exportable.ImportedContent, Is.EqualTo(exportable.Content));
+                }
+            }
+        }
+
         class TestExportableObject : IExportable
         {
+            public const string ImportFailedContent = "Failed";
+
             readonly string _exportName;
             public string ExportPath => _exportName;
 
             public readonly string Content;
+
+            public string? ImportedContent { get; private set; }
 
             public TestExportableObject(string exportName, string content)
             {
@@ -88,7 +120,15 @@ namespace Dialuverc.Editor.Tests.Base
 
             public void DeserializeForImport(Stream stream)
             {
-                throw new NotImplementedException();
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string result = reader.ReadToEnd();
+
+                    if (result is null)
+                        result = ImportFailedContent;
+
+                    ImportedContent = result;
+                }
             }
         }
     }
