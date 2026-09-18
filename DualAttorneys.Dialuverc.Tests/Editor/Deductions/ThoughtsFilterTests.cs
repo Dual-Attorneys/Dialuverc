@@ -7,9 +7,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
     {
         ThoughtsFilter _filter;
 
-        Thought _tychonThought = new Thought(Guid.NewGuid(), "nameKeyOne", "descriptionKeyOne", CharacterSides.Tychon);
-        Thought _forgerThought = new Thought(Guid.NewGuid(), "nameKeyTwo", "descriptionKeyTwo", CharacterSides.Forger);
-        Thought _anyThought = new Thought(Guid.NewGuid(), "nameKeyThree", "descriptionKeyThree", CharacterSides.Any);
+        Thought _tychonThought = new Thought(new ThoughtGuid(), "nameKeyOne", "descriptionKeyOne", CharacterSides.Tychon);
+        Thought _forgerThought = new Thought(new ThoughtGuid(), "nameKeyTwo", "descriptionKeyTwo", CharacterSides.Forger);
+        Thought _anyThought = new Thought(new ThoughtGuid(), "nameKeyThree", "descriptionKeyThree", CharacterSides.Any);
 
         [SetUp]
         public void SetUp()

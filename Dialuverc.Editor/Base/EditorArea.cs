@@ -27,6 +27,8 @@ namespace Dialuverc.Editor.Base
         /// </summary>
         public event Action? OnStateChanged;
 
+        public abstract string ExportPath { get; }
+
         /// <summary>
         /// Begins a transaction and makes sure a base state to undo towards exists.
         /// </summary>
@@ -102,16 +104,13 @@ namespace Dialuverc.Editor.Base
 
         protected abstract void ApplyRestoredState(T newState);
 
-        public abstract string SerializeForExport();
+        public abstract void SerializeForExport(Stream stream);
 
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
 
         #region Testing
 
-        /// <summary>
-        /// Moves <see cref="_currentState"/> to the latest saved state WITHOUT applying it.
-        /// </summary>
-        protected void PointToLatestState() => _currentState = _savedStates.Count - 1;
+        protected int CurrentStateIndex => _currentState;
 
         protected IReadOnlyList<T> SavedStates => _savedStates;
 
