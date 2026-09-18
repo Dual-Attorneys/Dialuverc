@@ -163,13 +163,7 @@ namespace Dialuverc.Editor.Tests.Base
             protected override byte[] GetStateToSave()
             {
                 return Encoding.UTF8.GetBytes(CurrentState);
-            }
-/* 
-            public override void SerializeForExport(Stream stream)
-            {
-                throw new NotImplementedException();
-            }
- */            
+            }      
         }
     }
 }
