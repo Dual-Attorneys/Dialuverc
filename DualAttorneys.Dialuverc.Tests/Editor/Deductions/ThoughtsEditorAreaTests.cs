@@ -1,6 +1,7 @@
 ﻿using Dialuverc.Editor.Base;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
+using Dialuverc.Editor.Base.IO;
 
 using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 
@@ -319,6 +320,29 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.RestorePreviousState(RestoreDirection.Next);
 
             Assert.That(_area.Thoughts[0], Is.EqualTo(_area.ActiveScratchpad));
+        }
+
+        [Test]
+        public void ExportAndImportForEditor()
+        {
+            ThoughtGuid addedThought = AddSampleThoughtToList();
+
+            using (TemporaryFileStorage fileStorage = new TemporaryFileStorage(
+                Path.Combine(Path.GetTempPath(), nameof(ThoughtsEditorAreaTests))))
+            {
+                IEnumerable<IExportable> exportables = _area.GetExportablesForTarget(ExportTarget.Editor);
+
+                // Can export either to Zip or folder.
+                ProjectExporter.ExportToFolder(exportables, fileStorage.FolderPath);
+
+                Assert.That(File.Exists(Path.Combine(fileStorage.FolderPath, exportables.First().ExportPath)), Is.True);
+
+                _area.RemoveThought(addedThought);
+
+                Assert.That(_area.Thoughts, Is.Empty);
+
+                // TODO: Importing.
+            }
         }
 
         #region Helpers
