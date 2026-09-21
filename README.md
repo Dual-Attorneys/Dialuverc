@@ -1,4 +1,5 @@
 # Dialuverc
+[![CodeFactor](https://www.codefactor.io/repository/github/dual-attorneys/dialuverc/badge)](https://www.codefactor.io/repository/github/dual-attorneys/dialuverc)
 
 A narrative framework for games, written with [Dual Attorneys](https://discord.gg/phECHVHCDe) in mind.
 
