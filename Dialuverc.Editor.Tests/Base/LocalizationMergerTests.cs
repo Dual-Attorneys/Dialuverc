@@ -7,6 +7,14 @@ namespace Dialuverc.Editor.Tests.Base
     {
         string _tempStoragePathForTest => $"Dialuverc{nameof(LocalizationMergerTests)}{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
 
+        LocalizationMergerFlatFile _merger;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _merger = new LocalizationMergerFlatFile(new string[] { "key", "value" });
+        }
+
         [Test]
         public void FileIsCreatedIfNotExisting()
         {
@@ -19,14 +27,16 @@ namespace Dialuverc.Editor.Tests.Base
 
                 Assert.That(File.Exists(outputPath), Is.False);
 
-                LocalizationMergerFlatFile.Merge(keys, outputPath, LocalizationMergerFlatFile.CSVSeparator);
+                _merger.Merge(keys, outputPath, LocalizationMergerFlatFile.CSVSeparator);
 
                 Assert.That(File.Exists(outputPath), Is.True);
 
-                IEnumerable<string> fileLines = File.ReadLines(outputPath);
+                string[] fileLines = File.ReadAllLines(outputPath);
 
                 // Asserts have to ignore the first line which contains column names.
                 Assert.That(keys.Count, Is.EqualTo(fileLines.Count() - 1));
+
+                Assert.That(fileLines[0], Is.EqualTo(string.Join(LocalizationMergerFlatFile.CSVSeparator, _merger.ColumnNames)));
 
                 foreach (string line in fileLines.Skip(1))
                 {
@@ -84,7 +94,7 @@ key3{LocalizationMergerFlatFile.CSVSeparator}value3{Environment.NewLine}";
 
                 File.WriteAllText(outputPath, starting);
 
-                LocalizationMergerFlatFile.Merge(keys, outputPath, LocalizationMergerFlatFile.CSVSeparator);
+                _merger.Merge(keys, outputPath, LocalizationMergerFlatFile.CSVSeparator);
 
                 string finalFileContent = File.ReadAllText(outputPath);
 

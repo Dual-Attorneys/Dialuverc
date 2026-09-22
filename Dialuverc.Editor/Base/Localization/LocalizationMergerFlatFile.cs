@@ -2,23 +2,58 @@ namespace Dialuverc.Editor.Base.Localization
 {
     public class LocalizationMergerFlatFile
     {
-        public const string MissingColumnNamesText = "Add column names here!";
-
         public const char CSVSeparator = ',';
         public const char TSVSeparator = '\t';
 
+        public readonly ICollection<string> ColumnNames;
+
+        public LocalizationMergerFlatFile(ICollection<string> columnNames)
+        {
+            ArgumentNullException.ThrowIfNull(columnNames);
+
+            ColumnNames = columnNames;
+        }
+
         /// <summary>
-        /// Merges an existing localization flat-file with a collection of localizable keys.
-        /// <para>Keys that:<br/>
-        /// - Exist both in the file and the collection will be copied over with their values intact.<br/>
-        /// - Do not exist in the collection will have their corresponding line dropped.<br/>
-        /// - Exist in the collection but not the file will be appended at the file's end.</para>
-        /// <para>The file is created if it doesn't exist yet.</para>
+        /// Updates or creates a flat-file containing localizable keys (and eventual already-existing values).
+        /// <para>
+        /// The existing content is merged with the passed <paramref name="allExistingKeys"/> with the following rules based on where the key is present:<br/>
+        /// <list type="table">
+        /// <item>
+        /// <term>In collection</term>
+        /// <term>In file</term>
+        /// <description>Result</description>
+        /// </item>
+        /// <item>
+        /// <term>Y</term>
+        /// <term>Y</term>
+        /// <description>Line is copied</description>
+        /// </item>
+        /// <item>
+        /// <term>Y</term>
+        /// <term>N</term>
+        /// <description>New line with key is appended at end of file</description>
+        /// </item>
+        /// <item>
+        /// <term>N</term>
+        /// <term>Y</term>
+        /// <description>Line is lost</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// Column names are always set to <see cref="ColumnNames"/> if the file doesn't exist yet.<br/>
+        /// If it does, they're copied without any special processing on the corresponding values.
+        /// </para>
+        /// <para>
+        /// <b>Note</b>: Appending is unordered.
+        /// </para>
         /// </summary>
-        /// <param name="existingKeys"></param>
+        /// <param name="allExistingKeys">Determines which keys currently exist.</param>
         /// <param name="filePath"></param>
-        /// <param name="separator">A character used to separate columns in a delimiter-separated values format.</param>
-        public static void Merge(IReadOnlySet<string> existingKeys, string filePath, char separator)
+        /// <param name="separator"></param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        public void Merge(IReadOnlySet<string> allExistingKeys, string filePath, char separator)
         {
             ReadOnlySpan<char> fileName = Path.GetFileNameWithoutExtension(filePath);
 
@@ -30,7 +65,7 @@ namespace Dialuverc.Editor.Base.Localization
             string tempFilePath = Path.Combine(directoryPath, $"_{fileName}_{Guid.NewGuid()}");
 
             // TODO: This doesn't account for ordering, should it?
-            HashSet<string> keysLeft = new HashSet<string>(existingKeys);
+            HashSet<string> keysLeft = new HashSet<string>(allExistingKeys);
 
             try
             {
@@ -43,7 +78,7 @@ namespace Dialuverc.Editor.Base.Localization
                     string? columnNames = streamReader.ReadLine();
 
                     if (string.IsNullOrWhiteSpace(columnNames))
-                        columnNames = MissingColumnNamesText;
+                        columnNames = string.Join(separator, ColumnNames);
 
                     streamWriter.WriteLine(columnNames);
 
