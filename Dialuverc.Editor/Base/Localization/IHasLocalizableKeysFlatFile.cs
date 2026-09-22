@@ -6,6 +6,6 @@ namespace Dialuverc.Editor.Base.Localization
     public interface IHasLocalizableKeysFlatFile
     {
         // No duplicates should exist in the same "namespace".
-        public IReadOnlySet<string> GetLocalizableKeysFlat();
+        public IReadOnlySet<string> GetLocalizableKeysFlatFile();
     }
 }

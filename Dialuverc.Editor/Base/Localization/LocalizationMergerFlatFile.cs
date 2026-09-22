@@ -65,6 +65,8 @@ namespace Dialuverc.Editor.Base.Localization
             string tempFilePath = Path.Combine(directoryPath, $"_{fileName}_{Guid.NewGuid()}");
 
             // TODO: This doesn't account for ordering, should it?
+            // TODO: Use allExistingKeys directly instead of copying (as non-readonly)? Likely, IHasLocalizableKeysFlatFile will return a new HashSet.
+            // Operating on the passed instance directly could lower best-case allocations to 1, and keep worst case to 2.
             HashSet<string> keysLeft = new HashSet<string>(allExistingKeys);
 
             try
@@ -89,8 +91,7 @@ namespace Dialuverc.Editor.Base.Localization
 
                         int indexOfFirstSeparator = currentLine.IndexOf(separator);
 
-                        // There's no key. The line looks like ".something".
-                        // The line is just a white space.
+                        // There's no key (e.g. ".something") || the line is just a whmagaite space.
                         if (indexOfFirstSeparator == 0 || string.IsNullOrWhiteSpace(currentLine))
                             continue;
 
