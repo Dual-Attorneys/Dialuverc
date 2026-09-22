@@ -34,7 +34,7 @@ namespace Dialuverc.Editor.Tests.Base
                 string[] fileLines = File.ReadAllLines(outputPath);
 
                 // Asserts have to ignore the first line which contains column names.
-                Assert.That(keys.Count, Is.EqualTo(fileLines.Count() - 1));
+                Assert.That(keys.Count, Is.EqualTo(fileLines.Length - 1));
 
                 Assert.That(fileLines[0], Is.EqualTo(string.Join(LocalizationMergerFlatFile.CSVSeparator, _merger.ColumnNames)));
 
