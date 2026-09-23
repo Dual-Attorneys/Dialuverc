@@ -15,7 +15,7 @@ namespace Dialuverc.Editor.Base.Localization
         }
 
         /// <summary>
-        /// Updates or creates a flat-file containing localizable keys (and eventual already-existing values).
+        /// Updates or creates a <see href="https://en.wikipedia.org/wiki/Flat-file_database">flat-file</see> containing localizable keys (and possibly values).
         /// <para>
         /// The existing content is merged with the passed <paramref name="allExistingKeys"/> with the following rules based on where the key is present:<br/>
         /// <list type="table">
@@ -91,7 +91,7 @@ namespace Dialuverc.Editor.Base.Localization
 
                         int indexOfFirstSeparator = currentLine.IndexOf(separator);
 
-                        // There's no key (e.g. ".something") || the line is just a whmagaite space.
+                        // There's no key (e.g. ".something") || the line is just a white space.
                         if (indexOfFirstSeparator == 0 || string.IsNullOrWhiteSpace(currentLine))
                             continue;
 
