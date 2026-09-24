@@ -1,4 +1,7 @@
 is_global = true
 
+# Prohibit declaring types outside namespaces.
+dotnet_diagnostic.CA1050.severity = error
+
 # BannedSymbols.txt
 dotnet_diagnostic.RS0030.severity = error

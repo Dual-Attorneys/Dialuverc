@@ -1,47 +1,49 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using Dialuverc.Editor.Base.IO;
-using DualAttorneys.Dialuverc.Editor.Deductions;
 
 // TODO: Find better naming?
-public class ThoughtsEditorExportable : IExportable
+namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
-    public string ExportPath => $"{nameof(ThoughtsEditorArea)}.Editor";
-
-    Func<IReadOnlyList<EditorThought>> _getToExport;
-    Action<ImmutableList<EditorThought>> _setImported;
-
-    JsonSerializerOptions _jsonOptions;
-
-    public ThoughtsEditorExportable(Func<IReadOnlyList<EditorThought>> getToExport,
-        Action<ImmutableList<EditorThought>> setImported,
-        JsonSerializerOptions jsonOptions)
+    public class ThoughtsEditorExportable : IExportable
     {
-        ArgumentNullException.ThrowIfNull(setImported);
-        ArgumentNullException.ThrowIfNull(getToExport);
-        ArgumentNullException.ThrowIfNull(jsonOptions);
+        public string ExportPath => $"{nameof(ThoughtsEditorArea)}.Editor";
 
-        _getToExport = getToExport;
-        _setImported = setImported;
-        _jsonOptions = jsonOptions;
-    }
+        Func<IReadOnlyList<EditorThought>> _getToExport;
+        Action<ImmutableList<EditorThought>> _setImported;
 
-    public void DeserializeForImport(Stream stream)
-    {
-        ImmutableList<EditorThought>? result =
-            JsonSerializer.Deserialize<ImmutableList<EditorThought>>(stream, _jsonOptions);
+        JsonSerializerOptions _jsonOptions;
 
-        // TODO: Proper error handling instead of just passing an empty list.
-        if (result is null)
-            result = ImmutableList<EditorThought>.Empty;
+        public ThoughtsEditorExportable(Func<IReadOnlyList<EditorThought>> getToExport,
+            Action<ImmutableList<EditorThought>> setImported,
+            JsonSerializerOptions jsonOptions)
+        {
+            ArgumentNullException.ThrowIfNull(setImported);
+            ArgumentNullException.ThrowIfNull(getToExport);
+            ArgumentNullException.ThrowIfNull(jsonOptions);
 
-        _setImported.Invoke(result);
-    }
+            _getToExport = getToExport;
+            _setImported = setImported;
+            _jsonOptions = jsonOptions;
+        }
 
-    public void SerializeForExport(Stream stream)
-    {
-        IReadOnlyList<EditorThought> toExport = _getToExport.Invoke();
+        public void DeserializeForImport(Stream stream)
+        {
+            ImmutableList<EditorThought>? result =
+                JsonSerializer.Deserialize<ImmutableList<EditorThought>>(stream, _jsonOptions);
 
-        JsonSerializer.Serialize(stream, toExport, _jsonOptions);
+            // TODO: Proper error handling instead of just passing an empty list.
+            if (result is null)
+                result = ImmutableList<EditorThought>.Empty;
+
+            _setImported.Invoke(result);
+        }
+
+        public void SerializeForExport(Stream stream)
+        {
+            IReadOnlyList<EditorThought> toExport = _getToExport.Invoke();
+
+            JsonSerializer.Serialize(stream, toExport, _jsonOptions);
+        }
     }
 }
