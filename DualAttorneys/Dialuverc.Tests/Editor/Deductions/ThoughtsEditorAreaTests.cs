@@ -336,20 +336,20 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             using (TemporaryFileStorage fileStorage = new TemporaryFileStorage(
                 Path.Combine(Path.GetTempPath(), nameof(ThoughtsEditorAreaTests))))
             {
-                IEnumerable<IExportable> exportables = _area.GetExportablesForTarget(ExportTarget.Editor);
+                IEnumerable<IImportable> importables = _area.GetEditorImportables();
 
                 // Can export either to Zip or folder.
                 // Picked folder because importing from it happened to be implemented before Zip.
-                ProjectExporter.ExportToFolder(exportables, fileStorage.FolderPath);
+                ProjectExporter.ExportToFolder(importables, fileStorage.FolderPath);
 
-                Assert.That(File.Exists(Path.Combine(fileStorage.FolderPath, exportables.First().ExportPath)), Is.True);
+                Assert.That(File.Exists(Path.Combine(fileStorage.FolderPath, importables.First().ExportPath)), Is.True);
 
                 _area.RemoveThought(firstThoughtGuid);
                 _area.RemoveThought(secondThoughtGuid);
 
                 Assert.That(_area.Thoughts, Is.Empty);
 
-                ProjectExporter.ImportFromFolder(exportables, fileStorage.FolderPath);
+                ProjectExporter.ImportFromFolder(importables, fileStorage.FolderPath);
 
                 Assert.That(_area.Thoughts, Has.Count.EqualTo(thoughtInfos.Length));
 

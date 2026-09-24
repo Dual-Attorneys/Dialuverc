@@ -16,6 +16,14 @@ namespace Dialuverc.Editor.Base
 
         public void RestorePreviousState(RestoreDirection direction);
 
-        public IEnumerable<IExportable> GetExportablesForTarget(ExportTarget exportTarget);
+        /// <summary>
+        /// Returns all <see cref="IExportable"/>s whose target is a game.
+        /// </summary>
+        public IEnumerable<IExportable> GetGameExportables();
+
+        /// <summary>
+        /// Returns all <see cref="IImportable"/>s usable to save and load work done in the editor.
+        /// </summary>
+        public IEnumerable<IImportable> GetEditorImportables();
     }
 }

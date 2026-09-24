@@ -5,7 +5,7 @@ using Dialuverc.Editor.Base.IO;
 // TODO: Find better naming?
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
-    public class ThoughtsEditorExportable : IExportable
+    public class ThoughtsEditorExportable : IImportable
     {
         public string ExportPath => $"{nameof(ThoughtsEditorArea)}.Editor";
 

@@ -270,20 +270,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
 
-        public override IEnumerable<IExportable> GetExportablesForTarget(ExportTarget exportTarget)
-        {
-            switch (exportTarget)
-            {
-                case ExportTarget.Editor:
-                    return new IExportable[] { _editorExportable };
-
-                case ExportTarget.Game:
-                    throw new NotImplementedException();
-
-                default:
-                    throw new InvalidOperationException($"No exportable defined for target {exportTarget}");
-            }
-        }
+        public override IEnumerable<IImportable> GetEditorImportables() => new IImportable[] { _editorExportable };
 
         #endregion
     }
