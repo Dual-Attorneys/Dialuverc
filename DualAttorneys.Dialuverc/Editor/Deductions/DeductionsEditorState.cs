@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base.Modes;
+using Dialuverc.Editor.Base.Modes;
 using System.Collections.Immutable;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions

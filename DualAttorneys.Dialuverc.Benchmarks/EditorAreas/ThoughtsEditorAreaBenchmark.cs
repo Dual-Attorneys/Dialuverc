@@ -1,4 +1,4 @@
-﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Attributes;
 using Dialuverc.Editor.Base;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 
@@ -45,7 +45,7 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         [Benchmark]
         public void StateSave()
         {
-            
+
         }
 
         // Making enough Edits to make Verify have a significantly higher impact than it would with no problems found

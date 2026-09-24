@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base.Verifier;
+using Dialuverc.Editor.Base.Verifier;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 

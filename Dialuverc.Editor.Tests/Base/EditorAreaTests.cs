@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base;
 using System.Text;
 
 namespace Dialuverc.Editor.Tests.Base
@@ -43,7 +43,7 @@ namespace Dialuverc.Editor.Tests.Base
             Assert.That(_testArea.SavedStates, Has.Count.EqualTo(0));
 
             _testArea.ChangeState(_baseState);
- 
+
             Assert.That(_testArea.SavedStates, Has.Count.EqualTo(1));
 
             _testArea.ChangeState("UserState");
@@ -163,7 +163,7 @@ namespace Dialuverc.Editor.Tests.Base
             protected override byte[] GetStateToSave()
             {
                 return Encoding.UTF8.GetBytes(CurrentState);
-            }      
+            }
         }
     }
 }

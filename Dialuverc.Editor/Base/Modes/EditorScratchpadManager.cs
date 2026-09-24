@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base.Modes
+namespace Dialuverc.Editor.Base.Modes
 {
     /// <summary>
     /// A component which manages temporary scratchpad objects of type <typeparamref name="T"/> for an <see cref="EditorArea{T}"/> to work on.

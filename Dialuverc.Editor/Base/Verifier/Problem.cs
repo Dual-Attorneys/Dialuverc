@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base.Verifier
+namespace Dialuverc.Editor.Base.Verifier
 {
     /// <summary>
     /// Something that has to be brought to the attention of the user.

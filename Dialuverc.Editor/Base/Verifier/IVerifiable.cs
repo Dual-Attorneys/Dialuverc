@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base.Verifier
+namespace Dialuverc.Editor.Base.Verifier
 {
     /// <summary>
     /// Identifies something that supports being analyzed for any <see cref="Problem"/>s.

@@ -1,4 +1,4 @@
-﻿namespace DualAttorneys.Dialuverc.Deductions
+namespace DualAttorneys.Dialuverc.Deductions
 {
     /// <summary>
     /// Represents an arrangement of <see cref="Thought"/>s over 3 slots where <see langword="null"/> represents an empty slot.

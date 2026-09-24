@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base;
 using Dialuverc.Editor.Base.Modes;
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
@@ -189,13 +189,13 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         #region EditorArea
 
-        protected override DeductionsEditorState GetStateToSave() 
+        protected override DeductionsEditorState GetStateToSave()
             => new DeductionsEditorState(_deductions, _scratchpadManager.AddScratchpad, _scratchpadManager.EditScratchpad, _scratchpadManager.CurrentMode, _selectionGuid);
 
         // Changing mode or selecting a deduction are not state changes by themselves.
-        protected override bool CheckStateEquality(DeductionsEditorState a, DeductionsEditorState b) 
-            => a.Deductions == b.Deductions && 
-            a.AddBuilder == b.AddBuilder && 
+        protected override bool CheckStateEquality(DeductionsEditorState a, DeductionsEditorState b)
+            => a.Deductions == b.Deductions &&
+            a.AddBuilder == b.AddBuilder &&
             a.EditBuilder == b.EditBuilder;
 
         protected override void ApplyRestoredState(DeductionsEditorState newState)

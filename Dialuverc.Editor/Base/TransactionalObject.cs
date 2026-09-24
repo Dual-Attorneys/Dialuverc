@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base
+namespace Dialuverc.Editor.Base
 {
     /// <summary>
     /// Allows tracking of one or multiple changes which can all be applied together.

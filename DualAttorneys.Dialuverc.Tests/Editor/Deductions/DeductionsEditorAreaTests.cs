@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 

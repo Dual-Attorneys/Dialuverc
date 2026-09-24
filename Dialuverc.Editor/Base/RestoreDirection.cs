@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base
+namespace Dialuverc.Editor.Base
 {
     /// <summary>
     /// Represents in which direction a state restore in an <see cref="IEditorArea"/> is done.

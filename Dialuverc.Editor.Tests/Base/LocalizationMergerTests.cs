@@ -18,7 +18,7 @@ namespace Dialuverc.Editor.Tests.Base
         [Test]
         public void FileIsCreatedIfNotExisting()
         {
-            HashSet<string> keys = new HashSet<string>() { "key1", "key2", "key3",  "key4" };
+            HashSet<string> keys = new HashSet<string>() { "key1", "key2", "key3", "key4" };
 
             using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(
                 Path.Combine(Path.GetTempPath(), _tempStoragePathForTest)))
@@ -48,7 +48,7 @@ namespace Dialuverc.Editor.Tests.Base
         [Test]
         public void KeysAreAddedIfNotInFile()
         {
-            HashSet<string> keys = new HashSet<string>() { "key1", "key2", "key3",  "key4" };
+            HashSet<string> keys = new HashSet<string>() { "key1", "key2", "key3", "key4" };
 
             string startingFileContent =
 @$"key{LocalizationMergerFlatFile.CSVSeparator}value

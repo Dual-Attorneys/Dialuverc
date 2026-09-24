@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base.Modes
+namespace Dialuverc.Editor.Base.Modes
 {
     /// <summary>
     /// An abstract component which manages in which mode an <see cref="EditorArea{T}"/> works.

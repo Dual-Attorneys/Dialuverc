@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base.Verifier
+namespace Dialuverc.Editor.Base.Verifier
 {
     /// <summary>
     /// How severe a <see cref="Problem"/> is.

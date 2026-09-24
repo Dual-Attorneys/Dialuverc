@@ -1,4 +1,4 @@
-﻿using DualAttorneys.Dialuverc.Deductions;
+using DualAttorneys.Dialuverc.Deductions;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
@@ -25,7 +25,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             if (SideFilter == side)
                 return true;
 
-            if (!Strict && 
+            if (!Strict &&
                 (SideFilter == CharacterSides.Any || side == CharacterSides.Any))
                 return true;
 

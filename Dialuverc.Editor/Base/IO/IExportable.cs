@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base.IO
+namespace Dialuverc.Editor.Base.IO
 {
     /// <summary>
     /// Represents an object which can be exported and eventually restored from a serialized format.
@@ -11,7 +11,7 @@
         public string ExportPath { get; }
 
         public void SerializeForExport(Stream stream);
-        
+
         public void DeserializeForImport(Stream stream);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base.IO;
+using Dialuverc.Editor.Base.IO;
 
 namespace Dialuverc.Editor.Tests.Base
 {

@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base.IO;
+using Dialuverc.Editor.Base.IO;
 using System.IO.Compression;
 
 namespace Dialuverc.Editor.Tests.Base
@@ -133,7 +133,7 @@ namespace Dialuverc.Editor.Tests.Base
             public TestExportableObject(string exportName, string content)
             {
                 _exportName = exportName;
-                
+
                 Content = content;
             }
 

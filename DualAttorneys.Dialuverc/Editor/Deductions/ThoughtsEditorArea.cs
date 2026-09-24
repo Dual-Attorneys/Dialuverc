@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base;
 using Dialuverc.Editor.Base.IO;
 using Dialuverc.Editor.Base.Modes;
 using Dialuverc.Editor.Base.Verifier;
@@ -152,7 +152,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public bool RemoveThought(ThoughtGuid guid)
         {
             int foundThought = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
-            
+
             // Don't throw if we remove a thought that doesn't exist
             // since it not existing results in the same state as it being removed.
             if (foundThought < 0)

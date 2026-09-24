@@ -1,4 +1,4 @@
-﻿namespace Dialuverc.Editor.Base.IO
+namespace Dialuverc.Editor.Base.IO
 {
     /// <summary>
     /// Represents a temporary folder whose contents are deleted on disposal.

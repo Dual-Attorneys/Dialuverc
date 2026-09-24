@@ -1,4 +1,4 @@
-﻿using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 using Dialuverc.Editor.Base.IO;
@@ -195,8 +195,8 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             EditorThought? currentSelection = null;
 
             _area.ScratchpadManager.OnModeChanged += (_) => { changeModeInvokations++; };
-            _area.OnThoughtSelectionChanged += (selection) => 
-            { 
+            _area.OnThoughtSelectionChanged += (selection) =>
+            {
                 changeSelectInvokations++;
                 currentSelection = selection;
             };
@@ -269,8 +269,8 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             int eventInvokations = 0;
             EditorThought? currentSelection = null;
 
-            _area.OnThoughtSelectionChanged += (selection) => 
-            { 
+            _area.OnThoughtSelectionChanged += (selection) =>
+            {
                 eventInvokations++;
                 currentSelection = selection;
             };
