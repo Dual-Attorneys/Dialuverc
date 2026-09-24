@@ -1,8 +1,8 @@
 <Solution>
   <Folder Name="/DualAttorneys/">
-    <Project Path="DualAttorneys.Dialuverc.Benchmarks/DualAttorneys.Dialuverc.Benchmarks.csproj" />
-    <Project Path="DualAttorneys.Dialuverc.Tests/DualAttorneys.Dialuverc.Tests.csproj" />
-    <Project Path="DualAttorneys.Dialuverc/DualAttorneys.Dialuverc.csproj" />
+    <Project Path="DualAttorneys/Dialuverc.Benchmarks/DualAttorneys.Dialuverc.Benchmarks.csproj" />
+    <Project Path="DualAttorneys/Dialuverc.Tests/DualAttorneys.Dialuverc.Tests.csproj" />
+    <Project Path="DualAttorneys/Dialuverc/DualAttorneys.Dialuverc.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="$(MSBuildThisFileDirectory)/CodeAnalysis/BannedSymbols.txt" />

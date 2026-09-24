@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DualAttorneys.Dialuverc\DualAttorneys.Dialuverc.csproj" />
+    <ProjectReference Include="..\Dialuverc\DualAttorneys.Dialuverc.csproj" />
   </ItemGroup>
 
 </Project>
