@@ -10,7 +10,7 @@ using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
-    public class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
+    public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {
         ImmutableList<EditorThought> _thoughts = ImmutableList<EditorThought>.Empty;
         public IReadOnlyList<EditorThought> Thoughts => _thoughts;
@@ -27,7 +27,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public EditorModeManager ScratchpadManager => _scratchpadManager;
         public EditorThought? ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
-        ThoughtsEditorExportable _editorExportable;
+        EditorThoughtsImportable _editorThoughtsImportable;
 
         // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
         // This assumes their structure is unlikely to change and will always need few parameters.
@@ -38,7 +38,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _scratchpadManager.AddScratchpad = CreateDefaultEditorThought();
 
-            _editorExportable = new ThoughtsEditorExportable(() => Thoughts, OnEditorThoughtsImported, new JsonSerializerOptions
+            _editorThoughtsImportable = new EditorThoughtsImportable(this, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 IncludeFields = true,
@@ -225,24 +225,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             string.Empty,
             CharacterSides.Any));
 
-        #region Exportables
-
-        void OnEditorThoughtsImported(ImmutableList<EditorThought> importedEditorThoughts)
-        {
-            // TODO: Some thinking has to go into this.
-            // If we didn't do anything before importing, we may not want to allow Undo.
-            // Possibly we may want importing to clear the history.
-            // For now, the safest option is to just handle it as any other change.
-
-            BeginChange();
-
-            _thoughts = importedEditorThoughts;
-
-            EndChange();
-        }
-
-        #endregion
-
         #region EditorArea
 
         protected override ThoughtsEditorState GetStateToSave()
@@ -270,7 +252,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
 
-        public override IEnumerable<IImportable> GetEditorImportables() => new IImportable[] { _editorExportable };
+        public override IEnumerable<IImportable> GetEditorImportables() => new IImportable[] { _editorThoughtsImportable };
 
         #endregion
     }
