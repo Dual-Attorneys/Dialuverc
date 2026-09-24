@@ -26,5 +26,5 @@ In addition to runtime story execution, it provides a base to build your own edi
 
 *Dialuverc* is licensed under [MIT](https://github.com/Dual-Attorneys/Dialuverc/blob/main/LICENSE).
 
-Please note that the code in [DualAttorneys.Dialuverc](https://github.com/Dual-Attorneys/Dialuverc/tree/main/DualAttorneys.Dialuverc) is instead licensed separately under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/legalcode).
+Please note that the code in [DualAttorneys](https://github.com/Dual-Attorneys/Dialuverc/tree/main/DualAttorneys) is instead licensed separately under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/legalcode).
 Any of the code that is deemed to be useful to other projects will be moved to live in the framework.
