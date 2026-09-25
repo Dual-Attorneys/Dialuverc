@@ -105,7 +105,8 @@ namespace Dialuverc.Editor.Base
 
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
 
-        public virtual IEnumerable<IExportable> GetExportablesForTarget(ExportTarget exportTarget) { return Array.Empty<IExportable>(); }
+        public virtual IEnumerable<IExportable> GetGameExportables() { return Array.Empty<IExportable>(); }
+        public virtual IEnumerable<IImportable> GetEditorImportables() { return Array.Empty<IImportable>(); }
 
         #region Testing
 

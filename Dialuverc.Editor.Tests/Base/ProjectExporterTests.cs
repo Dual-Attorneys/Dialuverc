@@ -8,11 +8,11 @@ namespace Dialuverc.Editor.Tests.Base
         [Test]
         public void ZipArchiveCreation()
         {
-            TestExportableObject[] toExport = new TestExportableObject[]
+            TestImportableObject[] toExport = new TestImportableObject[]
             {
-                new TestExportableObject("file1", "content1"),
-                new TestExportableObject("file2", "content2"),
-                new TestExportableObject("file3", "content3"),
+                new TestImportableObject("file1", "content1"),
+                new TestImportableObject("file2", "content2"),
+                new TestImportableObject("file3", "content3"),
             };
 
             using (MemoryStream memoryStream = new MemoryStream())
@@ -42,11 +42,11 @@ namespace Dialuverc.Editor.Tests.Base
         [Test]
         public void ExportToFolder()
         {
-            TestExportableObject[] toExport = new TestExportableObject[]
+            TestImportableObject[] toExport = new TestImportableObject[]
             {
-                new TestExportableObject("file1", "content1"),
-                new TestExportableObject("file2", "content2"),
-                new TestExportableObject("folder/file3", "content3"),
+                new TestImportableObject("file1", "content1"),
+                new TestImportableObject("file2", "content2"),
+                new TestImportableObject("folder/file3", "content3"),
             };
 
             using (TemporaryFileStorage storage = new TemporaryFileStorage(
@@ -67,26 +67,26 @@ namespace Dialuverc.Editor.Tests.Base
         [Test]
         public void ImportFromZip()
         {
-            TestExportableObject first = new TestExportableObject("firstFile", "firstContent");
-            TestExportableObject second = new TestExportableObject("secondFile", "secondContent");
-            TestExportableObject third = new TestExportableObject("folder/thirdFile", "thirdContent");
+            TestImportableObject first = new TestImportableObject("firstFile", "firstContent");
+            TestImportableObject second = new TestImportableObject("secondFile", "secondContent");
+            TestImportableObject third = new TestImportableObject("folder/thirdFile", "thirdContent");
 
-            TestExportableObject[] exportables = new TestExportableObject[] { first, second, third };
+            TestImportableObject[] importables = new TestImportableObject[] { first, second, third };
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                ProjectExporter.CreateZip(exportables, memoryStream, true);
+                ProjectExporter.CreateZip(importables, memoryStream, true);
 
-                foreach (TestExportableObject exportable in exportables)
+                foreach (TestImportableObject importable in importables)
                 {
-                    Assert.That(exportable.ImportedContent, Is.Null);
+                    Assert.That(importable.ImportedContent, Is.Null);
                 }
 
-                ProjectExporter.ImportFromZip(exportables, memoryStream);
+                ProjectExporter.ImportFromZip(importables, memoryStream);
 
-                foreach (TestExportableObject exportable in exportables)
+                foreach (TestImportableObject importable in importables)
                 {
-                    Assert.That(exportable.ImportedContent, Is.EqualTo(exportable.Content));
+                    Assert.That(importable.ImportedContent, Is.EqualTo(importable.Content));
                 }
             }
         }
@@ -94,32 +94,32 @@ namespace Dialuverc.Editor.Tests.Base
         [Test]
         public void ImportFromFolder()
         {
-            TestExportableObject first = new TestExportableObject("firstFile", "firstContent");
-            TestExportableObject second = new TestExportableObject("secondFile", "secondContent");
-            TestExportableObject third = new TestExportableObject("folder/thirdFile", "thirdContent");
+            TestImportableObject first = new TestImportableObject("firstFile", "firstContent");
+            TestImportableObject second = new TestImportableObject("secondFile", "secondContent");
+            TestImportableObject third = new TestImportableObject("folder/thirdFile", "thirdContent");
 
-            TestExportableObject[] exportables = new TestExportableObject[] { first, second, third };
+            TestImportableObject[] importables = new TestImportableObject[] { first, second, third };
 
             using (TemporaryFileStorage storage = new TemporaryFileStorage(
                 Path.Combine(Path.GetTempPath(), $"Dialuverc{nameof(ProjectExporterTests)}{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}")))
             {
-                ProjectExporter.ExportToFolder(exportables, storage.FolderPath);
+                ProjectExporter.ExportToFolder(importables, storage.FolderPath);
 
-                foreach (TestExportableObject exportable in exportables)
+                foreach (TestImportableObject importable in importables)
                 {
-                    Assert.That(exportable.ImportedContent, Is.Null);
+                    Assert.That(importable.ImportedContent, Is.Null);
                 }
 
-                ProjectExporter.ImportFromFolder(exportables, storage.FolderPath);
+                ProjectExporter.ImportFromFolder(importables, storage.FolderPath);
 
-                foreach (TestExportableObject exportable in exportables)
+                foreach (TestImportableObject importable in importables)
                 {
-                    Assert.That(exportable.ImportedContent, Is.EqualTo(exportable.Content));
+                    Assert.That(importable.ImportedContent, Is.EqualTo(importable.Content));
                 }
             }
         }
 
-        class TestExportableObject : IExportable
+        class TestImportableObject : IImportable
         {
             public const string ImportFailedContent = "Failed";
 
@@ -130,7 +130,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             public string? ImportedContent { get; private set; }
 
-            public TestExportableObject(string exportName, string content)
+            public TestImportableObject(string exportName, string content)
             {
                 _exportName = exportName;
 
