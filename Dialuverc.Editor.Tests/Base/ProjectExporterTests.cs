@@ -5,6 +5,8 @@ namespace Dialuverc.Editor.Tests.Base
 {
     internal class ProjectExporterTests
     {
+        const string _tempStorageName = nameof(ProjectExporterTests);
+
         [Test]
         public void ZipArchiveCreation()
         {
@@ -49,8 +51,7 @@ namespace Dialuverc.Editor.Tests.Base
                 new TestImportableObject("folder/file3", "content3"),
             };
 
-            using (TemporaryFileStorage storage = new TemporaryFileStorage(
-                Path.Combine(Path.GetTempPath(), $"Dialuverc{nameof(ProjectExporterTests)}{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}")))
+            using (TemporaryFileStorage storage = new TemporaryFileStorage(_tempStorageName))
             {
                 ProjectExporter.ExportToFolder(toExport.AsEnumerable(), storage.AbsoluteFolderPath);
 
@@ -100,8 +101,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             TestImportableObject[] importables = new TestImportableObject[] { first, second, third };
 
-            using (TemporaryFileStorage storage = new TemporaryFileStorage(
-                Path.Combine(Path.GetTempPath(), $"Dialuverc{nameof(ProjectExporterTests)}{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}")))
+            using (TemporaryFileStorage storage = new TemporaryFileStorage(_tempStorageName))
             {
                 ProjectExporter.ExportToFolder(importables, storage.AbsoluteFolderPath);
 

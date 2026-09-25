@@ -7,15 +7,16 @@ namespace Dialuverc.Editor.Tests.Base
         [Test]
         public void FolderIsCreatedAndDestroyed()
         {
-            TemporaryFileStorage storage = new TemporaryFileStorage(
-                Path.Combine(Path.GetTempPath(), $"Dialuverc{nameof(TemporaryFileStorageTests)}{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"));
+            string? storagePath;
 
-            using (storage)
+            using (TemporaryFileStorage storage = new TemporaryFileStorage(Path.GetRandomFileName()))
             {
-                Assert.That(Directory.Exists(storage.AbsoluteFolderPath), Is.True);
+                storagePath = storage.AbsoluteFolderPath;
+
+                Assert.That(Directory.Exists(storagePath), Is.True);
             }
 
-            Assert.That(Directory.Exists(storage.AbsoluteFolderPath), Is.False);
+            Assert.That(Directory.Exists(storagePath), Is.False);
         }
     }
 }

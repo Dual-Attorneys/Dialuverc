@@ -5,7 +5,7 @@ namespace Dialuverc.Editor.Tests.Base
 {
     internal class LocalizationMergerTests
     {
-        string _tempStoragePathForTest => $"Dialuverc{nameof(LocalizationMergerTests)}{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+        string _tempStoragePath => nameof(LocalizationMergerTests);
 
         LocalizationMergerFlatFile _merger;
 
@@ -20,8 +20,7 @@ namespace Dialuverc.Editor.Tests.Base
         {
             HashSet<string> keys = new HashSet<string>() { "key1", "key2", "key3", "key4" };
 
-            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(
-                Path.Combine(Path.GetTempPath(), _tempStoragePathForTest)))
+            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(_tempStoragePath))
             {
                 string outputPath = Path.Combine(tempStorage.AbsoluteFolderPath, "localizationOut.csv");
 
@@ -87,8 +86,7 @@ key3{LocalizationMergerFlatFile.CSVSeparator}value3{Environment.NewLine}";
 
         void WriteAndAssertTextsAreEqual(IReadOnlySet<string> keys, string starting, string expected)
         {
-            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(
-                Path.Combine(Path.GetTempPath(), _tempStoragePathForTest)))
+            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(_tempStoragePath))
             {
                 string outputPath = Path.Combine(tempStorage.AbsoluteFolderPath, "localizationOut.csv");
 

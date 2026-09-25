@@ -333,8 +333,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             EditorThought[] thoughtInfos = new EditorThought[] { firstThoughtInfo, secondThoughtInfo };
 
-            using (TemporaryFileStorage fileStorage = new TemporaryFileStorage(
-                Path.Combine(Path.GetTempPath(), nameof(ThoughtsEditorAreaTests))))
+            using (TemporaryFileStorage fileStorage = new TemporaryFileStorage(nameof(ThoughtsEditorAreaTests)))
             {
                 IEnumerable<IImportable> importables = _area.GetEditorImportables();
 
