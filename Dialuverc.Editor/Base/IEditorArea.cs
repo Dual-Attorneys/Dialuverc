@@ -12,6 +12,11 @@ namespace Dialuverc.Editor.Base
         public bool CanUndo { get; }
         public bool CanRedo { get; }
 
+        /// <summary>
+        /// Whether this <see cref="IEditorArea"/> has unsaved changes, making destructive operations dangerous.
+        /// </summary>
+        public bool HasUnsavedChanges { get; }
+
         public event Action? OnStateChanged;
 
         public void RestorePreviousState(RestoreDirection direction);
@@ -25,5 +30,10 @@ namespace Dialuverc.Editor.Base
         /// Returns all <see cref="IImportable"/>s usable to save and load work done in the editor.
         /// </summary>
         public IEnumerable<IImportable> GetEditorImportables();
+
+        /// <summary>
+        /// Sets this <see cref="IEditorArea"/>'s changes (since last save) as saved, making destructive operations safe.
+        /// </summary>
+        public void SetCurrentStateAsSaved();
     }
 }

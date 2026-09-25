@@ -128,6 +128,28 @@ namespace Dialuverc.Editor.Tests.Base
             Assert.That(count, Is.EqualTo(3));
         }
 
+        [Test]
+        public void UnsavedChangesUpdatesCorrectly()
+        {
+            Assert.That(_testArea.HasUnsavedChanges, Is.False);
+
+            _testArea.ChangeState("A");
+
+            Assert.That(_testArea.HasUnsavedChanges, Is.True);
+
+            _testArea.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_testArea.HasUnsavedChanges, Is.False);
+
+            _testArea.ChangeState("B");
+
+            Assert.That(_testArea.HasUnsavedChanges, Is.True);
+
+            _testArea.SetCurrentStateAsSaved();
+
+            Assert.That(_testArea.HasUnsavedChanges, Is.False);
+        }
+
         private class TestArea : EditorArea<byte[]>
         {
             public string CurrentState { get; private set; }
