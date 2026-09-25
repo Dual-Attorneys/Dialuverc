@@ -1,12 +1,16 @@
 namespace Dialuverc.Editor.Base.IO
 {
     /// <summary>
-    /// Represents a temporary folder whose contents are deleted on disposal.
+    /// Represents a temporary folder which is deleted (along with its contents) on disposal.<br/>
+    /// The folder is created at <see cref="Path.GetTempPath"/>.
+    /// <para><b>Note</b>: This class is intended for testing purposes only.</para>
     /// </summary>
-    // Note: This class is a convenience intended for testing. Do not use for anything else.
-    internal class TemporaryFileStorage : IDisposable
+    public class TemporaryFileStorage : IDisposable
     {
-        public string FolderPath { get; private set; }
+        /// <summary>
+        /// The absolute path the folder is at.
+        /// </summary>
+        public string AbsoluteFolderPath { get; private set; }
 
         /// <summary>
         /// Creates a new <see cref="TemporaryFileStorage"/> representing the folder at <paramref name="folderPath"/>.<br/>
@@ -17,17 +21,19 @@ namespace Dialuverc.Editor.Base.IO
             if (string.IsNullOrWhiteSpace(folderPath))
                 throw new ArgumentException($"Folder path can't be null or white space", nameof(folderPath));
 
-            if (!Directory.Exists(folderPath))
-                Directory.CreateDirectory(folderPath);
+            string fullPath = Path.Combine(Path.GetTempPath(), folderPath);
 
-            FolderPath = folderPath;
+            if (!Directory.Exists(fullPath))
+                Directory.CreateDirectory(fullPath);
+
+            AbsoluteFolderPath = fullPath;
         }
 
         public void Dispose()
         {
             try
             {
-                Directory.Delete(FolderPath, true);
+                Directory.Delete(AbsoluteFolderPath, true);
             }
             catch { }
         }
