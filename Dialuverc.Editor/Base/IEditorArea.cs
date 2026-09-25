@@ -21,6 +21,8 @@ namespace Dialuverc.Editor.Base
 
         public void RestorePreviousState(RestoreDirection direction);
 
+        public void ClearStatesHistory();
+
         /// <summary>
         /// Returns all <see cref="IExportable"/>s whose target is a game.
         /// </summary>

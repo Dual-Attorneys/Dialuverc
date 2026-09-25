@@ -23,7 +23,7 @@ namespace Dialuverc.Editor.Base
         public bool CanUndo => _savedStates.Count > 0 && _currentState > 0;
         public bool CanRedo => _currentState < _savedStates.Count - 1;
 
-        T _lastSavedState = default(T)!;
+        T _lastSavedState = default!;
         public bool HasUnsavedChanges => _savedStates.Count > 0 &&
             _lastSavedState is not null &&
             !CheckStateEquality(_lastSavedState, _savedStates[_currentState]);
@@ -107,13 +107,17 @@ namespace Dialuverc.Editor.Base
             OnStateChanged?.Invoke();
         }
 
-        protected abstract T GetStateToSave();
+        public void ClearStatesHistory()
+        {
+            if (_isRestoringPreviousState || TransactionPending)
+                return;
 
-        // Since we don't know what T is,
-        // force whoever is writing the code to think about how equality between states is determined.
-        protected abstract bool CheckStateEquality(T a, T b);
+            _savedStates.Clear();
 
-        protected abstract void ApplyRestoredState(T newState);
+            _currentState = default;
+
+            _lastSavedState = default!;
+        }
 
         // Since saving is done using IImportables, we do not necessarily know who is doing the saving or when it happens.
         // We let the object doing the saving tell us when changes are safe.
@@ -124,6 +128,14 @@ namespace Dialuverc.Editor.Base
 
             _lastSavedState = _savedStates[_currentState];
         }
+
+        protected abstract T GetStateToSave();
+
+        // Since we don't know what T is,
+        // force whoever is writing the code to think about how equality between states is determined.
+        protected abstract bool CheckStateEquality(T a, T b);
+
+        protected abstract void ApplyRestoredState(T newState);
 
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
 
