@@ -23,6 +23,11 @@ namespace Dialuverc.Editor.Base
         public bool CanUndo => _savedStates.Count > 0 && _currentState > 0;
         public bool CanRedo => _currentState < _savedStates.Count - 1;
 
+        T _lastSavedState = default!;
+        public bool HasUnsavedChanges => _savedStates.Count > 0 &&
+            _lastSavedState is not null &&
+            !CheckStateEquality(_lastSavedState, _savedStates[_currentState]);
+
         /// <summary>
         /// Invoked when state is saved or restored.
         /// </summary>
@@ -40,8 +45,15 @@ namespace Dialuverc.Editor.Base
 
         void MakeSureBaseStateIsSaved()
         {
-            if (_savedStates.Count == 0)
-                ForceCommit();
+            if (_savedStates.Count != 0)
+                return;
+
+            ForceCommit();
+
+            // When MakeSureBaseStateIsSaved runs, we're either on an empty EditorArea (which means there's nothing to save),
+            // or we've just restored state for the first time from an external source in some way.
+            // In the last case, we can assume state comes from a persistent storage, meaning it is already "saved".
+            SetCurrentStateAsSaved();
         }
 
         protected override void Commit()
@@ -93,6 +105,28 @@ namespace Dialuverc.Editor.Base
             _isRestoringPreviousState = false;
 
             OnStateChanged?.Invoke();
+        }
+
+        public void ClearStatesHistory()
+        {
+            if (_isRestoringPreviousState || TransactionPending)
+                return;
+
+            _savedStates.Clear();
+
+            _currentState = default;
+
+            _lastSavedState = default!;
+        }
+
+        // Since saving is done using IImportables, we do not necessarily know who is doing the saving or when it happens.
+        // We let the object doing the saving tell us when changes are safe.
+        public void SetCurrentStateAsSaved()
+        {
+            if (_savedStates.Count == 0)
+                return;
+
+            _lastSavedState = _savedStates[_currentState];
         }
 
         protected abstract T GetStateToSave();
