@@ -27,7 +27,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public EditorModeManager ScratchpadManager => _scratchpadManager;
         public EditorThought? ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
-        EditorThoughtsImportable _editorThoughtsImportable;
+        readonly EditorThoughtsImportable _editorThoughtsImportable;
+
+        readonly IImportable[] _cachedImportables;
 
         // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
         // This assumes their structure is unlikely to change and will always need few parameters.
@@ -43,6 +45,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                 WriteIndented = true,
                 IncludeFields = true,
             });
+
+            _cachedImportables = new IImportable[]
+            {
+                _editorThoughtsImportable,
+            };
         }
 
         public void SetNameKey(string nameKey)
@@ -252,7 +259,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
 
-        public override IEnumerable<IImportable> GetEditorImportables() => new IImportable[] { _editorThoughtsImportable };
+        public override IEnumerable<IImportable> GetEditorImportables() => _cachedImportables;
 
         #endregion
     }

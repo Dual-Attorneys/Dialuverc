@@ -28,7 +28,14 @@ namespace Dialuverc.Editor.Base.IO
 
         public void SerializeForExport(Stream stream) => JsonSerializer.Serialize(stream, GetToExport(), _jsonOptions);
 
+        /// <summary>
+        /// Retrieves the instance of <typeparamref name="T"/> to export.
+        /// </summary>
         public abstract T GetToExport();
+
+        /// <summary>
+        /// Called once deserialization is completed.
+        /// </summary>
         public abstract void OnImported(T? result);
     }
 }
