@@ -1,8 +1,9 @@
 namespace Dialuverc.Editor.Base.IO
 {
     /// <summary>
-    /// Represents a temporary folder which is deleted (along with its contents) on disposal.
-    /// <para>Folder is created at <see cref="Path.GetTempPath"/>.</para>
+    /// Represents a temporary folder which is deleted (along with its contents) on disposal.<br/>
+    /// The folder is created at <see cref="Path.GetTempPath"/>.
+    /// <para><b>Note</b>: This class is intended for testing purposes only.</para>
     /// </summary>
     public class TemporaryFileStorage : IDisposable
     {
