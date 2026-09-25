@@ -340,16 +340,16 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
                 // Can export either to Zip or folder.
                 // Picked folder because importing from it happened to be implemented before Zip.
-                ProjectExporter.ExportToFolder(importables, fileStorage.FolderPath);
+                ProjectExporter.ExportToFolder(importables, fileStorage.AbsoluteFolderPath);
 
-                Assert.That(File.Exists(Path.Combine(fileStorage.FolderPath, importables.First().ExportPath)), Is.True);
+                Assert.That(File.Exists(Path.Combine(fileStorage.AbsoluteFolderPath, importables.First().ExportPath)), Is.True);
 
                 _area.RemoveThought(firstThoughtGuid);
                 _area.RemoveThought(secondThoughtGuid);
 
                 Assert.That(_area.Thoughts, Is.Empty);
 
-                ProjectExporter.ImportFromFolder(importables, fileStorage.FolderPath);
+                ProjectExporter.ImportFromFolder(importables, fileStorage.AbsoluteFolderPath);
 
                 Assert.That(_area.Thoughts, Has.Count.EqualTo(thoughtInfos.Length));
 

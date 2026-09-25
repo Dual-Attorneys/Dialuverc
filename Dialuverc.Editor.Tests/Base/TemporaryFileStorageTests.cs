@@ -12,10 +12,10 @@ namespace Dialuverc.Editor.Tests.Base
 
             using (storage)
             {
-                Assert.That(Directory.Exists(storage.FolderPath), Is.True);
+                Assert.That(Directory.Exists(storage.AbsoluteFolderPath), Is.True);
             }
 
-            Assert.That(Directory.Exists(storage.FolderPath), Is.False);
+            Assert.That(Directory.Exists(storage.AbsoluteFolderPath), Is.False);
         }
     }
 }

@@ -52,11 +52,11 @@ namespace Dialuverc.Editor.Tests.Base
             using (TemporaryFileStorage storage = new TemporaryFileStorage(
                 Path.Combine(Path.GetTempPath(), $"Dialuverc{nameof(ProjectExporterTests)}{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}")))
             {
-                ProjectExporter.ExportToFolder(toExport.AsEnumerable(), storage.FolderPath);
+                ProjectExporter.ExportToFolder(toExport.AsEnumerable(), storage.AbsoluteFolderPath);
 
                 for (int i = 0; i < toExport.Length; i++)
                 {
-                    string filePath = Path.Combine(storage.FolderPath, toExport[i].ExportPath);
+                    string filePath = Path.Combine(storage.AbsoluteFolderPath, toExport[i].ExportPath);
 
                     Assert.That(File.Exists(filePath), Is.True);
                     Assert.That(File.ReadAllText(filePath), Is.EqualTo(toExport[i].Content));
@@ -103,14 +103,14 @@ namespace Dialuverc.Editor.Tests.Base
             using (TemporaryFileStorage storage = new TemporaryFileStorage(
                 Path.Combine(Path.GetTempPath(), $"Dialuverc{nameof(ProjectExporterTests)}{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}")))
             {
-                ProjectExporter.ExportToFolder(importables, storage.FolderPath);
+                ProjectExporter.ExportToFolder(importables, storage.AbsoluteFolderPath);
 
                 foreach (TestImportableObject importable in importables)
                 {
                     Assert.That(importable.ImportedContent, Is.Null);
                 }
 
-                ProjectExporter.ImportFromFolder(importables, storage.FolderPath);
+                ProjectExporter.ImportFromFolder(importables, storage.AbsoluteFolderPath);
 
                 foreach (TestImportableObject importable in importables)
                 {

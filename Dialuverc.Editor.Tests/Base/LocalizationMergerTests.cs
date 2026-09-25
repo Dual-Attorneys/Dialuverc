@@ -23,7 +23,7 @@ namespace Dialuverc.Editor.Tests.Base
             using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(
                 Path.Combine(Path.GetTempPath(), _tempStoragePathForTest)))
             {
-                string outputPath = Path.Combine(tempStorage.FolderPath, "localizationOut.csv");
+                string outputPath = Path.Combine(tempStorage.AbsoluteFolderPath, "localizationOut.csv");
 
                 Assert.That(File.Exists(outputPath), Is.False);
 
@@ -90,7 +90,7 @@ key3{LocalizationMergerFlatFile.CSVSeparator}value3{Environment.NewLine}";
             using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(
                 Path.Combine(Path.GetTempPath(), _tempStoragePathForTest)))
             {
-                string outputPath = Path.Combine(tempStorage.FolderPath, "localizationOut.csv");
+                string outputPath = Path.Combine(tempStorage.AbsoluteFolderPath, "localizationOut.csv");
 
                 File.WriteAllText(outputPath, starting);
 
