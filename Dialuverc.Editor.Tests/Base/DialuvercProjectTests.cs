@@ -75,6 +75,46 @@ namespace Dialuverc.Editor.Tests.Base
             }
         }
 
+        [Test]
+        public void ImportFailRestoresLatestBackup()
+        {
+            TestingImportable[] importables = new TestingImportable[]
+            {
+                new TestingImportable("file1")
+            };
+
+            // Only saving creates backups, exporting doesn't.
+            TestingImportable[] exportables = Array.Empty<TestingImportable>();
+
+            IProjectTrackable[] trackables = new IProjectTrackable[]
+            {
+                new TestingProjectTrackable(importables, exportables),
+            };
+
+            string firstContent = "Hello";
+            string secondContent = "World";
+
+            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(DialuvercProjectTests)))
+            {
+                DialuvercProject project = new DialuvercProject(
+                    Path.Combine(tempStorage.AbsoluteFolderPath, "DialuvercProject"),
+                    trackables);
+
+                string filePath = Path.Combine(project.ContentFolderPath, importables[0].ExportPath);
+
+                importables[0].Content = firstContent;
+
+                Assert.That(project.SaveProject(), Is.True);
+                Assert.That(File.ReadAllText(filePath), Is.EqualTo(firstContent));
+
+                importables[0].Content = secondContent;
+                importables[0].ThrowOn = ImportableThrowOn.Serialize;
+
+                Assert.That(project.SaveProject(), Is.False);
+                Assert.That(File.ReadAllText(filePath), Is.EqualTo(firstContent));
+            }
+        }
+
         private class TestingProjectTrackable : IProjectTrackable
         {
             public bool HasUnsavedChanges { get; private set; }
@@ -103,6 +143,8 @@ namespace Dialuverc.Editor.Tests.Base
             readonly string _exportPath;
             public string ExportPath => _exportPath;
 
+            public ImportableThrowOn ThrowOn { get; set; } = ImportableThrowOn.None;
+
             public string? Content { get; set; }
 
             public TestingImportable(string exportPath)
@@ -112,6 +154,9 @@ namespace Dialuverc.Editor.Tests.Base
 
             public void DeserializeForImport(Stream stream)
             {
+                if (ThrowOn == ImportableThrowOn.Both || ThrowOn == ImportableThrowOn.Deserialize)
+                    throw new Exception($"Importing threw an exception because {nameof(ThrowOn)} is {ThrowOn}");
+
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     Content = reader.ReadToEnd();
@@ -120,11 +165,22 @@ namespace Dialuverc.Editor.Tests.Base
 
             public void SerializeForExport(Stream stream)
             {
+                if (ThrowOn == ImportableThrowOn.Both || ThrowOn == ImportableThrowOn.Serialize)
+                    throw new Exception($"Exporting threw an exception because {nameof(ThrowOn)} is {ThrowOn}");
+
                 using (StreamWriter writer = new StreamWriter(stream))
                 {
                     writer.Write(Content);
                 }
             }
+        }
+
+        private enum ImportableThrowOn
+        {
+            None,
+            Deserialize,
+            Serialize,
+            Both,
         }
     }
 }

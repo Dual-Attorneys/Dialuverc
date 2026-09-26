@@ -64,12 +64,14 @@ namespace Dialuverc.Editor.Base.Project
         {
             string? tempFolderPath = null;
 
+            string? pathUsedForBackup = null;
+
             try
             {
                 tempFolderPath = Path.Combine(ProjectFolderPath, $"TempContent{Guid.NewGuid()}");
                 Directory.CreateDirectory(tempFolderPath);
 
-                MoveCurrentSaveToBackups();
+                pathUsedForBackup = MoveCurrentSaveToBackups();
 
                 ProjectExporter.ExportToFolder(EnumerateImportables(), tempFolderPath);
 
@@ -91,17 +93,20 @@ namespace Dialuverc.Editor.Base.Project
                 if (Directory.Exists(tempFolderPath))
                     Directory.Delete(tempFolderPath, true);
 
+                if (!string.IsNullOrWhiteSpace(pathUsedForBackup))
+                    Directory.Move(pathUsedForBackup, ContentFolderPath);
+
                 return false;
             }
         }
 
-        void MoveCurrentSaveToBackups()
+        string? MoveCurrentSaveToBackups()
         {
             if (!Directory.Exists(ContentFolderPath))
-                return;
+                return null;
 
             if (!Directory.EnumerateFileSystemEntries(ContentFolderPath).Any())
-                return;
+                return null;
 
             Directory.CreateDirectory(BackupsFolderPath);
 
@@ -111,6 +116,8 @@ namespace Dialuverc.Editor.Base.Project
             string usableContentBackupPath = Path.Combine(usableBackupPath, "Content");
 
             Directory.Move(ContentFolderPath, usableContentBackupPath);
+
+            return usableContentBackupPath;
         }
     }
 }
