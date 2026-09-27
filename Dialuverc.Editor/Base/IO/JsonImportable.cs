@@ -6,16 +6,25 @@ namespace Dialuverc.Editor.Base.IO
     /// An <see cref="IImportable"/> which supports serializing/deserializing to/from Json.
     /// </summary>
     /// <typeparam name="T">The type to import/export. May need a <see cref="System.Text.Json.Serialization.JsonConverter"/>.</typeparam>
-    public abstract class JsonImportable<T> : IImportable
+    public class JsonImportable<T> : IImportable
     {
-        public abstract string ExportPath { get; }
+        public string ExportPath { get; private set; }
 
-        JsonSerializerOptions _jsonOptions;
+        readonly Func<T> _getter;
+        readonly Action<T?> _setter;
 
-        public JsonImportable(JsonSerializerOptions jsonOptions)
+        readonly JsonSerializerOptions _jsonOptions;
+
+        public JsonImportable(string exportPath, Func<T> getter, Action<T?> setter, JsonSerializerOptions jsonOptions)
         {
+            ArgumentNullException.ThrowIfNull(exportPath);
+            ArgumentNullException.ThrowIfNull(getter);
+            ArgumentNullException.ThrowIfNull(setter);
             ArgumentNullException.ThrowIfNull(jsonOptions);
 
+            ExportPath = exportPath;
+            _getter = getter;
+            _setter = setter;
             _jsonOptions = jsonOptions;
         }
 
@@ -23,19 +32,9 @@ namespace Dialuverc.Editor.Base.IO
         {
             T? result = JsonSerializer.Deserialize<T>(stream, _jsonOptions);
 
-            OnImported(result);
+            _setter.Invoke(result);
         }
 
-        public void SerializeForExport(Stream stream) => JsonSerializer.Serialize(stream, GetToExport(), _jsonOptions);
-
-        /// <summary>
-        /// Retrieves the instance of <typeparamref name="T"/> to export.
-        /// </summary>
-        public abstract T GetToExport();
-
-        /// <summary>
-        /// Called once deserialization is completed.
-        /// </summary>
-        public abstract void OnImported(T? result);
+        public void SerializeForExport(Stream stream) => JsonSerializer.Serialize(stream, _getter.Invoke(), _jsonOptions);
     }
 }
