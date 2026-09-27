@@ -27,7 +27,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public EditorModeManager ScratchpadManager => _scratchpadManager;
         public EditorThought? ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
-        readonly EditorThoughtsImportable _editorThoughtsImportable;
+        readonly JsonImportable<ImmutableList<EditorThought>> _editorThoughtsImportable;
 
         readonly IImportable[] _cachedImportables;
 
@@ -40,7 +40,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _scratchpadManager.AddScratchpad = CreateDefaultEditorThought();
 
-            _editorThoughtsImportable = new EditorThoughtsImportable(this, new JsonSerializerOptions
+            _editorThoughtsImportable = new JsonImportable<ImmutableList<EditorThought>>(nameof(ThoughtsEditorArea), GetEditorThoughtsForImportable, OnEditorThoughtsImported, new JsonSerializerOptions
             {
                 WriteIndented = true,
                 IncludeFields = true,
@@ -231,6 +231,27 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             string.Empty,
             string.Empty,
             CharacterSides.Any));
+
+        #region Exportables/Importables
+
+        ImmutableList<EditorThought> GetEditorThoughtsForImportable() => _thoughts;
+
+        void OnEditorThoughtsImported(ImmutableList<EditorThought>? imported)
+        {
+            // TODO: Proper error handling.
+            // This probably should not be done in a transaction.
+
+            if (imported is null)
+                return;
+
+            BeginChange();
+
+            _thoughts = imported;
+
+            EndChange();
+        }
+
+        #endregion
 
         #region EditorArea
 
