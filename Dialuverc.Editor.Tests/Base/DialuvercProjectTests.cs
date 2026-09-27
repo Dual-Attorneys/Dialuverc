@@ -6,7 +6,7 @@ namespace Dialuverc.Editor.Tests.Base
     internal class DialuvercProjectTests
     {
         [Test]
-        public void BackupIsCreated()
+        public void SaveSuccessCreatesBackup()
         {
             TestingImportable[] importables = new TestingImportable[]
             {
@@ -76,7 +76,7 @@ namespace Dialuverc.Editor.Tests.Base
         }
 
         [Test]
-        public void ImportFailRestoresLatestBackup()
+        public void SaveFailRestoresLatestBackup()
         {
             TestingImportable[] importables = new TestingImportable[]
             {
