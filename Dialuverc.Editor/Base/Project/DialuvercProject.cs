@@ -74,7 +74,8 @@ namespace Dialuverc.Editor.Base.Project
         // TODO: Proper error handling.
         public bool SaveProject()
         {
-            string? tempFolderPath = null;
+            string? tempProjectInfoPath = null;
+            string? tempContentFolderPath = null;
 
             string? pathUsedForBackup = null;
 
@@ -82,25 +83,32 @@ namespace Dialuverc.Editor.Base.Project
             {
                 Directory.CreateDirectory(ProjectFolderPath);
 
-                using (FileStream projectInfoStream = File.Open(
-                    Path.Combine(ProjectFolderPath, ".dialuverc"),
-                    FileMode.OpenOrCreate, FileAccess.Write))
+                tempProjectInfoPath = Path.Combine(ProjectFolderPath, ".dialuverc.tmp");
+
+                using (FileStream projectInfoStream = File.Open(tempProjectInfoPath, FileMode.OpenOrCreate, FileAccess.Write))
                 {
                     JsonSerializer.Serialize(projectInfoStream, _projectInfo);
                 }
 
-                tempFolderPath = Path.Combine(ProjectFolderPath, $"TempContent{Guid.NewGuid()}");
-                Directory.CreateDirectory(tempFolderPath);
+                tempContentFolderPath = Path.Combine(ProjectFolderPath, $"TempContent{Guid.NewGuid()}");
+                Directory.CreateDirectory(tempContentFolderPath);
 
                 pathUsedForBackup = MoveCurrentSaveToBackups();
 
-                ProjectExporter.ExportToFolder(EnumerateImportables(), tempFolderPath);
+                ProjectExporter.ExportToFolder(EnumerateImportables(), tempContentFolderPath);
 
                 // If Content exists, it's empty (MoveCurrentSaveToBackups would have moved it if it had anything inside).
                 if (Directory.Exists(ContentFolderPath))
                     Directory.Delete(ContentFolderPath);
 
-                Directory.Move(tempFolderPath, ContentFolderPath);
+                string projectInfoPath = Path.Combine(ProjectFolderPath, ".dialuverc");
+
+                if (File.Exists(projectInfoPath))
+                    File.Delete(projectInfoPath);
+
+                File.Move(tempProjectInfoPath, projectInfoPath);
+
+                Directory.Move(tempContentFolderPath, ContentFolderPath);
 
                 foreach (IProjectTrackable trackable in _projectTrackables)
                 {
@@ -111,10 +119,13 @@ namespace Dialuverc.Editor.Base.Project
             }
             catch
             {
-                if (Directory.Exists(tempFolderPath))
-                    Directory.Delete(tempFolderPath, true);
+                if (File.Exists(tempProjectInfoPath))
+                    File.Delete(tempProjectInfoPath);
 
-                if (!string.IsNullOrWhiteSpace(pathUsedForBackup))
+                if (Directory.Exists(tempContentFolderPath))
+                    Directory.Delete(tempContentFolderPath, true);
+
+                if (Directory.Exists(pathUsedForBackup))
                     Directory.Move(pathUsedForBackup, ContentFolderPath);
 
                 return false;
