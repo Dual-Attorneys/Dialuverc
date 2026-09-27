@@ -1,5 +1,6 @@
 using Dialuverc.Editor.Base.IO;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 
 namespace Dialuverc.Editor.Base.Project
 {
@@ -11,11 +12,19 @@ namespace Dialuverc.Editor.Base.Project
 
         readonly IEnumerable<IProjectTrackable> _projectTrackables;
 
+        DialuvercProjectInfo _projectInfo = new DialuvercProjectInfo();
+
+        public string Name
+        {
+            get => _projectInfo.Name;
+            set => _projectInfo.Name = value;
+        }
+
         public DialuvercProject(string folderPath, IEnumerable<IProjectTrackable> projectTrackables)
         {
             ArgumentNullException.ThrowIfNull(projectTrackables);
 
-            MoveProject(folderPath);
+            UpdatePathsFromProjectFolder(folderPath);
 
             _projectTrackables = projectTrackables;
         }
@@ -25,27 +34,31 @@ namespace Dialuverc.Editor.Base.Project
         /// Relative paths (e.g. <see cref="ContentFolderPath"/>, <see cref="BackupsFolderPath"/>) are updated accordingly.
         /// </summary>
         // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis#helper-methods-membernotnull-and-membernotnullwhen
+        public void MoveProject(string newFolderPath)
+        {
+            // We may be initializing the paths without actually moving the folder.
+            if (ProjectFolderPath is not null &&
+                !ProjectFolderPath.Equals(newFolderPath, StringComparison.OrdinalIgnoreCase))
+                Directory.Move(ProjectFolderPath, newFolderPath);
+
+            UpdatePathsFromProjectFolder(newFolderPath);
+
+            Directory.CreateDirectory(ProjectFolderPath);
+        }
+
         [MemberNotNull(nameof(ProjectFolderPath),
             nameof(ContentFolderPath),
             nameof(BackupsFolderPath))]
-        public void MoveProject(string newFolderPath)
+        void UpdatePathsFromProjectFolder(string newFolderPath)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(newFolderPath);
 
             if (!Path.IsPathFullyQualified(newFolderPath))
                 throw new ArgumentException($"'{newFolderPath}' must be an absolute path", nameof(newFolderPath));
 
-            // We may be initializing the paths without actually moving the folder.
-            if (ProjectFolderPath is not null &&
-                !ProjectFolderPath.Equals(newFolderPath, StringComparison.OrdinalIgnoreCase))
-                Directory.Move(ProjectFolderPath, newFolderPath);
-
             ProjectFolderPath = newFolderPath;
             ContentFolderPath = Path.Combine(newFolderPath, "Content");
             BackupsFolderPath = Path.Combine(newFolderPath, "Backups");
-
-            // No-op if the folder already exists.
-            Directory.CreateDirectory(ProjectFolderPath);
         }
 
         IEnumerable<IImportable> EnumerateImportables()
@@ -68,6 +81,15 @@ namespace Dialuverc.Editor.Base.Project
 
             try
             {
+                Directory.CreateDirectory(ProjectFolderPath);
+
+                using (FileStream projectInfoStream = File.Open(
+                    Path.Combine(ProjectFolderPath, ".dialuverc"),
+                    FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    JsonSerializer.Serialize(projectInfoStream, _projectInfo);
+                }
+
                 tempFolderPath = Path.Combine(ProjectFolderPath, $"TempContent{Guid.NewGuid()}");
                 Directory.CreateDirectory(tempFolderPath);
 
