@@ -36,7 +36,6 @@ namespace Dialuverc.Editor.Base.Project
         // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis#helper-methods-membernotnull-and-membernotnullwhen
         public void MoveProject(string newFolderPath)
         {
-            // We may be initializing the paths without actually moving the folder.
             if (ProjectFolderPath is not null &&
                 !ProjectFolderPath.Equals(newFolderPath, StringComparison.OrdinalIgnoreCase))
                 Directory.Move(ProjectFolderPath, newFolderPath);
