@@ -234,6 +234,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         #region Exportables/Importables
 
+        public override IEnumerable<IImportable> GetEditorImportables() => _cachedImportables;
+
         ImmutableList<EditorThought> GetEditorThoughtsForImportable() => _thoughts;
 
         void OnEditorThoughtsImported(ImmutableList<EditorThought>? imported)
@@ -279,8 +281,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         }
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
-
-        public override IEnumerable<IImportable> GetEditorImportables() => _cachedImportables;
 
         #endregion
     }
