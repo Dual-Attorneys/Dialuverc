@@ -4,6 +4,9 @@ using System.Runtime.Versioning;
 
 namespace Dialuverc.Editor.Base.Installation.Windows
 {
+    /// <summary>
+    /// Handles installation of Dialuverc-derived editors on Windows.
+    /// </summary>
     [SupportedOSPlatform("Windows")]
     public class WindowsInstaller
     {
@@ -12,6 +15,11 @@ namespace Dialuverc.Editor.Base.Installation.Windows
         const string _defaultIcon = "DefaultIcon";
         const string _shellOpenCommand = @"Shell\Open\Command";
 
+        /// <summary>
+        /// Sets up the required <see cref="RegistryKey"/>s to tell the OS:<br/>
+        /// - Which icon to use for which file extension.<br/>
+        /// - Which program to run when the file is opened.
+        /// </summary>
         public static void InstallFileExtensionForProgram(WindowsFileExtension extension, WindowsProgram program)
         {
             string extensionOpenWithProgIdsPath = $@"{extension.Extension}\{_openWithProgIds}";

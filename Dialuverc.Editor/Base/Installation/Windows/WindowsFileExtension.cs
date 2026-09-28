@@ -2,6 +2,9 @@ using System.Runtime.Versioning;
 
 namespace Dialuverc.Editor.Base.Installation.Windows
 {
+    /// <summary>
+    /// Pairs a file extension with an icon on Windows.
+    /// </summary>
     [SupportedOSPlatform("Windows")]
     public class WindowsFileExtension
     {
