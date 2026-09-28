@@ -33,7 +33,6 @@ namespace Dialuverc.Editor.Base.Project
         /// Moves this project's folder to the passed <paramref name="newFolderPath"/>.<br/>
         /// Relative paths (e.g. <see cref="ContentFolderPath"/>, <see cref="BackupsFolderPath"/>) are updated accordingly.
         /// </summary>
-        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis#helper-methods-membernotnull-and-membernotnullwhen
         public void MoveProject(string newFolderPath)
         {
             if (ProjectFolderPath is not null &&
@@ -45,6 +44,7 @@ namespace Dialuverc.Editor.Base.Project
             Directory.CreateDirectory(ProjectFolderPath);
         }
 
+        // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis#helper-methods-membernotnull-and-membernotnullwhen
         [MemberNotNull(nameof(ProjectFolderPath),
             nameof(ContentFolderPath),
             nameof(BackupsFolderPath))]
