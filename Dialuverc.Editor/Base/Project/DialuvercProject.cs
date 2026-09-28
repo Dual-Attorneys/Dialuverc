@@ -85,6 +85,8 @@ namespace Dialuverc.Editor.Base.Project
 
                 tempProjectInfoPath = Path.Combine(ProjectFolderPath, ".dialuverc.tmp");
 
+                // IImportable can't currently be used for this as they require writing/reading to/from the same file (".dialuverc.tmp" <-> ".dialuverc").
+                // This can be fixed by making the saving process run entirely inside a temp project folder (if needed).
                 using (FileStream projectInfoStream = File.Open(tempProjectInfoPath, FileMode.OpenOrCreate, FileAccess.Write))
                 {
                     JsonSerializer.Serialize(projectInfoStream, _projectInfo);
