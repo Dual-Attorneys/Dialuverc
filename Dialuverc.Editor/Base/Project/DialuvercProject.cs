@@ -91,7 +91,6 @@ namespace Dialuverc.Editor.Base.Project
                 }
 
                 tempContentFolderPath = Path.Combine(ProjectFolderPath, $"TempContent{Guid.NewGuid()}");
-                Directory.CreateDirectory(tempContentFolderPath);
 
                 pathUsedForBackup = MoveCurrentSaveToBackups();
 
