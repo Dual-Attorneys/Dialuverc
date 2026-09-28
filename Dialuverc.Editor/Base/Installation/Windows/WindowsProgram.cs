@@ -1,5 +1,8 @@
+using System.Runtime.Versioning;
+
 namespace Dialuverc.Editor.Base.Installation.Windows
 {
+    [SupportedOSPlatform("Windows")]
     public class WindowsProgram
     {
         public readonly string ProgramID;
