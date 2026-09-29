@@ -427,3 +427,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# DocFX
+Dialuverc.DocFX/_site/
+Dialuverc.DocFX/api/
