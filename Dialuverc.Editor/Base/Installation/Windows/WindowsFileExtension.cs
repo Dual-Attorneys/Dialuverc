@@ -30,7 +30,7 @@ namespace Dialuverc.Editor.Base.Installation.Windows
                 if (!char.IsAsciiLetterOrDigit(character))
                     throw new ArgumentException("An extension can't contain invalid characters for a path", nameof(extension));
             }
-                
+
             if (!Path.IsPathFullyQualified(iconPath))
                 throw new ArgumentException("Path is not fully qualified", nameof(iconPath));
 
