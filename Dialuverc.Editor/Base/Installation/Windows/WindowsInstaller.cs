@@ -75,6 +75,24 @@ namespace Dialuverc.Editor.Base.Installation.Windows
             NotifyWindows();
         }
 
+        /// <summary>
+        /// Removes all program associations for the passed <paramref name="extension"/>.
+        /// </summary>
+        public static void UninstallFileExtensionForAll(WindowsFileExtension extension)
+        {
+            string extensionPath = $@"{extension.Extension}";
+
+            using (RegistryKey? topmostKey = Registry.CurrentUser.OpenSubKey(_softwareClasses, true))
+            {
+                if (topmostKey is null)
+                    return;
+
+                topmostKey.DeleteSubKeyTree(extensionPath, false);
+            }
+
+            NotifyWindows();
+        }
+
         [DllImport("Shell32.dll")]
         static extern void SHChangeNotify(uint eventID, uint flags, IntPtr dwItem1, IntPtr dwItem2);
 
