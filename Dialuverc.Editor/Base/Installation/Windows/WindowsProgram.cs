@@ -25,6 +25,9 @@ namespace Dialuverc.Editor.Base.Installation.Windows
             if (!char.IsAsciiLetter(programID[0]))
                 throw new ArgumentException("A ProgID can only start with an ASCII letter", nameof(programID));
 
+            if (programID[programID.Length - 1] == '.')
+                throw new ArgumentException("A ProgID can only end with an ASCII number or letter", nameof(programID));
+
             foreach (char character in programID)
             {
                 if (!char.IsAsciiLetterOrDigit(character) && character != '.')
