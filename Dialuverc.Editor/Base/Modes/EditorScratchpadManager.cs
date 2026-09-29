@@ -48,7 +48,7 @@ namespace Dialuverc.Editor.Base.Modes
                 {
                     case Mode.Add:
 
-                        AddScratchpad = value!;
+                        AddScratchpad = value;
                         break;
 
                     case Mode.Edit:
