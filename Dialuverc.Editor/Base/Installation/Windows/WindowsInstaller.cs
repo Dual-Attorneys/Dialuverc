@@ -44,7 +44,11 @@ namespace Dialuverc.Editor.Base.Installation.Windows
 
                     using (RegistryKey shellOpenCommandKey = progIDDotExtensionKey.CreateSubKey(_shellOpenCommand))
                     {
-                        shellOpenCommandKey.SetValue(null, $"\"{program.ProgramPath}\" \"%1\"");
+                        // TODO: Which position should %1 be in?
+                        if (!string.IsNullOrWhiteSpace(program.LaunchArgs))
+                            shellOpenCommandKey.SetValue(null, $"\"{program.ProgramPath}\" \"%1\" {program.LaunchArgs}");
+                        else
+                            shellOpenCommandKey.SetValue(null, $"\"{program.ProgramPath}\" \"%1\"");
                     }
                 }
             }

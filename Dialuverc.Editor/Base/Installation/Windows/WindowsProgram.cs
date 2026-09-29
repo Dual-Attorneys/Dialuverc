@@ -11,13 +11,17 @@ namespace Dialuverc.Editor.Base.Installation.Windows
         public readonly string ProgramID;
         public readonly string ProgramPath;
 
-        public WindowsProgram(string programID, string programPath)
+        public readonly string? LaunchArgs;
+
+        public WindowsProgram(string programID, string programPath, string launchArgs = null)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(programID);
             ArgumentNullException.ThrowIfNullOrWhiteSpace(programPath);
 
             ProgramID = programID;
             ProgramPath = programPath;
+
+            LaunchArgs = launchArgs;
         }
     }
 }
