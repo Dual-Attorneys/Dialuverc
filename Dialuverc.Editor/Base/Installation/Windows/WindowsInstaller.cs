@@ -55,9 +55,9 @@ namespace Dialuverc.Editor.Base.Installation.Windows
         /// <summary>
         /// Removes the passed <paramref name="program"/> as an intended way to open files with the passed <paramref name="extension"/>.
         /// </summary>
+        // This leaves behind .extension key in case it's an already-in-use-by-other-software key.
         public static void UninstallFileExtensionForProgram(WindowsFileExtension extension, WindowsProgram program)
         {
-            string extensionPath = $@"{extension.Extension}";
             string extensionOpenWithProgIdsPath = $@"{extension.Extension}\{_openWithProgIds}";
             string progIDDotExtension = $"{program.ProgramID}{extension.Extension}";
 
@@ -70,24 +70,8 @@ namespace Dialuverc.Editor.Base.Installation.Windows
                 {
                     extensionOpenWithProgIdsKey.DeleteValue(progIDDotExtension, false);
                 }
-            }
 
-            NotifyWindows();
-        }
-
-        /// <summary>
-        /// Removes all program associations for the passed <paramref name="extension"/>.
-        /// </summary>
-        public static void UninstallFileExtensionForAll(WindowsFileExtension extension)
-        {
-            string extensionPath = $@"{extension.Extension}";
-
-            using (RegistryKey? topmostKey = Registry.CurrentUser.OpenSubKey(_softwareClasses, true))
-            {
-                if (topmostKey is null)
-                    return;
-
-                topmostKey.DeleteSubKeyTree(extensionPath, false);
+                topmostKey.DeleteSubKeyTree(progIDDotExtension, false);
             }
 
             NotifyWindows();
