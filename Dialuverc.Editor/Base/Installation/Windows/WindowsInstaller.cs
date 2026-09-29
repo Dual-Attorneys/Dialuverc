@@ -53,7 +53,9 @@ namespace Dialuverc.Editor.Base.Installation.Windows
         }
 
         /// <summary>
-        /// Removes the passed <paramref name="program"/> as an intended way to open files with the passed <paramref name="extension"/>.
+        /// Undoes <see cref="InstallFileExtensionForProgram(WindowsFileExtension, WindowsProgram)"/>:<br/>
+        /// - Stops using the previously set icon for the passed <paramref name="extension"/>.<br/>
+        /// - Stops running the passed <paramref name="program"/> when attempting to open the file.
         /// </summary>
         // This leaves behind .extension key in case it's an already-in-use-by-other-software key.
         public static void UninstallFileExtensionForProgram(WindowsFileExtension extension, WindowsProgram program)
