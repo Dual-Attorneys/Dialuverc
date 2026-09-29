@@ -28,7 +28,7 @@ namespace Dialuverc.Editor.Base.Installation.Windows
             foreach (char character in extension.Skip(1))
             {
                 if (!char.IsAsciiLetterOrDigit(character))
-                    throw new ArgumentException("An extension can't contain invalid characters for a path", nameof(extension));
+                    throw new ArgumentException("An extension can only contain ASCII numbers and letters", nameof(extension));
             }
 
             if (!Path.IsPathFullyQualified(iconPath))

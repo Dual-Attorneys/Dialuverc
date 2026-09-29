@@ -26,6 +26,10 @@ namespace Dialuverc.Editor.Base.Installation.Windows
             string extensionOpenWithProgIdsPath = $@"{extension.Extension}\{_openWithProgIds}";
             string progIDDotExtension = $"{program.ProgramID}{extension.Extension}";
 
+            // https://learn.microsoft.com/en-us/windows/win32/com/-progid--key
+            if (progIDDotExtension.Length > 39)
+                throw new FormatException($"Combined ProgID is too long ({progIDDotExtension.Length > 39})");
+
             using (RegistryKey? topmostKey = Registry.CurrentUser.OpenSubKey(_softwareClasses, true))
             {
                 if (topmostKey is null)

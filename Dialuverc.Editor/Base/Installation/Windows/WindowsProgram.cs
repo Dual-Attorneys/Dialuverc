@@ -18,6 +18,19 @@ namespace Dialuverc.Editor.Base.Installation.Windows
             ArgumentNullException.ThrowIfNullOrWhiteSpace(programID);
             ArgumentNullException.ThrowIfNullOrWhiteSpace(programPath);
 
+            if (!Path.IsPathFullyQualified(programPath))
+                throw new ArgumentException("Path is not fully qualified", nameof(programPath));
+
+            // https://learn.microsoft.com/en-us/windows/win32/com/-progid--key
+            if (!char.IsAsciiLetter(programID[0]))
+                throw new ArgumentException("A ProgID can only start with an ASCII letter", nameof(programID));
+
+            foreach (char character in programID)
+            {
+                if (!char.IsAsciiLetterOrDigit(character) && character != '.')
+                    throw new ArgumentException("A ProgID can only contain ASCII numbers, letters or dots", nameof(programID));
+            }
+
             ProgramID = programID;
             ProgramPath = programPath;
 
