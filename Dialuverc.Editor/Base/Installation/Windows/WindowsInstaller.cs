@@ -17,16 +17,19 @@ namespace Dialuverc.Editor.Base.Installation.Windows
 
         /// <summary>
         /// Sets up the required <see cref="RegistryKey"/>s to tell the OS:<br/>
-        /// - Which icon to use for which file extension.<br/>
-        /// - Which program to run when the file is opened.
+        /// - Which icon to use for the passed <paramref name="extension"/>.<br/>
+        /// - Which <paramref name="program"/> to run when the file is opened.
         /// </summary>
         public static void InstallFileExtensionForProgram(WindowsFileExtension extension, WindowsProgram program)
         {
             string extensionOpenWithProgIdsPath = $@"{extension.Extension}\{_openWithProgIds}";
             string progIDDotExtension = $"{program.ProgramID}{extension.Extension}";
 
-            using (RegistryKey topmostKey = Registry.CurrentUser.CreateSubKey(_softwareClasses))
+            using (RegistryKey? topmostKey = Registry.CurrentUser.OpenSubKey(_softwareClasses, true))
             {
+                if (topmostKey is null)
+                    return;
+
                 using (RegistryKey extensionOpenWithProgIdsKey = topmostKey.CreateSubKey(extensionOpenWithProgIdsPath))
                 {
                     extensionOpenWithProgIdsKey.SetValue(progIDDotExtension, string.Empty);
@@ -45,6 +48,31 @@ namespace Dialuverc.Editor.Base.Installation.Windows
                     }
                 }
             }
+
+            NotifyWindows();
+        }
+
+        /// <summary>
+        /// Removes the passed <paramref name="program"/> as an intended way to open files with the passed <paramref name="extension"/>.
+        /// </summary>
+        public static void UninstallFileExtensionForProgram(WindowsFileExtension extension, WindowsProgram program)
+        {
+            string extensionPath = $@"{extension.Extension}";
+            string extensionOpenWithProgIdsPath = $@"{extension.Extension}\{_openWithProgIds}";
+            string progIDDotExtension = $"{program.ProgramID}{extension.Extension}";
+
+            using (RegistryKey? topmostKey = Registry.CurrentUser.OpenSubKey(_softwareClasses, true))
+            {
+                if (topmostKey is null)
+                    return;
+
+                using (RegistryKey extensionOpenWithProgIdsKey = topmostKey.CreateSubKey(extensionOpenWithProgIdsPath))
+                {
+                    extensionOpenWithProgIdsKey.DeleteValue(progIDDotExtension, false);
+                }
+            }
+
+            NotifyWindows();
         }
 
         [DllImport("Shell32.dll")]
