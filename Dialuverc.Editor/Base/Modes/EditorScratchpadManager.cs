@@ -29,10 +29,6 @@ namespace Dialuverc.Editor.Base.Modes
                 switch (CurrentMode)
                 {
                     case Mode.Add:
-
-                        if (AddScratchpad is null)
-                            throw new InvalidOperationException($"Can't get {nameof(ActiveScratchpad)} in {Mode.Add} mode with null {nameof(AddScratchpad)}");
-
                         return AddScratchpad;
 
                     case Mode.Edit:
