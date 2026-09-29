@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Text;
 
 namespace Dialuverc.Editor.Base.Installation.Windows
 {
@@ -44,11 +45,17 @@ namespace Dialuverc.Editor.Base.Installation.Windows
 
                     using (RegistryKey shellOpenCommandKey = progIDDotExtensionKey.CreateSubKey(_shellOpenCommand))
                     {
-                        // TODO: Which position should %1 be in?
-                        if (!string.IsNullOrWhiteSpace(program.LaunchArgs))
-                            shellOpenCommandKey.SetValue(null, $"\"{program.ProgramPath}\" \"%1\" {program.LaunchArgs}");
+                        if (program.LaunchArgs is not null)
+                        {
+                            string joinedArgs = string.Join(' ', program.LaunchArgs.Select(s => $"\"{s}\""));
+
+                            // TODO: Which position should %1 be in?
+                            shellOpenCommandKey.SetValue(null, $"\"{program.ProgramPath}\" \"%1\" {joinedArgs}");
+                        }
                         else
+                        {
                             shellOpenCommandKey.SetValue(null, $"\"{program.ProgramPath}\" \"%1\"");
+                        }
                     }
                 }
             }
