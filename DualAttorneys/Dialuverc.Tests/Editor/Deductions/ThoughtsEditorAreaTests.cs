@@ -77,6 +77,19 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         }
 
         [Test]
+        public void ChangingPropertyWithSameValueDoesNotSave()
+        {
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
+
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey(_area.ActiveScratchpad!.RuntimeThought.DescriptionKey);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.CanUndo, Is.False);
+        }
+
+        [Test]
         public void AddThoughtToList()
         {
             Assert.That(_area.Thoughts, Is.Empty);

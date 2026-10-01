@@ -1,6 +1,6 @@
 namespace DualAttorneys.Dialuverc.Deductions
 {
-    public class Thought
+    public record class Thought
     {
         public readonly ThoughtGuid Guid;
 
