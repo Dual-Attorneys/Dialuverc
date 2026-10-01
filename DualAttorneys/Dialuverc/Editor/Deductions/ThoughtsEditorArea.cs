@@ -31,9 +31,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         readonly IImportable[] _cachedImportables;
 
-        // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
-        // This assumes their structure is unlikely to change and will always need few parameters.
-
         public ThoughtsEditorArea()
         {
             _scratchpadManager = new EditorScratchpadManager<EditorThought>();
