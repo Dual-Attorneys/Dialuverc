@@ -54,17 +54,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetNameKey(string nameKey)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
-
             BeginChange();
 
-            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad! with
             {
-                RuntimeThought = new Thought(
-                    currentRuntimeThought.Guid,
-                    nameKey,
-                    currentRuntimeThought.DescriptionKey,
-                    currentRuntimeThought.Side)
+                RuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought with
+                {
+                    NameKey = nameKey,
+                }
             };
 
             EndChange();
@@ -72,17 +69,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetDescriptionKey(string descriptionKey)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
-
             BeginChange();
 
-            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad! with
             {
-                RuntimeThought = new Thought(
-                    currentRuntimeThought.Guid,
-                    currentRuntimeThought.NameKey,
-                    descriptionKey,
-                    currentRuntimeThought.Side)
+                RuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought with
+                {
+                    DescriptionKey = descriptionKey,
+                }
             };
 
             EndChange();
@@ -90,17 +84,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetSide(CharacterSides side)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
-
             BeginChange();
 
-            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad! with
             {
-                RuntimeThought = new Thought(
-                    currentRuntimeThought.Guid,
-                    currentRuntimeThought.NameKey,
-                    currentRuntimeThought.DescriptionKey,
-                    side)
+                RuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought with
+                {
+                    Side = side
+                }
             };
 
             EndChange();
