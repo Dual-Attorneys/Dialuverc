@@ -119,6 +119,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                 if (index < 0)
                     throw new InvalidOperationException($"No thought with id '{_scratchpadManager.EditScratchpad.RuntimeThought.Guid}'");
 
+                // List is checked by reference. Prevent stacking state saving when there's no actual changes.
+                if (_thoughts[index] == _scratchpadManager.EditScratchpad)
+                    return _thoughts[index].RuntimeThought.Guid;
+
                 BeginChange();
 
                 _thoughts = _thoughts.SetItem(index, _scratchpadManager.EditScratchpad!);

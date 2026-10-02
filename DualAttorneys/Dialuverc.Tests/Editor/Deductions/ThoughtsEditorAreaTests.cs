@@ -90,6 +90,26 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         }
 
         [Test]
+        public void FinishBuildingWithNoChangesIsNoOp()
+        {
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
+
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            ThoughtGuid toEdit = _area.FinishBuilding();
+
+            _area.SelectThought(toEdit);
+
+            _area.SetNameKey("editedNameKey");
+
+            _area.FinishBuilding();
+            _area.FinishBuilding();
+
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(5));
+        }
+
+        [Test]
         public void AddThoughtToList()
         {
             Assert.That(_area.Thoughts, Is.Empty);
