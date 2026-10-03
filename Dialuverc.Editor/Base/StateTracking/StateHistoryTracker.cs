@@ -6,6 +6,7 @@ namespace Dialuverc.Editor.Base.StateTracking
     /// <para><b>Note</b>: <typeparamref name="T"/> should be either immutable or handled like it is (applies to collections as well)!</para>
     /// </summary>
     /// <typeparam name="T">The type of state to track.</typeparam>
+    // Heavily inspired by osu-lazer's EditorChangeHandler.
     public abstract class StateHistoryTracker<T> : TransactionalObject, IStateHistoryTracker
     {
         protected virtual int MaxStates => 50;
