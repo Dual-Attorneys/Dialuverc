@@ -7,7 +7,7 @@ namespace Dialuverc.Editor.Base
 {
     /// <summary>
     /// An area of the editor, similar in concept to standard document editing software.
-    /// <para>Allows the user to works on a specific part of the system and provides both local and project-level functionality.</para>
+    /// <para>Allows the user to work on a specific part of the system and provides both local and project-level functionality.</para>
     /// </summary>
     /// <typeparam name="T">The object that represents this area's state.</typeparam>
     // Interface separation here is intentional:
@@ -15,6 +15,8 @@ namespace Dialuverc.Editor.Base
     public abstract class EditorArea<T> : StateHistoryTracker<T>, IProjectTrackable, IVerifiable
     {
         T _lastSavedState = default!;
+
+        // Do not check for null here as default state *could* be null.
         public bool HasUnsavedChanges => SavedStates.Count > 0 &&
             !CheckStateEquality(_lastSavedState, SavedStates[CurrentState]);
 
