@@ -1,5 +1,11 @@
 namespace Dialuverc.Editor.Base.StateTracking
 {
+    /// <summary>
+    /// An abstract component which keeps track of up to <see cref="MaxStates"/> states of type <typeparamref name="T"/>,<br/>
+    /// and provides undo/redo capabilities.
+    /// <para><b>Note</b>: <typeparamref name="T"/> should be either immutable or handled like it is (applies to collections as well)!</para>
+    /// </summary>
+    /// <typeparam name="T">The type of state to track.</typeparam>
     public abstract class StateHistoryTracker<T> : TransactionalObject, IStateHistoryTracker
     {
         protected virtual int MaxStates => 50;
@@ -29,6 +35,11 @@ namespace Dialuverc.Editor.Base.StateTracking
             base.BeginChange();
         }
 
+        /// <summary>
+        /// Runs on the very first transaction when there's no history.<br/>
+        /// Makes sure a base state to undo towards exists.
+        /// </summary>
+        // Making this virtual, allows inheriting classes to operate on the base state.
         protected virtual void MakeSureBaseStateIsSaved()
         {
             if (_savedStates.Count != 0)

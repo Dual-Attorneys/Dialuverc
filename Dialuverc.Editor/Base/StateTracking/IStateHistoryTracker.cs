@@ -1,5 +1,9 @@
 namespace Dialuverc.Editor.Base.StateTracking
 {
+    /// <summary>
+    /// Represents an object which can keep track of a single timeline of state changes.
+    /// <para>Provides undo/redo capabilities.</para>
+    /// </summary>
     public interface IStateHistoryTracker
     {
         public bool CanUndo { get; }

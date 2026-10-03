@@ -6,12 +6,10 @@ using Dialuverc.Editor.Base.Verifier;
 namespace Dialuverc.Editor.Base
 {
     /// <summary>
-    /// An implementation of <see cref="IEditorArea"/>.
-    /// <para>Note: <typeparamref name="T"/> must be immutable or at least handled like it is.<br/>
-    /// This means that state, even if possible to mutate, should not be mutated after being saved.<br/>
-    /// This also applies to items inside collections.</para>
+    /// An area of the editor, similar in concept to standard document editing software.
+    /// <para>Allows the user to works on a specific part of the system and provides both local and project-level functionality.</para>
     /// </summary>
-    /// <typeparam name="T">The object that represents the editor state.</typeparam>
+    /// <typeparam name="T">The object that represents this area's state.</typeparam>
     public abstract class EditorArea<T> : StateHistoryTracker<T>, IProjectTrackable, IVerifiable
     {
         T _lastSavedState = default!;
