@@ -1,4 +1,4 @@
-using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base.StateTracking;
 
 namespace Dialuverc.Editor.Tests.Base
 {

@@ -1,9 +1,9 @@
-using Dialuverc.Editor.Base;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 using Dialuverc.Editor.Base.IO;
 
 using static Dialuverc.Editor.Base.Modes.EditorModeManager;
+using Dialuverc.Editor.Base.StateTracking;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
@@ -421,7 +421,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
         private class TestThoughtsEditorArea : ThoughtsEditorArea
         {
-            public new int CurrentStateIndex => base.CurrentStateIndex;
+            public new int CurrentStateIndex => base.CurrentState;
         }
 
         #endregion
