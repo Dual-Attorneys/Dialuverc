@@ -1,19 +1,18 @@
-using Dialuverc.Editor.Base;
 using Dialuverc.Editor.Base.StateTracking;
 using System.Text;
 
 namespace Dialuverc.Editor.Tests.Base
 {
-    internal class EditorAreaTests
+    internal class StateHistoryTrackerTests
     {
         const string _baseState = "BaseState";
 
-        TestArea _testArea;
+        TestStateHistoryTracker _testArea;
 
         [SetUp]
         public void SetUp()
         {
-            _testArea = new TestArea(_baseState);
+            _testArea = new TestStateHistoryTracker(_baseState);
         }
 
         [Test]
@@ -129,51 +128,7 @@ namespace Dialuverc.Editor.Tests.Base
             Assert.That(count, Is.EqualTo(3));
         }
 
-        [Test]
-        public void UnsavedChangesUpdatesCorrectly()
-        {
-            Assert.That(_testArea.HasUnsavedChanges, Is.False);
-
-            _testArea.ChangeState("A");
-
-            Assert.That(_testArea.HasUnsavedChanges, Is.True);
-
-            _testArea.RestorePreviousState(RestoreDirection.Previous);
-
-            Assert.That(_testArea.HasUnsavedChanges, Is.False);
-
-            _testArea.ChangeState("B");
-
-            Assert.That(_testArea.HasUnsavedChanges, Is.True);
-
-            _testArea.SetCurrentStateAsSaved();
-
-            Assert.That(_testArea.HasUnsavedChanges, Is.False);
-        }
-
-        [Test]
-        public void ClearStatesHistory()
-        {
-            _testArea.ChangeState("A");
-            _testArea.ChangeState("B");
-
-            _testArea.ClearStatesHistory();
-
-            Assert.That(_testArea.CanUndo, Is.False);
-            Assert.That(_testArea.CanRedo, Is.False);
-            Assert.That(_testArea.HasUnsavedChanges, Is.False);
-
-            _testArea.ChangeState("C");
-            _testArea.ChangeState("D");
-
-            Assert.That(_testArea.CurrentLocalState, Is.EqualTo("D"));
-
-            _testArea.RestorePreviousState(RestoreDirection.Previous);
-
-            Assert.That(_testArea.CurrentLocalState, Is.EqualTo("C"));
-        }
-
-        private class TestArea : EditorArea<byte[]>
+        private class TestStateHistoryTracker : StateHistoryTracker<byte[]>
         {
             public string CurrentLocalState { get; private set; }
 
@@ -181,7 +136,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             new public IReadOnlyList<byte[]> SavedStates => base.SavedStates;
 
-            public TestArea(string baseState)
+            public TestStateHistoryTracker(string baseState)
             {
                 CurrentLocalState = baseState;
             }
