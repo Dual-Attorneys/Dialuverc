@@ -10,6 +10,8 @@ namespace Dialuverc.Editor.Base
     /// <para>Allows the user to works on a specific part of the system and provides both local and project-level functionality.</para>
     /// </summary>
     /// <typeparam name="T">The object that represents this area's state.</typeparam>
+    // Interface separation here is intentional:
+    // the consumer of this should be interested in only one of those at any time as they represent different domains.
     public abstract class EditorArea<T> : StateHistoryTracker<T>, IProjectTrackable, IVerifiable
     {
         T _lastSavedState = default!;
