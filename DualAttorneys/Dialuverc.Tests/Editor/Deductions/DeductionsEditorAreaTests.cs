@@ -18,7 +18,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
         private class TestDeductionsEditorArea : DeductionsEditorArea
         {
-            public new int CurrentStateIndex => base.CurrentStateIndex;
+            public new int CurrentStateIndex => base.CurrentState;
         }
     }
 }

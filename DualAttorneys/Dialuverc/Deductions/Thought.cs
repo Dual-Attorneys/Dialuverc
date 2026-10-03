@@ -1,16 +1,16 @@
 namespace DualAttorneys.Dialuverc.Deductions
 {
-    public class Thought
+    public record class Thought
     {
-        public readonly ThoughtGuid Guid;
+        public ThoughtGuid Guid { get; init; }
 
-        public readonly string NameKey;
-        public readonly string DescriptionKey;
+        public string NameKey { get; init; }
+        public string DescriptionKey { get; init; }
 
         /// <summary>
         /// Represents which character this thought can be given to.
         /// </summary>
-        public readonly CharacterSides Side;
+        public CharacterSides Side { get; init; }
 
         public Thought(ThoughtGuid guid, string nameKey, string descriptionKey, CharacterSides side)
         {

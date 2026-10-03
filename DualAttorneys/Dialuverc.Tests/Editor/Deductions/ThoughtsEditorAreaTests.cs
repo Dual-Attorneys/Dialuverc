@@ -1,9 +1,9 @@
-using Dialuverc.Editor.Base;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 using Dialuverc.Editor.Base.IO;
 
 using static Dialuverc.Editor.Base.Modes.EditorModeManager;
+using Dialuverc.Editor.Base.StateTracking;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
@@ -74,6 +74,39 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.RestorePreviousState(RestoreDirection.Next);
             Assert.That(_area.ActiveScratchpad.EditorNote, Is.EqualTo("editorNote"));
+        }
+
+        [Test]
+        public void ChangingPropertyWithSameValueDoesNotSave()
+        {
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
+
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey(_area.ActiveScratchpad!.RuntimeThought.DescriptionKey);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.CanUndo, Is.False);
+        }
+
+        [Test]
+        public void FinishBuildingWithNoChangesIsNoOp()
+        {
+            _area.ScratchpadManager.ChangeMode(Mode.Add);
+
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            ThoughtGuid toEdit = _area.FinishBuilding();
+
+            _area.SelectThought(toEdit);
+
+            _area.SetNameKey("editedNameKey");
+
+            _area.FinishBuilding();
+            _area.FinishBuilding();
+
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(5));
         }
 
         [Test]
@@ -388,7 +421,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
         private class TestThoughtsEditorArea : ThoughtsEditorArea
         {
-            public new int CurrentStateIndex => base.CurrentStateIndex;
+            public new int CurrentStateIndex => base.CurrentState;
         }
 
         #endregion
