@@ -1,5 +1,5 @@
 using BenchmarkDotNet.Attributes;
-using Dialuverc.Editor.Base;
+using Dialuverc.Editor.Base.StateTracking;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 
 using static Dialuverc.Editor.Base.Modes.EditorModeManager;
