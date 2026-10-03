@@ -157,14 +157,14 @@ namespace Dialuverc.Editor.Tests.Base
 
             protected override bool CheckStateEquality(byte[] a, byte[] b)
             {
-                if (a is null && b is not null ||
-                    a is not null & b is null)
+                if ((a is null && b is not null) ||
+                    (a is not null & b is null))
                     return false;
 
-                if (a is null & b is null)
+                if (a is null && b is null)
                     return true;
 
-                return a.SequenceEqual(b);
+                return a!.SequenceEqual(b!);
             }
 
             protected override byte[] GetStateToSave()
