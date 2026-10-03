@@ -61,20 +61,20 @@ namespace Dialuverc.Editor.Tests.Base
             _testArea.ChangeState(state1);
             _testArea.ChangeState(state2);
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo(state2));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo(state2));
 
             _testArea.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo(state1));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo(state1));
 
             _testArea.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo(_baseState));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo(_baseState));
 
             _testArea.RestorePreviousState(RestoreDirection.Next);
             _testArea.RestorePreviousState(RestoreDirection.Next);
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo(state2));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo(state2));
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             Assert.That(_testArea.SavedStates.Count, Is.EqualTo(5));
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo(states[3]));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo(states[3]));
 
             _testArea.RestorePreviousState(RestoreDirection.Previous);
             _testArea.RestorePreviousState(RestoreDirection.Previous);
@@ -109,11 +109,11 @@ namespace Dialuverc.Editor.Tests.Base
 
             _testArea.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo(states[1]));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo(states[1]));
 
             _testArea.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo(states[0]));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo(states[0]));
         }
 
         [Test]
@@ -166,16 +166,16 @@ namespace Dialuverc.Editor.Tests.Base
             _testArea.ChangeState("C");
             _testArea.ChangeState("D");
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo("D"));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo("D"));
 
             _testArea.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_testArea.CurrentState, Is.EqualTo("C"));
+            Assert.That(_testArea.CurrentLocalState, Is.EqualTo("C"));
         }
 
         private class TestArea : EditorArea<byte[]>
         {
-            public string CurrentState { get; private set; }
+            public string CurrentLocalState { get; private set; }
 
             new public int MaxStates => base.MaxStates;
 
@@ -183,31 +183,38 @@ namespace Dialuverc.Editor.Tests.Base
 
             public TestArea(string baseState)
             {
-                CurrentState = baseState;
+                CurrentLocalState = baseState;
             }
 
             public void ChangeState(string newState)
             {
                 BeginChange();
 
-                CurrentState = newState;
+                CurrentLocalState = newState;
 
                 EndChange();
             }
 
             protected override void ApplyRestoredState(byte[] newState)
             {
-                CurrentState = Encoding.UTF8.GetString(newState);
+                CurrentLocalState = Encoding.UTF8.GetString(newState);
             }
 
             protected override bool CheckStateEquality(byte[] a, byte[] b)
             {
+                if (a is null && b is not null ||
+                    a is not null & b is null)
+                    return false;
+
+                if (a is null & b is null)
+                    return true;
+
                 return a.SequenceEqual(b);
             }
 
             protected override byte[] GetStateToSave()
             {
-                return Encoding.UTF8.GetBytes(CurrentState);
+                return Encoding.UTF8.GetBytes(CurrentLocalState);
             }
         }
     }

@@ -421,7 +421,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
         private class TestThoughtsEditorArea : ThoughtsEditorArea
         {
-            public new int CurrentStateIndex => base.CurrentStateIndex;
+            public new int CurrentStateIndex => base.CurrentState;
         }
 
         #endregion
