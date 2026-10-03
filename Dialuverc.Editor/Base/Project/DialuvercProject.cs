@@ -10,15 +10,9 @@ namespace Dialuverc.Editor.Base.Project
         public string ContentFolderPath { get; private set; }
         public string BackupsFolderPath { get; private set; }
 
+        readonly DialuvercProjectInfo ProjectInfo = new DialuvercProjectInfo();
+
         readonly IEnumerable<IProjectTrackable> _projectTrackables;
-
-        DialuvercProjectInfo _projectInfo = new DialuvercProjectInfo();
-
-        public string Name
-        {
-            get => _projectInfo.Name;
-            set => _projectInfo.Name = value;
-        }
 
         public DialuvercProject(string folderPath, IEnumerable<IProjectTrackable> projectTrackables)
         {
@@ -89,7 +83,7 @@ namespace Dialuverc.Editor.Base.Project
                 // This can be fixed by making the saving process run entirely inside a temp project folder (if needed).
                 using (FileStream projectInfoStream = File.Open(tempProjectInfoPath, FileMode.OpenOrCreate, FileAccess.Write))
                 {
-                    JsonSerializer.Serialize(projectInfoStream, _projectInfo);
+                    JsonSerializer.Serialize(projectInfoStream, ProjectInfo);
                 }
 
                 tempContentFolderPath = Path.Combine(ProjectFolderPath, $"TempContent{Guid.NewGuid()}");
@@ -144,6 +138,7 @@ namespace Dialuverc.Editor.Base.Project
             Directory.CreateDirectory(BackupsFolderPath);
 
             string usableBackupPath = Path.Combine(BackupsFolderPath, $"Backup{Guid.NewGuid()}");
+
             Directory.CreateDirectory(usableBackupPath);
 
             string usableContentBackupPath = Path.Combine(usableBackupPath, "Content");
