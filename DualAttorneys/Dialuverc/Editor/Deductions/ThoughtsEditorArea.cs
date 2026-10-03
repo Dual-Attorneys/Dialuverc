@@ -31,9 +31,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         readonly IImportable[] _cachedImportables;
 
-        // Note: While we are using records for EditorThoughts, we'll keep (runtime) Thoughts readonly.
-        // This assumes their structure is unlikely to change and will always need few parameters.
-
         public ThoughtsEditorArea()
         {
             _scratchpadManager = new EditorScratchpadManager<EditorThought>();
@@ -54,17 +51,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetNameKey(string nameKey)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
-
             BeginChange();
 
-            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad! with
             {
-                RuntimeThought = new Thought(
-                    currentRuntimeThought.Guid,
-                    nameKey,
-                    currentRuntimeThought.DescriptionKey,
-                    currentRuntimeThought.Side)
+                RuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought with
+                {
+                    NameKey = nameKey,
+                }
             };
 
             EndChange();
@@ -72,17 +66,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetDescriptionKey(string descriptionKey)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
-
             BeginChange();
 
-            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad! with
             {
-                RuntimeThought = new Thought(
-                    currentRuntimeThought.Guid,
-                    currentRuntimeThought.NameKey,
-                    descriptionKey,
-                    currentRuntimeThought.Side)
+                RuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought with
+                {
+                    DescriptionKey = descriptionKey,
+                }
             };
 
             EndChange();
@@ -90,17 +81,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetSide(CharacterSides side)
         {
-            Thought currentRuntimeThought = _scratchpadManager.ActiveScratchpad!.RuntimeThought;
-
             BeginChange();
 
-            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad with
+            _scratchpadManager.ActiveScratchpad = _scratchpadManager.ActiveScratchpad! with
             {
-                RuntimeThought = new Thought(
-                    currentRuntimeThought.Guid,
-                    currentRuntimeThought.NameKey,
-                    currentRuntimeThought.DescriptionKey,
-                    side)
+                RuntimeThought = _scratchpadManager.ActiveScratchpad.RuntimeThought with
+                {
+                    Side = side
+                }
             };
 
             EndChange();
@@ -130,6 +118,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
                 if (index < 0)
                     throw new InvalidOperationException($"No thought with id '{_scratchpadManager.EditScratchpad.RuntimeThought.Guid}'");
+
+                // List is checked by reference. Prevent stacking state saving when there's no actual changes.
+                if (_thoughts[index] == _scratchpadManager.EditScratchpad)
+                    return _thoughts[index].RuntimeThought.Guid;
 
                 BeginChange();
 
