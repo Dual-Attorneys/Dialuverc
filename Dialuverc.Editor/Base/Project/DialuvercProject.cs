@@ -147,8 +147,13 @@ namespace Dialuverc.Editor.Base.Project
             return usableContentBackupPath;
         }
 
-        public void LoadProject(bool throwIfFoldersNotFound)
+        public void LoadProject()
         {
+            foreach (IProjectTrackable trackable in _projectTrackables)
+            {
+                trackable.ClearStatesHistory();
+            }
+
             ProjectExporter.ImportFromFolder(EnumerateImportables(), ContentFolderPath);
         }
     }
