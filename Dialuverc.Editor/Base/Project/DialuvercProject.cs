@@ -12,7 +12,7 @@ namespace Dialuverc.Editor.Base.Project
 
         readonly DialuvercProjectInfo ProjectInfo = new DialuvercProjectInfo();
 
-        readonly public IEnumerable<IProjectTrackable> ProjectTrackables;
+        readonly IEnumerable<IProjectTrackable> _projectTrackables;
 
         public DialuvercProject(string folderPath, IEnumerable<IProjectTrackable> projectTrackables)
         {
@@ -20,7 +20,7 @@ namespace Dialuverc.Editor.Base.Project
 
             UpdatePathsFromProjectFolder(folderPath);
 
-            ProjectTrackables = projectTrackables;
+            _projectTrackables = projectTrackables;
         }
 
         /// <summary>
@@ -54,9 +54,9 @@ namespace Dialuverc.Editor.Base.Project
             BackupsFolderPath = Path.Combine(newFolderPath, "Backups");
         }
 
-        public IEnumerable<IImportable> EnumerateImportables()
+        IEnumerable<IImportable> EnumerateImportables()
         {
-            foreach (IProjectTrackable trackable in ProjectTrackables)
+            foreach (IProjectTrackable trackable in _projectTrackables)
             {
                 foreach (IImportable importable in trackable.GetEditorImportables())
                 {
@@ -105,7 +105,7 @@ namespace Dialuverc.Editor.Base.Project
 
                 Directory.Move(tempContentFolderPath, ContentFolderPath);
 
-                foreach (IProjectTrackable trackable in ProjectTrackables)
+                foreach (IProjectTrackable trackable in _projectTrackables)
                 {
                     trackable.SetCurrentStateAsSaved();
                 }
@@ -149,7 +149,7 @@ namespace Dialuverc.Editor.Base.Project
 
         public void LoadProject()
         {
-            foreach (IProjectTrackable trackable in ProjectTrackables)
+            foreach (IProjectTrackable trackable in _projectTrackables)
             {
                 trackable.ClearStatesHistory();
             }
