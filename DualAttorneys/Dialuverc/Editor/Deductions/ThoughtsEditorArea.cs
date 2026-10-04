@@ -272,6 +272,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager.ChangeMode(newState.Mode, invokeEvent: false);
         }
 
+        protected override void OnClearStatesHistory()
+        {
+            _thoughts = ImmutableList<EditorThought>.Empty;
+            _selectionGuid = default;
+            _scratchpadManager.AddScratchpad = CreateDefaultEditorThought();
+            _scratchpadManager.EditScratchpad = default;
+        }
+
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
 
         #endregion

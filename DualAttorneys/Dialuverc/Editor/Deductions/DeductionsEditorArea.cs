@@ -208,6 +208,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager.ChangeMode(newState.Mode, invokeEvent: false);
         }
 
+        protected override void OnClearStatesHistory()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

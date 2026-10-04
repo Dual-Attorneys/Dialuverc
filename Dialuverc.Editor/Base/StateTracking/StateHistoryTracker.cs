@@ -116,6 +116,8 @@ namespace Dialuverc.Editor.Base.StateTracking
             _savedStates.Clear();
 
             CurrentState = default;
+
+            OnStateChanged?.Invoke();
         }
     }
 }

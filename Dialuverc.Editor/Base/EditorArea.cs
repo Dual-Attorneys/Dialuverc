@@ -29,9 +29,11 @@ namespace Dialuverc.Editor.Base
 
         public void ClearStatesHistory()
         {
-            base.Clear();
-
             _lastSavedState = default!;
+
+            OnClearStatesHistory();
+
+            base.Clear();
         }
 
         // Since saving is done using IImportables, we do not necessarily know who is doing the saving or when it happens.
@@ -43,6 +45,8 @@ namespace Dialuverc.Editor.Base
 
             _lastSavedState = SavedStates[CurrentState];
         }
+
+        protected abstract void OnClearStatesHistory();
 
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
 
