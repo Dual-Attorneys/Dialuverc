@@ -66,7 +66,7 @@ namespace Dialuverc.Editor.Base.Project
         }
 
         // TODO: Proper error handling.
-        public bool SaveProject()
+        public void SaveProject()
         {
             string? tempProjectInfoPath = null;
             string? tempContentFolderPath = null;
@@ -109,8 +109,6 @@ namespace Dialuverc.Editor.Base.Project
                 {
                     trackable.SetCurrentStateAsSaved();
                 }
-
-                return true;
             }
             catch
             {
@@ -123,7 +121,8 @@ namespace Dialuverc.Editor.Base.Project
                 if (Directory.Exists(pathUsedForBackup))
                     Directory.Move(pathUsedForBackup, ContentFolderPath);
 
-                return false;
+                // Surface any exceptions thrown during saving.
+                throw;
             }
         }
 

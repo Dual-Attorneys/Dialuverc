@@ -34,7 +34,7 @@ namespace Dialuverc.Editor.Tests.Base
 
                 importables[0].Content = firstContent;
 
-                Assert.That(project.SaveProject(), Is.True);
+                Assert.That(project.SaveProject, Throws.Nothing);
 
                 Assert.That(Directory.Exists(project.BackupsFolderPath), Is.False);
                 Assert.That(Directory.Exists(project.ContentFolderPath), Is.True);
@@ -44,7 +44,7 @@ namespace Dialuverc.Editor.Tests.Base
 
                 importables[0].Content = secondContent;
 
-                Assert.That(project.SaveProject(), Is.True);
+                Assert.That(project.SaveProject, Throws.Nothing);
 
                 Assert.That(Directory.Exists(project.BackupsFolderPath), Is.True);
 
@@ -104,13 +104,13 @@ namespace Dialuverc.Editor.Tests.Base
 
                 importables[0].Content = firstContent;
 
-                Assert.That(project.SaveProject(), Is.True);
+                Assert.That(project.SaveProject, Throws.Nothing);
                 Assert.That(File.ReadAllText(filePath), Is.EqualTo(firstContent));
 
                 importables[0].Content = secondContent;
                 importables[0].ThrowOn = ImportableThrowOn.Serialize;
 
-                Assert.That(project.SaveProject(), Is.False);
+                Assert.That(project.SaveProject, Throws.Exception);
                 Assert.That(File.ReadAllText(filePath), Is.EqualTo(firstContent));
             }
         }
