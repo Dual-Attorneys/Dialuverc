@@ -65,6 +65,17 @@ namespace Dialuverc.Editor.Base.Project
             }
         }
 
+        public bool CheckHasUnsavedChanges()
+        {
+            foreach (IProjectTrackable trackable in _projectTrackables)
+            {
+                if (trackable.HasUnsavedChanges)
+                    return true;
+            }
+
+            return false;
+        }
+
         // TODO: Proper error handling.
         public void SaveProject()
         {
