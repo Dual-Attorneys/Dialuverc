@@ -106,7 +106,12 @@ namespace Dialuverc.Editor.Base.Localization
 
                         // If the key is not "deprecated", copy the whole line in the new file.
                         // If it is, drop the whole line.
-                        if (keysLeft.Remove(currentKey))
+                        if (!keysLeft.Remove(currentKey))
+                            continue;
+
+                        if (HasUnevenQuotationsMarks(currentLine))
+                            WriteLineGroup(currentLine, streamWriter, streamReader);
+                        else
                             streamWriter.WriteLine(currentLine);
                     }
 
@@ -125,6 +130,24 @@ namespace Dialuverc.Editor.Base.Localization
 
                 // Surface any exceptions thrown during merging.
                 throw;
+            }
+        }
+
+        // If a '"' was opened but not closed (i.e. odd '"' count), we can assume we'll find another some lines below.
+        bool HasUnevenQuotationsMarks(string line) => line.Count(c => c == '"') % 2 != 0;
+
+        void WriteLineGroup(string currentLine, StreamWriter to, StreamReader from)
+        {
+            to.WriteLine(currentLine);
+
+            while (!from.EndOfStream)
+            {
+                string line = from.ReadLine()!;
+
+                to.WriteLine(line);
+
+                if (HasUnevenQuotationsMarks(line))
+                    break;
             }
         }
     }

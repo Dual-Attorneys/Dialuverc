@@ -84,6 +84,26 @@ key3{LocalizationMergerFlatFile.CSVSeparator}value3{Environment.NewLine}";
             WriteAndAssertTextsAreEqual(keys, startingFileContent, expectedFinalFileContent);
         }
 
+        [Test]
+        public void NewLineValuesAreCopied()
+        {
+            HashSet<string> keys = new HashSet<string>() { "key1", "key2" };
+
+            string startingFileContent =
+@$"key{LocalizationMergerFlatFile.CSVSeparator}value
+key1{LocalizationMergerFlatFile.CSVSeparator}""value1
+onnewline""
+key2{LocalizationMergerFlatFile.CSVSeparator}value2{Environment.NewLine}";
+
+            string expectedFinalFileContent =
+@$"key{LocalizationMergerFlatFile.CSVSeparator}value
+key1{LocalizationMergerFlatFile.CSVSeparator}""value1
+onnewline""
+key2{LocalizationMergerFlatFile.CSVSeparator}value2{Environment.NewLine}";
+
+            WriteAndAssertTextsAreEqual(keys, startingFileContent, expectedFinalFileContent);
+        }
+
         void WriteAndAssertTextsAreEqual(IReadOnlySet<string> keys, string starting, string expected)
         {
             using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(_tempStoragePath))
