@@ -85,7 +85,7 @@ key3{LocalizationMergerFlatFile.CSVSeparator}value3{Environment.NewLine}";
         }
 
         [Test]
-        public void NewLineValuesAreCopied()
+        public void MultiLineValuesAreCopied()
         {
             HashSet<string> keys = new HashSet<string>() { "key1", "key2" };
 

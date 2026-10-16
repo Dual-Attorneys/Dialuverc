@@ -109,8 +109,9 @@ namespace Dialuverc.Editor.Base.Localization
                         if (!keysLeft.Remove(currentKey))
                             continue;
 
+                        // If a '"' was opened but not closed (i.e. odd '"' count), we can assume we'll find another some lines below.
                         if (HasUnevenQuotationsMarks(currentLine))
-                            WriteLineGroup(currentLine, streamWriter, streamReader);
+                            WriteMultiLineValues(currentLine, streamWriter, streamReader);
                         else
                             streamWriter.WriteLine(currentLine);
                     }
@@ -133,10 +134,9 @@ namespace Dialuverc.Editor.Base.Localization
             }
         }
 
-        // If a '"' was opened but not closed (i.e. odd '"' count), we can assume we'll find another some lines below.
         bool HasUnevenQuotationsMarks(string line) => line.Count(c => c == '"') % 2 != 0;
 
-        void WriteLineGroup(string currentLine, StreamWriter to, StreamReader from)
+        void WriteMultiLineValues(string currentLine, StreamWriter to, StreamReader from)
         {
             to.WriteLine(currentLine);
 
@@ -146,6 +146,7 @@ namespace Dialuverc.Editor.Base.Localization
 
                 to.WriteLine(line);
 
+                // We can assume the next time '"' are unbalanced, we're closing a previous '"' some lines up.
                 if (HasUnevenQuotationsMarks(line))
                     break;
             }
