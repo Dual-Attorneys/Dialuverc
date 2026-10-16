@@ -91,8 +91,6 @@ namespace Dialuverc.Editor.Base.Localization
 
                     while (!streamReader.EndOfStream)
                     {
-                        builder.Clear();
-
                         string currentRecord = streamReader.ReadLine()!;
 
                         if (string.IsNullOrWhiteSpace(currentRecord))
@@ -130,6 +128,8 @@ namespace Dialuverc.Editor.Base.Localization
                         // We can assume that an unbalanced '"' will be eventually closed in the next lines.
                         if (HasUnevenQuotationsMarks(currentRecord))
                         {
+                            builder.Clear();
+
                             builder.Append(currentRecord);
 
                             ReadUntilQuotationsAreBalanced(builder, streamReader);
