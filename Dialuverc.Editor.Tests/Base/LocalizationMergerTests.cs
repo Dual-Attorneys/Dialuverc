@@ -92,13 +92,15 @@ key3{LocalizationMergerFlatFile.CSVSeparator}value3{Environment.NewLine}";
             string startingFileContent =
 @$"key{LocalizationMergerFlatFile.CSVSeparator}value
 key1{LocalizationMergerFlatFile.CSVSeparator}""value1
-onnewline""
+onnewline
+onemore""
 key2{LocalizationMergerFlatFile.CSVSeparator}value2{Environment.NewLine}";
 
             string expectedFinalFileContent =
 @$"key{LocalizationMergerFlatFile.CSVSeparator}value
 key1{LocalizationMergerFlatFile.CSVSeparator}""value1
-onnewline""
+onnewline
+onemore""
 key2{LocalizationMergerFlatFile.CSVSeparator}value2{Environment.NewLine}";
 
             WriteAndAssertTextsAreEqual(keys, startingFileContent, expectedFinalFileContent);
