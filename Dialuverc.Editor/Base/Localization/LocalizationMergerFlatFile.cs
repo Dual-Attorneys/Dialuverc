@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Dialuverc.Editor.Base.Localization
 {
     public class LocalizationMergerFlatFile
@@ -53,6 +55,7 @@ namespace Dialuverc.Editor.Base.Localization
         /// <param name="filePath"></param>
         /// <param name="separator"></param>
         /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="InvalidDataException"></exception>
         public void Merge(IReadOnlySet<string> allExistingKeys, string filePath, char separator)
         {
             ReadOnlySpan<char> fileName = Path.GetFileNameWithoutExtension(filePath);
@@ -68,6 +71,8 @@ namespace Dialuverc.Editor.Base.Localization
             // TODO: Use allExistingKeys directly instead of copying (as non-readonly)? Likely, IHasLocalizableKeysFlatFile will return a new HashSet.
             // Operating on the passed instance directly could lower best-case allocations to 1, and keep worst case to 2.
             HashSet<string> keysLeft = new HashSet<string>(allExistingKeys);
+
+            StringBuilder builder = new StringBuilder();
 
             try
             {
@@ -86,28 +91,53 @@ namespace Dialuverc.Editor.Base.Localization
 
                     while (!streamReader.EndOfStream)
                     {
-                        // Returns null only if the stream end is reached, but we check for that in the loop already.
-                        string currentLine = streamReader.ReadLine()!;
+                        string currentRecord = streamReader.ReadLine()!;
 
-                        int indexOfFirstSeparator = currentLine.IndexOf(separator);
-
-                        // There's no key (e.g. ".something") || the line is just a white space.
-                        if (indexOfFirstSeparator == 0 || string.IsNullOrWhiteSpace(currentLine))
+                        if (string.IsNullOrWhiteSpace(currentRecord))
                             continue;
+
+                        int indexOfFirstSeparator = currentRecord.IndexOf(separator);
+
+                        // There's no key (e.g. ",something"). Key must be on the first line of a multi-line record.
+                        if (indexOfFirstSeparator == 0)
+                            throw new InvalidDataException($"Record \"{currentRecord}\" lacks a key");
 
                         // There's no way to check if a string exists using a span.
                         string currentKey;
 
-                        // The line only contains a key (if the key still exists in the collection).
+                        // The line only contains a key.
                         if (indexOfFirstSeparator == -1)
-                            currentKey = currentLine;
+                            currentKey = currentRecord;
                         else
-                            currentKey = currentLine.AsSpan().Slice(0, indexOfFirstSeparator).ToString();
+                            currentKey = currentRecord.Substring(0, indexOfFirstSeparator);
 
-                        // If the key is not "deprecated", copy the whole line in the new file.
-                        // If it is, drop the whole line.
-                        if (keysLeft.Remove(currentKey))
-                            streamWriter.WriteLine(currentLine);
+                        // Prevent multi-line records from starting at a key.
+                        if (currentKey.Contains('"'))
+                            throw new InvalidDataException($"A localization key can't contain '\"' (\"{currentRecord}\")");
+
+                        // If the key is not "deprecated", copy the whole record in the new file.
+                        // If it is, drop the whole record.
+                        if (!keysLeft.Remove(currentKey))
+                        {
+                            if (HasUnevenQuotationsMarks(currentRecord))
+                                ReadUntilQuotationsAreBalanced(null, streamReader);
+
+                            continue;
+                        }
+
+                        // We can assume that an unbalanced '"' will be eventually closed in the next lines.
+                        if (HasUnevenQuotationsMarks(currentRecord))
+                        {
+                            builder.Clear();
+
+                            builder.Append(currentRecord);
+
+                            ReadUntilQuotationsAreBalanced(builder, streamReader);
+
+                            currentRecord = builder.ToString();
+                        }
+
+                        streamWriter.WriteLine(currentRecord);
                     }
 
                     // Create a new line for each new key not in the original file.
@@ -125,6 +155,23 @@ namespace Dialuverc.Editor.Base.Localization
 
                 // Surface any exceptions thrown during merging.
                 throw;
+            }
+        }
+
+        static bool HasUnevenQuotationsMarks(string line) => line.Count(c => c == '"') % 2 != 0;
+
+        static void ReadUntilQuotationsAreBalanced(StringBuilder? builder, StreamReader from)
+        {
+            while (!from.EndOfStream)
+            {
+                string currentLine = from.ReadLine()!;
+
+                builder?.Append(Environment.NewLine);
+                builder?.Append(currentLine);
+
+                // We can assume the next time we find an unbalanced '"', it's closing a previous '"'.
+                if (HasUnevenQuotationsMarks(currentLine))
+                    break;
             }
         }
     }
