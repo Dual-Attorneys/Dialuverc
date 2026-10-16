@@ -2,15 +2,17 @@ using Dialuverc.Editor.Base;
 using Dialuverc.Editor.Base.IO;
 using Dialuverc.Editor.Base.Modes;
 using Dialuverc.Editor.Base.Verifier;
+using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
+
 
 using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
-    public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
+    public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>, IHasLocalizableKeysFlatFile
     {
         ImmutableList<EditorThought> _thoughts = ImmutableList<EditorThought>.Empty;
         public IReadOnlyList<EditorThought> Thoughts => _thoughts;
@@ -273,6 +275,23 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         }
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
+
+        // This is what was on 'ThoughtsEditorPage' in Dual-Attorneys.
+        // IHasLocalizableKeysFlatFile requires this to be implemented
+        // so I thought that it should've been moved here.
+        // Note: we are already in the so called "_editorArea" so it's just Thoughts
+        public IReadOnlySet<string> GetLocalizableKeysFlatFile()
+        {
+            HashSet<string> keys = new HashSet<string>();
+
+            foreach (EditorThought editorThought in Thoughts)
+            {
+                keys.Add(editorThought.RuntimeThought.NameKey);
+                keys.Add(editorThought.RuntimeThought.DescriptionKey);
+            }
+
+            return keys;
+        }
 
         #endregion
     }
