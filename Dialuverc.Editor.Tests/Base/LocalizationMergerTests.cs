@@ -61,7 +61,9 @@ key3{LocalizationMergerFlatFile.CSVSeparator}value3
 key1
 key4{Environment.NewLine}";
 
-            WriteAndAssertTextsAreEqual(keys, startingFileContent, expectedFinalFileContent);
+            string finalFileContent = WriteStartingFileAndMerge(keys, startingFileContent);
+
+            Assert.That(finalFileContent, Is.EqualTo(expectedFinalFileContent));
         }
 
         [Test]
@@ -81,7 +83,9 @@ key4{LocalizationMergerFlatFile.CSVSeparator}value4{Environment.NewLine}";
 key2{LocalizationMergerFlatFile.CSVSeparator}value2
 key3{LocalizationMergerFlatFile.CSVSeparator}value3{Environment.NewLine}";
 
-            WriteAndAssertTextsAreEqual(keys, startingFileContent, expectedFinalFileContent);
+            string finalFileContent = WriteStartingFileAndMerge(keys, startingFileContent);
+
+            Assert.That(finalFileContent, Is.EqualTo(expectedFinalFileContent));
         }
 
         [Test]
@@ -103,7 +107,9 @@ onnewline
 onemore""
 key2{LocalizationMergerFlatFile.CSVSeparator}value2{Environment.NewLine}";
 
-            WriteAndAssertTextsAreEqual(keys, startingFileContent, expectedFinalFileContent);
+            string finalFileContent = WriteStartingFileAndMerge(keys, startingFileContent);
+
+            Assert.That(finalFileContent, Is.EqualTo(expectedFinalFileContent));
         }
 
         [Test]
@@ -122,10 +128,30 @@ key2{LocalizationMergerFlatFile.CSVSeparator}value2{Environment.NewLine}";
 @$"key{LocalizationMergerFlatFile.CSVSeparator}value
 key2{LocalizationMergerFlatFile.CSVSeparator}value2{Environment.NewLine}";
 
-            WriteAndAssertTextsAreEqual(keys, startingFileContent, expectedFinalFileContent);
+            string finalFileContent = WriteStartingFileAndMerge(keys, startingFileContent);
+
+            Assert.That(finalFileContent, Is.EqualTo(expectedFinalFileContent));
         }
 
-        void WriteAndAssertTextsAreEqual(IReadOnlySet<string> keys, string starting, string expected)
+        [Test]
+        public void ThrowsOnMalformedFile()
+        {
+            HashSet<string> keys = new HashSet<string>() { "key1" };
+
+            string emptyLine =
+@$"key{LocalizationMergerFlatFile.CSVSeparator}value
+{LocalizationMergerFlatFile.CSVSeparator}value1";
+
+            Assert.That(() => WriteStartingFileAndMerge(keys, emptyLine), Throws.Exception.TypeOf<InvalidDataException>());
+
+            string multiLineKey =
+@$"key{LocalizationMergerFlatFile.CSVSeparator}value
+key""1{LocalizationMergerFlatFile.CSVSeparator}value1";
+
+            Assert.That(() => WriteStartingFileAndMerge(keys, multiLineKey), Throws.Exception.TypeOf<InvalidDataException>());
+        }
+
+        string WriteStartingFileAndMerge(IReadOnlySet<string> keys, string starting)
         {
             using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(_tempStoragePath))
             {
@@ -135,9 +161,7 @@ key2{LocalizationMergerFlatFile.CSVSeparator}value2{Environment.NewLine}";
 
                 _merger.Merge(keys, outputPath, LocalizationMergerFlatFile.CSVSeparator);
 
-                string finalFileContent = File.ReadAllText(outputPath);
-
-                Assert.That(finalFileContent, Is.EqualTo(expected));
+                return File.ReadAllText(outputPath);
             }
         }
     }
