@@ -7,7 +7,6 @@ using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
 
-
 using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
