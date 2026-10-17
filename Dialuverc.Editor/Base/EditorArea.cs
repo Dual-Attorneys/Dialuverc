@@ -12,7 +12,7 @@ namespace Dialuverc.Editor.Base
     /// <typeparam name="T">The object that represents this area's state.</typeparam>
     // Interface separation here is intentional:
     // the consumer of this should be interested in only one of those at any time as they represent different domains.
-    public abstract class EditorArea<T> : StateHistoryTracker<T>, IProjectTrackable, IVerifiable
+    public abstract class EditorArea<T> : StateHistoryTracker<T>, IGameProjectTrackable, IVerifiable
     {
         T _lastSavedState = default!;
 

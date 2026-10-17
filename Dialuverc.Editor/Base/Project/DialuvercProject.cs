@@ -9,9 +9,9 @@ namespace Dialuverc.Editor.Base.Project
         public string ContentFolderPath { get; private set; }
         public string BackupsFolderPath { get; private set; }
 
-        readonly IEnumerable<IProjectTrackable> _projectTrackables;
+        readonly IEnumerable<IEditorProjectTrackable> _projectTrackables;
 
-        public DialuvercProject(string folderPath, IEnumerable<IProjectTrackable> projectTrackables)
+        public DialuvercProject(string folderPath, IEnumerable<IEditorProjectTrackable> projectTrackables)
         {
             ArgumentNullException.ThrowIfNull(projectTrackables);
 
@@ -53,7 +53,7 @@ namespace Dialuverc.Editor.Base.Project
 
         IEnumerable<IImportable> EnumerateImportables()
         {
-            foreach (IProjectTrackable trackable in _projectTrackables)
+            foreach (IEditorProjectTrackable trackable in _projectTrackables)
             {
                 foreach (IImportable importable in trackable.GetEditorImportables())
                 {
@@ -64,7 +64,7 @@ namespace Dialuverc.Editor.Base.Project
 
         public bool CheckHasUnsavedChanges()
         {
-            foreach (IProjectTrackable trackable in _projectTrackables)
+            foreach (IEditorProjectTrackable trackable in _projectTrackables)
             {
                 if (trackable.HasUnsavedChanges)
                     return true;
@@ -96,7 +96,7 @@ namespace Dialuverc.Editor.Base.Project
 
                 Directory.Move(tempContentFolderPath, ContentFolderPath);
 
-                foreach (IProjectTrackable trackable in _projectTrackables)
+                foreach (IEditorProjectTrackable trackable in _projectTrackables)
                 {
                     trackable.SetCurrentStateAsSaved();
                 }
@@ -137,7 +137,7 @@ namespace Dialuverc.Editor.Base.Project
 
         public void LoadProject()
         {
-            foreach (IProjectTrackable trackable in _projectTrackables)
+            foreach (IEditorProjectTrackable trackable in _projectTrackables)
             {
                 trackable.ClearStatesHistory();
             }
