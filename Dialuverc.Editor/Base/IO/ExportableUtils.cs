@@ -5,7 +5,7 @@ namespace Dialuverc.Editor.Base.IO
     /// <summary>
     /// Contains methods to handle exporting/importing.
     /// </summary>
-    public class ProjectExporter
+    public class ExportableUtils
     {
         /// <summary>
         /// Creates a <see cref="ZipArchive"/> containing a <see cref="ZipArchiveEntry"/> for each <see cref="IExportable"/> in <paramref name="toExport"/>.<br/>

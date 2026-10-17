@@ -3,9 +3,9 @@ using System.IO.Compression;
 
 namespace Dialuverc.Editor.Tests.Base
 {
-    internal class ProjectExporterTests
+    internal class ExporterUtilsTests
     {
-        const string _tempStorageName = nameof(ProjectExporterTests);
+        const string _tempStorageName = nameof(ExporterUtilsTests);
 
         [Test]
         public void ZipArchiveCreation()
@@ -19,7 +19,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                ProjectExporter.CreateZip(toExport.AsEnumerable(), memoryStream, true);
+                ExportableUtils.CreateZip(toExport.AsEnumerable(), memoryStream, true);
 
                 using (ZipArchive readArchive = new ZipArchive(memoryStream))
                 {
@@ -53,7 +53,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             using (TemporaryFileStorage storage = new TemporaryFileStorage(_tempStorageName))
             {
-                ProjectExporter.ExportToFolder(toExport.AsEnumerable(), storage.AbsoluteFolderPath);
+                ExportableUtils.ExportToFolder(toExport.AsEnumerable(), storage.AbsoluteFolderPath);
 
                 for (int i = 0; i < toExport.Length; i++)
                 {
@@ -76,14 +76,14 @@ namespace Dialuverc.Editor.Tests.Base
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                ProjectExporter.CreateZip(importables, memoryStream, true);
+                ExportableUtils.CreateZip(importables, memoryStream, true);
 
                 foreach (TestImportableObject importable in importables)
                 {
                     Assert.That(importable.ImportedContent, Is.Null);
                 }
 
-                ProjectExporter.ImportFromZip(importables, memoryStream);
+                ExportableUtils.ImportFromZip(importables, memoryStream);
 
                 foreach (TestImportableObject importable in importables)
                 {
@@ -103,14 +103,14 @@ namespace Dialuverc.Editor.Tests.Base
 
             using (TemporaryFileStorage storage = new TemporaryFileStorage(_tempStorageName))
             {
-                ProjectExporter.ExportToFolder(importables, storage.AbsoluteFolderPath);
+                ExportableUtils.ExportToFolder(importables, storage.AbsoluteFolderPath);
 
                 foreach (TestImportableObject importable in importables)
                 {
                     Assert.That(importable.ImportedContent, Is.Null);
                 }
 
-                ProjectExporter.ImportFromFolder(importables, storage.AbsoluteFolderPath);
+                ExportableUtils.ImportFromFolder(importables, storage.AbsoluteFolderPath);
 
                 foreach (TestImportableObject importable in importables)
                 {

@@ -1,6 +1,5 @@
 using Dialuverc.Editor.Base.IO;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 
 namespace Dialuverc.Editor.Base.Project
 {
@@ -9,8 +8,6 @@ namespace Dialuverc.Editor.Base.Project
         public string ProjectFolderPath { get; private set; }
         public string ContentFolderPath { get; private set; }
         public string BackupsFolderPath { get; private set; }
-
-        readonly DialuvercProjectInfo ProjectInfo = new DialuvercProjectInfo();
 
         readonly IEnumerable<IProjectTrackable> _projectTrackables;
 
@@ -79,7 +76,6 @@ namespace Dialuverc.Editor.Base.Project
         // TODO: Proper error handling.
         public void SaveProject()
         {
-            string? tempProjectInfoPath = null;
             string? tempContentFolderPath = null;
 
             string? pathUsedForBackup = null;
@@ -88,31 +84,15 @@ namespace Dialuverc.Editor.Base.Project
             {
                 Directory.CreateDirectory(ProjectFolderPath);
 
-                tempProjectInfoPath = Path.Combine(ProjectFolderPath, ".dialuverc.tmp");
-
-                // IImportable can't currently be used for this as they require writing/reading to/from the same file (".dialuverc.tmp" <-> ".dialuverc").
-                // This can be fixed by making the saving process run entirely inside a temp project folder (if needed).
-                using (FileStream projectInfoStream = File.Open(tempProjectInfoPath, FileMode.OpenOrCreate, FileAccess.Write))
-                {
-                    JsonSerializer.Serialize(projectInfoStream, ProjectInfo);
-                }
-
                 tempContentFolderPath = Path.Combine(ProjectFolderPath, $"TempContent{Guid.NewGuid()}");
 
                 pathUsedForBackup = MoveCurrentSaveToBackups();
 
-                ProjectExporter.ExportToFolder(EnumerateImportables(), tempContentFolderPath);
+                ExportableUtils.ExportToFolder(EnumerateImportables(), tempContentFolderPath);
 
                 // If Content exists, it's empty (MoveCurrentSaveToBackups would have moved it if it had anything inside).
                 if (Directory.Exists(ContentFolderPath))
                     Directory.Delete(ContentFolderPath);
-
-                string projectInfoPath = Path.Combine(ProjectFolderPath, ".dialuverc");
-
-                if (File.Exists(projectInfoPath))
-                    File.Delete(projectInfoPath);
-
-                File.Move(tempProjectInfoPath, projectInfoPath);
 
                 Directory.Move(tempContentFolderPath, ContentFolderPath);
 
@@ -123,9 +103,6 @@ namespace Dialuverc.Editor.Base.Project
             }
             catch
             {
-                if (File.Exists(tempProjectInfoPath))
-                    File.Delete(tempProjectInfoPath);
-
                 if (Directory.Exists(tempContentFolderPath))
                     Directory.Delete(tempContentFolderPath, true);
 
@@ -165,7 +142,7 @@ namespace Dialuverc.Editor.Base.Project
                 trackable.ClearStatesHistory();
             }
 
-            ProjectExporter.ImportFromFolder(EnumerateImportables(), ContentFolderPath);
+            ExportableUtils.ImportFromFolder(EnumerateImportables(), ContentFolderPath);
         }
     }
 }
