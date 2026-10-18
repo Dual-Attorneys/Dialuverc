@@ -2,8 +2,8 @@ using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 using Dialuverc.Editor.Base.IO;
 
-using static Dialuverc.Editor.Base.Modes.EditorModeManager;
 using Dialuverc.Editor.Base.StateTracking;
+using Dialuverc.Editor.Base.Modes;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
@@ -21,7 +21,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         // Should be enough to test both Add and Edit scratchpads, assuming ActiveScratchpad works properly.
         public void SetProperties()
         {
-            _area.ScratchpadManager.ChangeMode(Mode.Add);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Add);
 
             Assert.That(_area.ActiveScratchpad!.RuntimeThought.NameKey, Is.Empty);
             Assert.That(_area.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.Empty);
@@ -44,7 +44,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void SetPropertiesHistory()
         {
-            _area.ScratchpadManager.ChangeMode(Mode.Add);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Add);
 
             _area.SetNameKey("nameKey");
             _area.SetDescriptionKey("descriptionKey");
@@ -79,7 +79,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void ChangingPropertyWithSameValueDoesNotSave()
         {
-            _area.ScratchpadManager.ChangeMode(Mode.Add);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Add);
 
             _area.SetNameKey("nameKey");
             _area.SetDescriptionKey(_area.ActiveScratchpad!.RuntimeThought.DescriptionKey);
@@ -92,7 +92,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void FinishBuildingWithNoChangesIsNoOp()
         {
-            _area.ScratchpadManager.ChangeMode(Mode.Add);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Add);
 
             _area.SetNameKey("nameKey");
             _area.SetDescriptionKey("descriptionKey");
@@ -114,7 +114,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             Assert.That(_area.Thoughts, Is.Empty);
 
-            _area.ScratchpadManager.ChangeMode(Mode.Add);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Add);
 
             PopulateSampleThought();
 
@@ -131,7 +131,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void AddThoughtToListHistory()
         {
-            _area.ScratchpadManager.ChangeMode(Mode.Add);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Add);
 
             PopulateSampleThought();
 
@@ -221,7 +221,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void SelectInvokesCorrectEvent()
         {
-            _area.ScratchpadManager.ChangeMode(Mode.Add);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Add);
 
             int changeModeInvokations = 0;
             int changeSelectInvokations = 0;
@@ -239,7 +239,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.SelectThought(guid1);
 
-            Assert.That(_area.ScratchpadManager.CurrentMode, Is.EqualTo(Mode.Edit));
+            Assert.That(_area.ScratchpadManager.CurrentMode, Is.EqualTo(AddEditEnum.Edit));
             Assert.That(_area.ActiveScratchpad, Is.EqualTo(_area.Thoughts[0]));
             Assert.That(changeModeInvokations, Is.EqualTo(1));
             Assert.That(changeSelectInvokations, Is.Zero);
@@ -247,7 +247,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.SelectThought(guid2);
 
-            Assert.That(_area.ScratchpadManager.CurrentMode, Is.EqualTo(Mode.Edit));
+            Assert.That(_area.ScratchpadManager.CurrentMode, Is.EqualTo(AddEditEnum.Edit));
             Assert.That(changeModeInvokations, Is.EqualTo(1));
             Assert.That(changeSelectInvokations, Is.EqualTo(1));
             Assert.That(currentSelection, Is.EqualTo(_area.Thoughts[1]));
@@ -259,7 +259,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             ThoughtGuid guid = AddSampleThoughtToList();
 
-            _area.ScratchpadManager.ChangeMode(Mode.Edit);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Edit);
 
             int eventInvokations = 0;
 
@@ -280,7 +280,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             ThoughtGuid guid = AddSampleThoughtToList();
 
-            _area.ScratchpadManager.ChangeMode(Mode.Edit);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Edit);
 
             _area.SelectThought(guid);
 
@@ -297,7 +297,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             ThoughtGuid guid = AddSampleThoughtToList();
 
-            _area.ScratchpadManager.ChangeMode(Mode.Edit);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Edit);
 
             int eventInvokations = 0;
             EditorThought? currentSelection = null;
@@ -406,9 +406,9 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
         ThoughtGuid AddSampleThoughtToList(int offset = 0)
         {
-            Mode previousMode = _area.ScratchpadManager.CurrentMode;
+            AddEditEnum previousMode = _area.ScratchpadManager.CurrentMode;
 
-            _area.ScratchpadManager.ChangeMode(Mode.Add);
+            _area.ScratchpadManager.ChangeMode(AddEditEnum.Add);
 
             PopulateSampleThought(offset);
 

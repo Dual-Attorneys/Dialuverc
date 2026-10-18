@@ -4,14 +4,11 @@ namespace Dialuverc.Editor.Base.Modes
     /// An abstract component which manages in which mode an <see cref="EditorArea{T}"/> works.
     /// <para>Can be used to safely expose a concrete implementation.</para>
     /// </summary>
-    // Note: This can later be refactored to take in an arbitrary enum as <T>.
-    // Implementations would then inherit from this<ArbitraryEnum>.
-    public abstract class EditorModeManager
+    public abstract class EditorModeManager<T> where T : struct, Enum
     {
-        // Add is currently assumed to be the default mode.
-        public Mode CurrentMode { get; private set; } = Mode.Add;
+        public T CurrentMode { get; private set; } = default;
 
-        public event Action<Mode>? OnModeChanged;
+        public event Action<T>? OnModeChanged;
 
         /// <summary>
         /// Attempts to change the <see cref="CurrentMode"/>.<br/>
@@ -20,9 +17,9 @@ namespace Dialuverc.Editor.Base.Modes
         /// <param name="newMode"></param>
         /// <param name="invokeEvent">Whether to invoke <see cref="OnModeChanged"/> on success.</param>
         /// <returns><see langword="true"/> if mode was changed, <see langword="false"/> otherwise.</returns>
-        public bool ChangeMode(Mode newMode, bool invokeEvent = true)
+        public bool ChangeMode(T newMode, bool invokeEvent = true)
         {
-            if (newMode == CurrentMode)
+            if (EqualityComparer<T>.Default.Equals(newMode, CurrentMode))
                 return false;
 
             CurrentMode = newMode;
@@ -31,12 +28,6 @@ namespace Dialuverc.Editor.Base.Modes
                 OnModeChanged?.Invoke(CurrentMode);
 
             return true;
-        }
-
-        public enum Mode
-        {
-            Add,
-            Edit
         }
     }
 }
