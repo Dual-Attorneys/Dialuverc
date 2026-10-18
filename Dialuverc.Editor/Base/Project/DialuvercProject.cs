@@ -95,11 +95,6 @@ namespace Dialuverc.Editor.Base.Project
                     Directory.Delete(ContentFolderPath);
 
                 Directory.Move(tempContentFolderPath, ContentFolderPath);
-
-                foreach (IEditorProjectTrackable trackable in _projectTrackables)
-                {
-                    trackable.SetCurrentStateAsSaved();
-                }
             }
             catch
             {
@@ -111,6 +106,11 @@ namespace Dialuverc.Editor.Base.Project
 
                 // Surface any exceptions thrown during saving.
                 throw;
+            }
+
+            foreach (IEditorProjectTrackable trackable in _projectTrackables)
+            {
+                trackable.SetCurrentStateAsSaved();
             }
         }
 
