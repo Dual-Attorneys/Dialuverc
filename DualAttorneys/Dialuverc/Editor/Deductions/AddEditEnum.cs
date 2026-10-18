@@ -1,4 +1,4 @@
-namespace Dialuverc.Editor.Base.Modes
+namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     public enum AddEditEnum
     {

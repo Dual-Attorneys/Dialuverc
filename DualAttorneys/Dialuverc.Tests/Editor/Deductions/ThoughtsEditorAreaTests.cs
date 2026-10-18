@@ -3,7 +3,6 @@ using DualAttorneys.Dialuverc.Editor.Deductions;
 using Dialuverc.Editor.Base.IO;
 
 using Dialuverc.Editor.Base.StateTracking;
-using Dialuverc.Editor.Base.Modes;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
