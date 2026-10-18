@@ -125,6 +125,13 @@ namespace Dialuverc.Editor.Base.IO
             string fullTargetPath = Path.GetFullPath(targetPath);
             string fullReferenceFolderPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(referenceFolder));
 
+            // Solves the following case:
+            // fullTargetPath = "folder", fullReferencePath = "folder"
+            // Going into the switch, fullReferencePath would become "folder/", returning false.
+            // The opposite case (fullTargetPath = "folder/") is already handled by the switch.
+            if (fullTargetPath.Equals(fullReferenceFolderPath, StringComparison.OrdinalIgnoreCase))
+                return true;
+
             switch (allowedTraversal)
             {
                 case AllowedDirectoryTraversal.None:

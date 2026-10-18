@@ -127,8 +127,10 @@ namespace Dialuverc.Editor.Tests.Base
         [TestCase("folder/subfolder/file.txt", "folder/", ExportableUtils.AllowedDirectoryTraversal.Parent)]
         [TestCase("folder", "folder", ExportableUtils.AllowedDirectoryTraversal.None)]
         [TestCase("folder/", "folder", ExportableUtils.AllowedDirectoryTraversal.None)]
+        [TestCase("folder", "folder/", ExportableUtils.AllowedDirectoryTraversal.None)]
         [TestCase("folder", "folder", ExportableUtils.AllowedDirectoryTraversal.Parent)]
         [TestCase("folder/", "folder", ExportableUtils.AllowedDirectoryTraversal.Parent)]
+        [TestCase("folder", "folder/", ExportableUtils.AllowedDirectoryTraversal.Parent)]
         public void PathTraversalCasesSuccess(string targetPath, string referenceFolder, ExportableUtils.AllowedDirectoryTraversal allowedTraversal)
         {
             Assert.That(ExportableUtils.PathDirectoryTraversalIsAllowed(targetPath, referenceFolder, allowedTraversal), Is.True);
