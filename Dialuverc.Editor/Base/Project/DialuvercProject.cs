@@ -137,12 +137,12 @@ namespace Dialuverc.Editor.Base.Project
 
         public void LoadProject()
         {
+            ExportableUtils.ImportFromFolder(EnumerateImportables(), ContentFolderPath);
+
             foreach (IEditorProjectTrackable trackable in _projectTrackables)
             {
                 trackable.ClearStatesHistory();
             }
-
-            ExportableUtils.ImportFromFolder(EnumerateImportables(), ContentFolderPath);
         }
     }
 }
