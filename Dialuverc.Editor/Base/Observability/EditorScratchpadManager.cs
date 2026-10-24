@@ -1,27 +1,26 @@
-namespace Dialuverc.Editor.Base.Modes
+namespace Dialuverc.Editor.Base.Observability
 {
     /// <summary>
-    /// A component which provides temporary scratchpad objects of type <typeparamref name="T"/> for an <see cref="EditorArea{T}"/> to work on.
-    /// <para>
-    /// To safely expose this to other systems, go through the base <see cref="EditorModeManager{E}"/>.
-    /// </para>
+    /// A component which stores temporary scratchpad objects of type <typeparamref name="T"/> for an <see cref="EditorArea{T}"/> to work on.
     /// </summary>
     /// <typeparam name="T">The type the associated <see cref="EditorArea{T}"/> works on.</typeparam>
     /// <typeparam name="E">The enum representing available modes.</typeparam>
-    public class EditorScratchpadManager<T, E> : EditorModeManager<E> where E : struct, Enum
+    public class EditorScratchpadManager<T, E> where E : struct, Enum
     {
+        public readonly EnumSelection<E> Selection = new EnumSelection<E>();
+
         readonly Dictionary<E, T?> _availableScratchpads = new Dictionary<E, T?>();
 
         /// <summary>
-        /// The appropriate scratchpad based on the <see cref="EditorModeManager{E}.CurrentMode"/>.
-        /// <para>Shorthand for <code>this[<see cref="EditorModeManager{E}.CurrentMode"/>]</code></para>
+        /// The appropriate scratchpad based on the <see cref="EnumSelection{E}.CurrentSelection"/>.
+        /// <para>Shorthand for <code>this[<see cref="EnumSelection{E}.CurrentSelection"/>]</code></para>
         /// </summary>
         public T? ActiveScratchpad
         {
             // Go through this[] to benefit from null checks.
-            get => this[CurrentMode];
+            get => this[Selection.CurrentSelection];
 
-            set => this[CurrentMode] = value;
+            set => this[Selection.CurrentSelection] = value;
         }
 
         public T? this[E mode]

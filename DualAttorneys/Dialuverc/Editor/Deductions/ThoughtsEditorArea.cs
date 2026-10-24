@@ -1,11 +1,11 @@
 using Dialuverc.Editor.Base;
 using Dialuverc.Editor.Base.IO;
-using Dialuverc.Editor.Base.Modes;
 using Dialuverc.Editor.Base.Verifier;
 using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
+using Dialuverc.Editor.Base.Observability;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
@@ -17,13 +17,13 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         ThoughtGuid? _selectionGuid = null;
 
         /// <summary>
-        /// Invoked when a <see cref="EditorThought"/> is selected or deselected while already in <see cref="Mode.Edit"/> mode.
+        /// Invoked when a <see cref="EditorThought"/> is selected or deselected while already in <see cref="AddEditEnum.Edit"/> mode.
         /// <para>Deselecting passes a <see langword="null"/> <see cref="EditorThought"/>.</para>
         /// </summary>
         public event Action<EditorThought?>? OnThoughtSelectionChanged;
 
         readonly EditorScratchpadManager<EditorThought, AddEditEnum> _scratchpadManager;
-        public EditorModeManager<AddEditEnum> ScratchpadManager => _scratchpadManager;
+        public EnumSelection<AddEditEnum> ScratchpadSelection => _scratchpadManager.Selection;
         public EditorThought? ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
         readonly JsonImportable<ImmutableList<EditorThought>> _editorThoughtsImportable;
@@ -105,11 +105,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         /// <summary>
         /// Applies all changes done so far on the active builder to the <see cref="Thoughts"/> list.
-        /// <para>If <see cref="EditorModeManager.CurrentMode"/> is <see cref="Mode.Add"/>, its builder is also reset.</para>
+        /// <para>If <see cref="ScratchpadSelection.CurrentSelection"/> is <see cref="AddEditEnum.Add"/>, its builder is also reset.</para>
         /// </summary>
         public ThoughtGuid FinishBuilding()
         {
-            if (_scratchpadManager.CurrentMode == AddEditEnum.Edit)
+            if (ScratchpadSelection.CurrentSelection == AddEditEnum.Edit)
             {
                 if (_scratchpadManager.ActiveScratchpad is null)
                     throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Edit} mode with null {_scratchpadManager.ActiveScratchpad}");
@@ -214,7 +214,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager[AddEditEnum.Edit] = foundThought;
             _selectionGuid = guid;
 
-            if (!_scratchpadManager.ChangeMode(AddEditEnum.Edit))
+            if (!ScratchpadSelection.ChangeSelection(AddEditEnum.Edit))
                 OnThoughtSelectionChanged?.Invoke(foundThought);
         }
 
@@ -251,7 +251,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            return new ThoughtsEditorState(_thoughts, _scratchpadManager[AddEditEnum.Add], _scratchpadManager[AddEditEnum.Edit], _scratchpadManager.CurrentMode, _selectionGuid);
+            return new ThoughtsEditorState(_thoughts, _scratchpadManager[AddEditEnum.Add], _scratchpadManager[AddEditEnum.Edit], ScratchpadSelection.CurrentSelection, _selectionGuid);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
@@ -269,7 +269,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadManager[AddEditEnum.Edit] = newState.EditBuilder;
             _selectionGuid = newState.ThoughtSelection;
 
-            _scratchpadManager.ChangeMode(newState.Mode, invokeEvent: false);
+            ScratchpadSelection.ChangeSelection(newState.Mode, invokeEvent: false);
         }
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
