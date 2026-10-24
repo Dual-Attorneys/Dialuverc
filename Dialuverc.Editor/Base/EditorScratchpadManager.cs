@@ -1,4 +1,6 @@
-namespace Dialuverc.Editor.Base.Observability
+using Dialuverc.Editor.Base.Observability;
+
+namespace Dialuverc.Editor.Base
 {
     /// <summary>
     /// A component which stores temporary scratchpad objects of type <typeparamref name="T"/> for an <see cref="EditorArea{T}"/> to work on.
