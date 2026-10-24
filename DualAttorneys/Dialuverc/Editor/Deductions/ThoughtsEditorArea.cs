@@ -34,8 +34,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         {
             _scratchpadManager = new EditorScratchpadManager<EditorThought, AddEditEnum>();
 
-            // Default is Add.
-            _scratchpadManager.ActiveScratchpad = CreateDefaultEditorThought();
+            _scratchpadManager[AddEditEnum.Add] = CreateDefaultEditorThought();
 
             _editorThoughtsImportable = new JsonImportable<ImmutableList<EditorThought>>(nameof(ThoughtsEditorArea), GetEditorThoughtsForImportable, OnEditorThoughtsImported, new JsonSerializerOptions
             {
@@ -109,43 +108,50 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public ThoughtGuid FinishBuilding()
         {
-            if (ScratchpadSelection.CurrentSelection == AddEditEnum.Edit)
+            switch (ScratchpadSelection.CurrentSelection)
             {
-                if (_scratchpadManager.ActiveScratchpad is null)
-                    throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Edit} mode with null {_scratchpadManager.ActiveScratchpad}");
+                case AddEditEnum.Edit:
 
-                int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _scratchpadManager.ActiveScratchpad.RuntimeThought.Guid);
+                    if (_scratchpadManager.ActiveScratchpad is null)
+                        throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Edit} mode with null {nameof(_scratchpadManager.ActiveScratchpad)}");
 
-                if (index < 0)
-                    throw new InvalidOperationException($"No thought with id '{_scratchpadManager.ActiveScratchpad.RuntimeThought.Guid}'");
+                    int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _scratchpadManager.ActiveScratchpad.RuntimeThought.Guid);
 
-                // List is checked by reference. Prevent stacking state saving when there's no actual changes.
-                if (_thoughts[index] == _scratchpadManager.ActiveScratchpad)
-                    return _thoughts[index].RuntimeThought.Guid;
+                    if (index < 0)
+                        throw new InvalidOperationException($"No thought with id '{_scratchpadManager.ActiveScratchpad.RuntimeThought.Guid}'");
 
-                BeginChange();
+                    // List is checked by reference. Prevent stacking state saving when there's no actual changes.
+                    if (_thoughts[index] == _scratchpadManager.ActiveScratchpad)
+                        return _thoughts[index].RuntimeThought.Guid;
 
-                _thoughts = _thoughts.SetItem(index, _scratchpadManager.ActiveScratchpad!);
+                    BeginChange();
 
-                EndChange();
+                    _thoughts = _thoughts.SetItem(index, _scratchpadManager.ActiveScratchpad!);
 
-                return _scratchpadManager.ActiveScratchpad.RuntimeThought.Guid;
+                    EndChange();
+
+                    return _scratchpadManager.ActiveScratchpad.RuntimeThought.Guid;
+
+                case AddEditEnum.Add:
+
+                    if (_scratchpadManager.ActiveScratchpad is null)
+                        throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Add} mode with null {nameof(_scratchpadManager.ActiveScratchpad)}");
+
+                    ThoughtGuid addedGuid = _scratchpadManager.ActiveScratchpad.RuntimeThought.Guid;
+
+                    BeginChange();
+
+                    _thoughts = _thoughts.Add(_scratchpadManager.ActiveScratchpad);
+
+                    _scratchpadManager.ActiveScratchpad = CreateDefaultEditorThought();
+
+                    EndChange();
+
+                    return addedGuid;
+
+                default:
+                    throw new InvalidOperationException($"{ScratchpadSelection.CurrentSelection} is not supported");
             }
-
-            if (_scratchpadManager.ActiveScratchpad is null)
-                throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Add} mode with null {nameof(_scratchpadManager.ActiveScratchpad)}");
-
-            ThoughtGuid addedGuid = _scratchpadManager.ActiveScratchpad.RuntimeThought.Guid;
-
-            BeginChange();
-
-            _thoughts = _thoughts.Add(_scratchpadManager.ActiveScratchpad);
-
-            _scratchpadManager.ActiveScratchpad = CreateDefaultEditorThought();
-
-            EndChange();
-
-            return addedGuid;
         }
 
         public bool RemoveThought(ThoughtGuid guid)
