@@ -1,5 +1,6 @@
 namespace Dialuverc.Editor.Base.Observability
 {
+    /// <typeparam name="T">The <see cref="Enum"/> defining valid values.</typeparam>
     public class EnumSelection<T> where T : struct, Enum
     {
         public T CurrentSelection { get; private set; }

@@ -22,7 +22,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public event Action<EditorThought?>? OnThoughtSelectionChanged;
 
-        readonly EditorScratchpadManager<EditorThought, AddEditEnum> _scratchpadManager;
+        readonly EditorScratchpadManager<AddEditEnum, EditorThought> _scratchpadManager;
         public EnumSelection<AddEditEnum> ScratchpadSelection => _scratchpadManager.Selection;
         public EditorThought? ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
 
@@ -32,7 +32,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public ThoughtsEditorArea()
         {
-            _scratchpadManager = new EditorScratchpadManager<EditorThought, AddEditEnum>();
+            _scratchpadManager = new EditorScratchpadManager<AddEditEnum, EditorThought>(AddEditEnum.Add);
 
             _scratchpadManager[AddEditEnum.Add] = CreateDefaultEditorThought();
 

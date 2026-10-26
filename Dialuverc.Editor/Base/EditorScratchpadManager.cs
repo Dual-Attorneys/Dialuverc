@@ -7,11 +7,16 @@ namespace Dialuverc.Editor.Base
     /// </summary>
     /// <typeparam name="T">The type the associated <see cref="EditorArea{T}"/> works on.</typeparam>
     /// <typeparam name="E">The enum representing available modes.</typeparam>
-    public class EditorScratchpadManager<T, E> where E : struct, Enum
+    public class EditorScratchpadManager<E, T> where E : struct, Enum
     {
-        public readonly EnumSelection<E> Selection = new EnumSelection<E>();
+        public readonly EnumSelection<E> Selection;
 
         readonly Dictionary<E, T?> _availableScratchpads = new Dictionary<E, T?>();
+
+        public EditorScratchpadManager(E defaultValue)
+        {
+            Selection = new EnumSelection<E>(defaultValue);
+        }
 
         /// <summary>
         /// The appropriate scratchpad based on the <see cref="EnumSelection{E}.CurrentSelection"/>.
