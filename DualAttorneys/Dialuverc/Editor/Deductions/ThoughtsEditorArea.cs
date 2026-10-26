@@ -5,7 +5,8 @@ using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
-using Dialuverc.Editor.Base.Observability;
+using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
+using Dialuverc.Editor.Base.Scratchpads;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
@@ -22,9 +23,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public event Action<EditorThought?>? OnThoughtSelectionChanged;
 
-        readonly EditorScratchpadManager<AddEditEnum, EditorThought> _scratchpadManager;
-        public EnumSelection<AddEditEnum> ScratchpadSelection => _scratchpadManager.Selection;
-        public EditorThought? ActiveScratchpad => _scratchpadManager.ActiveScratchpad;
+        readonly AddEditScratchpads<EditorThought> _scratchpadManager;
+        public IScratchpadsManager<AddEditEnum, EditorThought> ScratchpadsManager => _scratchpadManager; 
 
         readonly JsonImportable<ImmutableList<EditorThought>> _editorThoughtsImportable;
 
@@ -32,9 +32,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public ThoughtsEditorArea()
         {
-            _scratchpadManager = new EditorScratchpadManager<AddEditEnum, EditorThought>(AddEditEnum.Add);
+            _scratchpadManager = new AddEditScratchpads<EditorThought>(AddEditEnum.Add);
 
-            _scratchpadManager[AddEditEnum.Add] = CreateDefaultEditorThought();
+            _scratchpadManager.AddScratchpad = CreateDefaultEditorThought();
 
             _editorThoughtsImportable = new JsonImportable<ImmutableList<EditorThought>>(nameof(ThoughtsEditorArea), GetEditorThoughtsForImportable, OnEditorThoughtsImported, new JsonSerializerOptions
             {
@@ -108,7 +108,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public ThoughtGuid FinishBuilding()
         {
-            switch (ScratchpadSelection.CurrentSelection)
+            AddEditEnum currentSelection = _scratchpadManager.Selection.CurrentSelection;
+
+            switch (currentSelection)
             {
                 case AddEditEnum.Edit:
 
@@ -150,7 +152,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     return addedGuid;
 
                 default:
-                    throw new InvalidOperationException($"{ScratchpadSelection.CurrentSelection} is not supported");
+                    throw new InvalidOperationException($"{currentSelection} is not a supported mode");
             }
         }
 
@@ -217,10 +219,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     throw new InvalidOperationException($"No thought with id '{guid}'");
             }
 
-            _scratchpadManager[AddEditEnum.Edit] = foundThought;
+            _scratchpadManager.EditScratchpad = foundThought;
             _selectionGuid = guid;
 
-            if (!ScratchpadSelection.ChangeSelection(AddEditEnum.Edit))
+            if (!_scratchpadManager.Selection.ChangeSelection(AddEditEnum.Edit))
                 OnThoughtSelectionChanged?.Invoke(foundThought);
         }
 
@@ -257,7 +259,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            return new ThoughtsEditorState(_thoughts, _scratchpadManager[AddEditEnum.Add], _scratchpadManager[AddEditEnum.Edit], ScratchpadSelection.CurrentSelection, _selectionGuid);
+            return new ThoughtsEditorState(_thoughts, _scratchpadManager.AddScratchpad, _scratchpadManager.EditScratchpad, ScratchpadsManager.Selection.CurrentSelection, _selectionGuid);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
@@ -271,11 +273,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         protected override void ApplyRestoredState(ThoughtsEditorState newState)
         {
             _thoughts = newState.Thoughts;
-            _scratchpadManager[AddEditEnum.Add] = newState.AddBuilder;
-            _scratchpadManager[AddEditEnum.Edit] = newState.EditBuilder;
+            _scratchpadManager.AddScratchpad = newState.AddBuilder;
+            _scratchpadManager.EditScratchpad = newState.EditBuilder;
             _selectionGuid = newState.ThoughtSelection;
 
-            ScratchpadSelection.ChangeSelection(newState.Mode, invokeEvent: false);
+            ScratchpadsManager.Selection.ChangeSelection(newState.Mode, invokeEvent: false);
         }
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);

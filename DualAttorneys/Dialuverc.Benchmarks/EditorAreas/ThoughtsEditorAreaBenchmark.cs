@@ -1,6 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using Dialuverc.Editor.Base.StateTracking;
 using DualAttorneys.Dialuverc.Editor.Deductions;
+using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 
 namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
 {
@@ -17,7 +18,7 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         {
             _area = new ThoughtsEditorArea();
 
-            _area.ScratchpadSelection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
 
             for (int i = 0; i < _baseAmountOfThoughts; i++)
             {

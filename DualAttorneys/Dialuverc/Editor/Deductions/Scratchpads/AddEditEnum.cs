@@ -1,4 +1,4 @@
-namespace DualAttorneys.Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 {
     public enum AddEditEnum
     {
