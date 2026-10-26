@@ -4,10 +4,6 @@ using Dialuverc.Editor.Base.Scratchpads;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 {
-    /// <summary>
-    /// A component which stores temporary scratchpad objects of type <typeparamref name="T"/> for an <see cref="EditorArea{T}"/> to work on.
-    /// </summary>
-    /// <typeparam name="T">The type the associated <see cref="EditorArea{T}"/> works on.</typeparam>
     public class AddEditScratchpads<T> : IScratchpadsManager<AddEditEnum, T>
     {
         public EnumSelection<AddEditEnum> Selection { get; private set; }
