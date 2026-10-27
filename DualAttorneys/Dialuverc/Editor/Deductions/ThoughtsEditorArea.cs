@@ -24,7 +24,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public event Action<EditorThought?>? OnThoughtSelectionChanged;
 
         readonly AddEditScratchpads<EditorThought> _scratchpadsManager;
-        public IScratchpadsManager<AddEditEnum, EditorThought> ScratchpadsManager => _scratchpadsManager; 
+        public IScratchpadsManager<AddEditEnum, EditorThought> ScratchpadsManager => _scratchpadsManager;
 
         readonly JsonImportable<ImmutableList<EditorThought>> _editorThoughtsImportable;
 
