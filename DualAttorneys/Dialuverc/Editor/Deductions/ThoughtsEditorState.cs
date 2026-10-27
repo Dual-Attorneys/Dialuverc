@@ -1,5 +1,5 @@
-using Dialuverc.Editor.Base.Modes;
 using DualAttorneys.Dialuverc.Deductions;
+using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using System.Collections.Immutable;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
@@ -14,14 +14,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public readonly EditorThought? AddBuilder;
         public readonly EditorThought? EditBuilder;
 
-        public readonly EditorModeManager.Mode Mode;
+        public readonly AddEditEnum Mode;
 
         /// <summary>
         /// Which thought was selected at the time this state was saved.
         /// </summary>
         public readonly ThoughtGuid? ThoughtSelection;
 
-        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, EditorThought? addBuilder, EditorThought? editBuilder, EditorModeManager.Mode mode, ThoughtGuid? thoughtSelection)
+        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, EditorThought? addBuilder, EditorThought? editBuilder, AddEditEnum mode, ThoughtGuid? thoughtSelection)
         {
             Thoughts = thoughts;
             AddBuilder = addBuilder;
