@@ -53,7 +53,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
                     default:
                         throw new InvalidOperationException($"{Selection.CurrentSelection} does not map to a valid scratchpad");
                 }
-                ;
             }
         }
     }
