@@ -12,6 +12,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>, IHasLocalizableKeysFlatFile
     {
+        internal const string PlaceholderLocaleId = "";
+
         ImmutableList<EditorThought> _thoughts = ImmutableList<EditorThought>.Empty;
         public IReadOnlyList<EditorThought> Thoughts => _thoughts;
 
@@ -98,6 +100,54 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             BeginChange();
 
             _scratchpadsManager.ActiveScratchpad = _scratchpadsManager.ActiveScratchpad! with { EditorNote = editorNote };
+
+            EndChange();
+        }
+
+        public void SetNameLocalization(string value)
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException("Cannot set a localization without an active thought.");
+
+            EditorThought activeScratchpad = _scratchpadsManager.ActiveScratchpad;
+
+            activeScratchpad.NameLocalizations.TryGetValue(PlaceholderLocaleId, out string? existingValue);
+
+            if (existingValue == value)
+                return;
+
+            ImmutableDictionary<string, string> updatedNameLocalizations = activeScratchpad.NameLocalizations
+                .SetItem(PlaceholderLocaleId, value);
+
+            BeginChange();
+
+            _scratchpadsManager.ActiveScratchpad = activeScratchpad with { NameLocalizations = updatedNameLocalizations };
+
+            EndChange();
+        }
+
+        public void SetDescriptionLocalization(string value)
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException("Cannot set a localization without an active thought.");
+
+            EditorThought activeScratchpad = _scratchpadsManager.ActiveScratchpad;
+
+            activeScratchpad.DescriptionLocalizations.TryGetValue(PlaceholderLocaleId, out string? existingValue);
+
+            if (existingValue == value)
+                return;
+
+            ImmutableDictionary<string, string> updatedDescriptionLocalizations = activeScratchpad.DescriptionLocalizations
+                .SetItem(PlaceholderLocaleId, value);
+
+            BeginChange();
+
+            _scratchpadsManager.ActiveScratchpad = activeScratchpad with { DescriptionLocalizations = updatedDescriptionLocalizations };
 
             EndChange();
         }
@@ -241,11 +291,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         void OnEditorThoughtsImported(ImmutableList<EditorThought>? imported)
         {
             // TODO: Proper error handling.
-            // This probably should not be done in a transaction.
-
             if (imported is null)
                 return;
 
+            // This probably should not be done in a transaction.
             BeginChange();
 
             _thoughts = imported;

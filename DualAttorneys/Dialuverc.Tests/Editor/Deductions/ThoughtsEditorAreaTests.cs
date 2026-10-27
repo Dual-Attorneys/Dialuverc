@@ -1,7 +1,6 @@
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 using Dialuverc.Editor.Base.IO;
-
 using Dialuverc.Editor.Base.StateTracking;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 
