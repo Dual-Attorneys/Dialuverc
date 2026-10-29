@@ -1,5 +1,6 @@
 using Dialuverc.Editor.Base.Observability;
 using System.Collections.Immutable;
+using System.Collections.Specialized;
 
 namespace Dialuverc.Editor.Base.Localization
 {
@@ -11,6 +12,11 @@ namespace Dialuverc.Editor.Base.Localization
         readonly IReadOnlyObservableValue<string> _localeChoice;
 
         public string KeysNamespace { get; private set; }
+
+        /// <summary>
+        /// Notifies consumers that the key-value pair they're using may be outdated (or no longer existing).
+        /// </summary>
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
         // Keyed by locale and then by key.
         public ImmutableDictionary<string, ImmutableDictionary<string, string>> Lookup { get; set; }
@@ -32,12 +38,28 @@ namespace Dialuverc.Editor.Base.Localization
 
             ThrowIfLocaleChoiceIsInvalid();
 
+            NotifyCollectionChangedAction changeType;
+
             if (!Lookup.TryGetValue(_localeChoice.Value!, out ImmutableDictionary<string, string>? lookupForKey))
+            {
                 lookupForKey = ImmutableDictionary<string, string>.Empty.Add(key, value);
+
+                changeType = NotifyCollectionChangedAction.Add;
+            }
             else
+            {
                 lookupForKey = lookupForKey.SetItem(key, value);
 
+                changeType = NotifyCollectionChangedAction.Replace;
+            }
+
             Lookup = Lookup.SetItem(_localeChoice.Value!, lookupForKey);
+
+            // TODO: Add is probably not be needed?
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(changeType,
+                new KeyValuePair<string, KeyValuePair<string, string>>(
+                    _localeChoice.Value!,
+                    new KeyValuePair<string, string>(key, value))));
         }
 
         public bool TryGetValue(string key, out string? value)
