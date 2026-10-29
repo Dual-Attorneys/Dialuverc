@@ -1,16 +1,17 @@
 using Dialuverc.Editor.Base;
 using Dialuverc.Editor.Base.IO;
 using Dialuverc.Editor.Base.Verifier;
-using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Scratchpads;
+using Dialuverc.Editor.Base.Localization;
+using Dialuverc.Editor.Base.Observability;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
-    public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>, IHasLocalizableKeysFlatFile
+    public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {
         internal const string PlaceholderLocaleId = "";
 
@@ -28,15 +29,20 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         readonly AddEditScratchpads<EditorThought> _scratchpadsManager;
         public IScratchpadsManager<AddEditEnum, EditorThought> ScratchpadsManager => _scratchpadsManager;
 
+        readonly LocalizationStore _localizationManager;
+        public IReadOnlyLocalizationStore LocalizationManager => _localizationManager;
+
         readonly JsonImportable<ImmutableList<EditorThought>> _editorThoughtsImportable;
 
         readonly IImportable[] _cachedImportables;
 
-        public ThoughtsEditorArea()
+        public ThoughtsEditorArea(IReadOnlyObservableValue<string> localeChoice)
         {
             _scratchpadsManager = new AddEditScratchpads<EditorThought>(AddEditEnum.Add);
 
             _scratchpadsManager.AddScratchpad = CreateDefaultEditorThought();
+
+            _localizationManager = new LocalizationStore(localeChoice, "thoughts");
 
             _editorThoughtsImportable = new JsonImportable<ImmutableList<EditorThought>>(nameof(ThoughtsEditorArea), GetEditorThoughtsForImportable, OnEditorThoughtsImported, new JsonSerializerOptions
             {
@@ -106,48 +112,28 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetNameLocalization(string value)
         {
-            ArgumentNullException.ThrowIfNull(value);
-
             if (_scratchpadsManager.ActiveScratchpad is null)
-                throw new InvalidOperationException("Cannot set a localization without an active thought.");
+                throw new InvalidOperationException($"Can not call {nameof(SetNameLocalization)} with a null active scratchpad");
 
-            EditorThought activeScratchpad = _scratchpadsManager.ActiveScratchpad;
-
-            activeScratchpad.NameLocalizations.TryGetValue(PlaceholderLocaleId, out string? existingValue);
-
-            if (existingValue == value)
-                return;
-
-            ImmutableDictionary<string, string> updatedNameLocalizations = activeScratchpad.NameLocalizations
-                .SetItem(PlaceholderLocaleId, value);
+            ArgumentNullException.ThrowIfNull(value);
 
             BeginChange();
 
-            _scratchpadsManager.ActiveScratchpad = activeScratchpad with { NameLocalizations = updatedNameLocalizations };
+            _localizationManager.AddOrSetValue(_scratchpadsManager.ActiveScratchpad.RuntimeThought.NameKey, value);
 
             EndChange();
         }
 
         public void SetDescriptionLocalization(string value)
         {
-            ArgumentNullException.ThrowIfNull(value);
-
             if (_scratchpadsManager.ActiveScratchpad is null)
-                throw new InvalidOperationException("Cannot set a localization without an active thought.");
+                throw new InvalidOperationException($"Can not call {nameof(SetDescriptionLocalization)} with a null active scratchpad");
 
-            EditorThought activeScratchpad = _scratchpadsManager.ActiveScratchpad;
-
-            activeScratchpad.DescriptionLocalizations.TryGetValue(PlaceholderLocaleId, out string? existingValue);
-
-            if (existingValue == value)
-                return;
-
-            ImmutableDictionary<string, string> updatedDescriptionLocalizations = activeScratchpad.DescriptionLocalizations
-                .SetItem(PlaceholderLocaleId, value);
+            ArgumentNullException.ThrowIfNull(value);
 
             BeginChange();
 
-            _scratchpadsManager.ActiveScratchpad = activeScratchpad with { DescriptionLocalizations = updatedDescriptionLocalizations };
+            _localizationManager.AddOrSetValue(_scratchpadsManager.ActiveScratchpad.RuntimeThought.DescriptionKey, value);
 
             EndChange();
         }
@@ -158,7 +144,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public ThoughtGuid FinishBuilding()
         {
-            AddEditEnum currentSelection = _scratchpadsManager.Selection.CurrentSelection;
+            AddEditEnum currentSelection = _scratchpadsManager.Selection.Value;
 
             switch (currentSelection)
             {
@@ -272,7 +258,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadsManager.EditScratchpad = foundThought;
             _selectionGuid = guid;
 
-            if (!_scratchpadsManager.Selection.ChangeSelection(AddEditEnum.Edit))
+            if (!_scratchpadsManager.Selection.ChangeValue(AddEditEnum.Edit))
                 OnThoughtSelectionChanged?.Invoke(foundThought);
         }
 
@@ -308,7 +294,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            return new ThoughtsEditorState(_thoughts, _scratchpadsManager.AddScratchpad, _scratchpadsManager.EditScratchpad, ScratchpadsManager.Selection.CurrentSelection, _selectionGuid);
+            return new ThoughtsEditorState(_thoughts, _scratchpadsManager, _localizationManager, ScratchpadsManager.Selection.Value, _selectionGuid);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
@@ -316,17 +302,22 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             // Selecting a thought or changing modes is not a state change.
             return a.Thoughts == b.Thoughts &&
                 a.AddBuilder == b.AddBuilder &&
-                a.EditBuilder == b.EditBuilder;
+                a.EditBuilder == b.EditBuilder &&
+                a.LocalizationLookup == b.LocalizationLookup;
         }
 
         protected override void ApplyRestoredState(ThoughtsEditorState newState)
         {
             _thoughts = newState.Thoughts;
+
             _scratchpadsManager.AddScratchpad = newState.AddBuilder;
             _scratchpadsManager.EditScratchpad = newState.EditBuilder;
+
+            _localizationManager.Lookup = newState.LocalizationLookup;
+
             _selectionGuid = newState.ThoughtSelection;
 
-            ScratchpadsManager.Selection.ChangeSelection(newState.Mode, invokeEvent: false);
+            ScratchpadsManager.Selection.ChangeValue(newState.Mode, invokeEvent: false);
         }
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);

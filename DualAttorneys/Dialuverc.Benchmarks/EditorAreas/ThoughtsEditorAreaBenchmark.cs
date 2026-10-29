@@ -18,7 +18,7 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         {
             _area = new ThoughtsEditorArea();
 
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             for (int i = 0; i < _baseAmountOfThoughts; i++)
             {

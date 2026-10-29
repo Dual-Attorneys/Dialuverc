@@ -1,3 +1,4 @@
+using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using System.Collections.Immutable;
@@ -14,6 +15,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public readonly EditorThought? AddBuilder;
         public readonly EditorThought? EditBuilder;
 
+        public readonly ImmutableDictionary<string, ImmutableDictionary<string, string>> LocalizationLookup;
+
         public readonly AddEditEnum Mode;
 
         /// <summary>
@@ -21,12 +24,21 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public readonly ThoughtGuid? ThoughtSelection;
 
-        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, EditorThought? addBuilder, EditorThought? editBuilder, AddEditEnum mode, ThoughtGuid? thoughtSelection)
+        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts,
+            AddEditScratchpads<EditorThought> scratchpadsManager,
+            LocalizationStore localizationManager,
+            AddEditEnum mode,
+            ThoughtGuid? thoughtSelection)
         {
             Thoughts = thoughts;
-            AddBuilder = addBuilder;
-            EditBuilder = editBuilder;
+
+            AddBuilder = scratchpadsManager.AddScratchpad;
+            EditBuilder = scratchpadsManager.EditScratchpad;
+
+            LocalizationLookup = localizationManager.Lookup;
+
             Mode = mode;
+
             ThoughtSelection = thoughtSelection;
         }
     }

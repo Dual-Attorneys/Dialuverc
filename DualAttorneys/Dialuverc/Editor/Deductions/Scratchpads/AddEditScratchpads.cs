@@ -5,7 +5,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 {
     public class AddEditScratchpads<T> : IScratchpadsManager<AddEditEnum, T>
     {
-        public EnumSelection<AddEditEnum> Selection { get; private set; }
+        public ObservableValue<AddEditEnum> Selection { get; private set; }
 
         public AddEditScratchpads(AddEditEnum defaultValue)
         {
@@ -13,32 +13,32 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
             if (defaultValue != AddEditEnum.Add && defaultValue != AddEditEnum.Edit)
                 throw new InvalidOperationException($"{defaultValue} does not map to a valid scratchpad");
 
-            Selection = new EnumSelection<AddEditEnum>(defaultValue);
+            Selection = new ObservableValue<AddEditEnum>(defaultValue);
         }
 
         public T? AddScratchpad { get; set; }
         public T? EditScratchpad { get; set; }
 
         /// <summary>
-        /// The appropriate scratchpad based on the <see cref="EnumSelection{E}.CurrentSelection"/>.
-        /// <para>Shorthand for <code>this[<see cref="EnumSelection{E}.CurrentSelection"/>]</code></para>
+        /// The appropriate scratchpad based on the <see cref="ObservableValue{E}.Value"/>.
+        /// <para>Shorthand for <code>this[<see cref="ObservableValue{E}.Value"/>]</code></para>
         /// </summary>
         public T? ActiveScratchpad
         {
             get
             {
-                return Selection.CurrentSelection switch
+                return Selection.Value switch
                 {
                     AddEditEnum.Add => AddScratchpad,
                     AddEditEnum.Edit => EditScratchpad,
 
-                    _ => throw new InvalidOperationException($"{Selection.CurrentSelection} does not map to a valid scratchpad")
+                    _ => throw new InvalidOperationException($"{Selection.Value} does not map to a valid scratchpad")
                 };
             }
 
             set
             {
-                switch (Selection.CurrentSelection)
+                switch (Selection.Value)
                 {
                     case AddEditEnum.Add:
 
@@ -51,7 +51,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
                         break;
 
                     default:
-                        throw new InvalidOperationException($"{Selection.CurrentSelection} does not map to a valid scratchpad");
+                        throw new InvalidOperationException($"{Selection.Value} does not map to a valid scratchpad");
                 }
             }
         }

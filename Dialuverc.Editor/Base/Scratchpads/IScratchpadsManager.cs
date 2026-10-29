@@ -11,7 +11,7 @@ namespace Dialuverc.Editor.Base.Scratchpads
     /// <typeparam name="TScratchpad">The scratchpad's type.</typeparam>
     public interface IScratchpadsManager<TEnum, TScratchpad> where TEnum : struct, Enum
     {
-        public EnumSelection<TEnum> Selection { get; }
+        public ObservableValue<TEnum> Selection { get; }
 
         public TScratchpad? ActiveScratchpad { get; }
     }
