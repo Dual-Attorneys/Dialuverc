@@ -55,7 +55,6 @@ namespace Dialuverc.Editor.Base.Localization
 
             Lookup = Lookup.SetItem(_localeChoice.Value!, lookupForKey);
 
-            // TODO: Add is probably not be needed?
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(changeType,
                 new KeyValuePair<string, KeyValuePair<string, string>>(
                     _localeChoice.Value!,
