@@ -322,23 +322,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
 
-        // This is what was on 'ThoughtsEditorPage' in Dual-Attorneys.
-        // IHasLocalizableKeysFlatFile requires this to be implemented
-        // so I thought that it should've been moved here.
-        // Note: we are already in the so called "_editorArea" so it's just Thoughts
-        public IReadOnlySet<string> GetLocalizableKeysFlatFile()
-        {
-            HashSet<string> keys = new HashSet<string>();
-
-            foreach (EditorThought editorThought in Thoughts)
-            {
-                keys.Add(editorThought.RuntimeThought.NameKey);
-                keys.Add(editorThought.RuntimeThought.DescriptionKey);
-            }
-
-            return keys;
-        }
-
         #endregion
     }
 }
