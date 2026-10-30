@@ -23,8 +23,11 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public event Action<EditorThought?>? OnThoughtSelectionChanged;
 
-        readonly AddEditScratchpads<EditorThought> _scratchpadsManager;
-        public IScratchpadsManager<AddEditEnum, EditorThought> ScratchpadsManager => _scratchpadsManager;
+        readonly AddEditScratchpads<ThoughtsEditorFields> _scratchpadsManager;
+        public IScratchpadsManager<AddEditEnum, ThoughtsEditorFields> ScratchpadsManager => _scratchpadsManager;
+
+        // Records are immutable, making changes to this requires creating a new instance.
+        readonly ThoughtsEditorFields _cachedDefaultScratchpad = new ThoughtsEditorFields();
 
         readonly JsonImportable<ImmutableList<EditorThought>> _editorThoughtsImportable;
 
@@ -32,9 +35,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public ThoughtsEditorArea()
         {
-            _scratchpadsManager = new AddEditScratchpads<EditorThought>(AddEditEnum.Add);
+            _scratchpadsManager = new AddEditScratchpads<ThoughtsEditorFields>(AddEditEnum.Add);
 
-            _scratchpadsManager.AddScratchpad = CreateDefaultEditorThought();
+            _scratchpadsManager.AddScratchpad = _cachedDefaultScratchpad;
 
             _editorThoughtsImportable = new JsonImportable<ImmutableList<EditorThought>>(nameof(ThoughtsEditorArea), GetEditorThoughtsForImportable, OnEditorThoughtsImported, new JsonSerializerOptions
             {
@@ -50,54 +53,64 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetNameKey(string nameKey)
         {
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException($"Can't call {nameof(SetNameKey)} with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+
+            if (nameKey == _scratchpadsManager.ActiveScratchpad.NameKey)
+                return;
+
             BeginChange();
 
-            _scratchpadsManager.ActiveScratchpad = _scratchpadsManager.ActiveScratchpad! with
-            {
-                RuntimeThought = _scratchpadsManager.ActiveScratchpad.RuntimeThought with
-                {
-                    NameKey = nameKey,
-                }
-            };
+            _scratchpadsManager.ActiveScratchpad =
+                _scratchpadsManager.ActiveScratchpad with { NameKey = nameKey };
 
             EndChange();
         }
 
         public void SetDescriptionKey(string descriptionKey)
         {
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException($"Can't call {nameof(SetDescriptionKey)} with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+
+            if (descriptionKey == _scratchpadsManager.ActiveScratchpad.DescriptionKey)
+                return;
+
             BeginChange();
 
-            _scratchpadsManager.ActiveScratchpad = _scratchpadsManager.ActiveScratchpad! with
-            {
-                RuntimeThought = _scratchpadsManager.ActiveScratchpad.RuntimeThought with
-                {
-                    DescriptionKey = descriptionKey,
-                }
-            };
+            _scratchpadsManager.ActiveScratchpad =
+                _scratchpadsManager.ActiveScratchpad with { DescriptionKey = descriptionKey };
 
             EndChange();
         }
 
         public void SetSide(CharacterSides side)
         {
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException($"Can't call {nameof(SetSide)} with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+
+            if (side == _scratchpadsManager.ActiveScratchpad.Side)
+                return;
+
             BeginChange();
 
-            _scratchpadsManager.ActiveScratchpad = _scratchpadsManager.ActiveScratchpad! with
-            {
-                RuntimeThought = _scratchpadsManager.ActiveScratchpad.RuntimeThought with
-                {
-                    Side = side
-                }
-            };
+            _scratchpadsManager.ActiveScratchpad =
+                _scratchpadsManager.ActiveScratchpad with { Side = side };
 
             EndChange();
         }
 
         public void SetEditorNote(string editorNote)
         {
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException($"Can't call {nameof(SetEditorNote)} with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+
+            if (editorNote == _scratchpadsManager.ActiveScratchpad.EditorNote)
+                return;
+
             BeginChange();
 
-            _scratchpadsManager.ActiveScratchpad = _scratchpadsManager.ActiveScratchpad! with { EditorNote = editorNote };
+            _scratchpadsManager.ActiveScratchpad =
+                _scratchpadsManager.ActiveScratchpad with { EditorNote = editorNote };
 
             EndChange();
         }
@@ -114,38 +127,41 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             {
                 case AddEditEnum.Edit:
 
-                    if (_scratchpadsManager.ActiveScratchpad is null)
+                    if (_selectionGuid is null)
+                        throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Edit} mode with null {nameof(_selectionGuid)}");
+
+                    if (_scratchpadsManager.EditScratchpad is null)
                         throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Edit} mode with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
 
-                    int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _scratchpadsManager.ActiveScratchpad.RuntimeThought.Guid);
+                    int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _selectionGuid);
 
                     if (index < 0)
-                        throw new InvalidOperationException($"No thought with id '{_scratchpadsManager.ActiveScratchpad.RuntimeThought.Guid}'");
+                        throw new InvalidOperationException($"No thought with id '{_selectionGuid}'");
 
                     // List is checked by reference. Prevent stacking state saving when there's no actual changes.
-                    if (_thoughts[index] == _scratchpadsManager.ActiveScratchpad)
+                    if (!_scratchpadsManager.EditScratchpad.HasChanges(_thoughts[index]))
                         return _thoughts[index].RuntimeThought.Guid;
 
                     BeginChange();
 
-                    _thoughts = _thoughts.SetItem(index, _scratchpadsManager.ActiveScratchpad!);
+                    _thoughts = _thoughts.SetItem(index, _scratchpadsManager.EditScratchpad.CreateFromCurrentValues(_selectionGuid.Value));
 
                     EndChange();
 
-                    return _scratchpadsManager.ActiveScratchpad.RuntimeThought.Guid;
+                    return _selectionGuid.Value;
 
                 case AddEditEnum.Add:
 
-                    if (_scratchpadsManager.ActiveScratchpad is null)
+                    if (_scratchpadsManager.AddScratchpad is null)
                         throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Add} mode with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
 
-                    ThoughtGuid addedGuid = _scratchpadsManager.ActiveScratchpad.RuntimeThought.Guid;
+                    ThoughtGuid addedGuid = new ThoughtGuid();
 
                     BeginChange();
 
-                    _thoughts = _thoughts.Add(_scratchpadsManager.ActiveScratchpad);
+                    _thoughts = _thoughts.Add(_scratchpadsManager.AddScratchpad.CreateFromCurrentValues(addedGuid));
 
-                    _scratchpadsManager.ActiveScratchpad = CreateDefaultEditorThought();
+                    _scratchpadsManager.AddScratchpad = _cachedDefaultScratchpad;
 
                     EndChange();
 
@@ -210,6 +226,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             if (!guid.HasValue)
             {
                 foundThought = null;
+
+                _scratchpadsManager.EditScratchpad = null;
             }
             else
             {
@@ -217,20 +235,27 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
                 if (foundThought is null)
                     throw new InvalidOperationException($"No thought with id '{guid}'");
+
+                if (_scratchpadsManager.EditScratchpad is null)
+                    _scratchpadsManager.EditScratchpad = _cachedDefaultScratchpad;
+
+                _scratchpadsManager.EditScratchpad =
+                    _scratchpadsManager.EditScratchpad with
+                    {
+                        NameKey = foundThought.RuntimeThought.NameKey,
+                        DescriptionKey = foundThought.RuntimeThought.DescriptionKey,
+
+                        Side = foundThought.RuntimeThought.Side,
+
+                        EditorNote = foundThought.EditorNote
+                    };
             }
 
-            _scratchpadsManager.EditScratchpad = foundThought;
             _selectionGuid = guid;
 
             if (!_scratchpadsManager.Selection.ChangeSelection(AddEditEnum.Edit))
                 OnThoughtSelectionChanged?.Invoke(foundThought);
         }
-
-        EditorThought CreateDefaultEditorThought() => new EditorThought(new Thought(
-            new ThoughtGuid(),
-            string.Empty,
-            string.Empty,
-            CharacterSides.Any));
 
         #region Exportables/Importables
 
@@ -259,22 +284,24 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            return new ThoughtsEditorState(_thoughts, _scratchpadsManager.AddScratchpad, _scratchpadsManager.EditScratchpad, ScratchpadsManager.Selection.CurrentSelection, _selectionGuid);
+            return new ThoughtsEditorState(_thoughts, _scratchpadsManager, _selectionGuid);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
         {
             // Selecting a thought or changing modes is not a state change.
             return a.Thoughts == b.Thoughts &&
-                a.AddBuilder == b.AddBuilder &&
-                a.EditBuilder == b.EditBuilder;
+                a.AddScratchpad == b.AddScratchpad &&
+                a.EditScratchpad == b.EditScratchpad;
         }
 
         protected override void ApplyRestoredState(ThoughtsEditorState newState)
         {
             _thoughts = newState.Thoughts;
-            _scratchpadsManager.AddScratchpad = newState.AddBuilder;
-            _scratchpadsManager.EditScratchpad = newState.EditBuilder;
+
+            _scratchpadsManager.AddScratchpad = newState.AddScratchpad;
+            _scratchpadsManager.EditScratchpad = newState.EditScratchpad;
+
             _selectionGuid = newState.ThoughtSelection;
 
             ScratchpadsManager.Selection.ChangeSelection(newState.Mode, invokeEvent: false);

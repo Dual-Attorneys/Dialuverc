@@ -5,3 +5,6 @@ dotnet_diagnostic.CA1050.severity = error
 
 # BannedSymbols.txt
 dotnet_diagnostic.RS0030.severity = error
+
+# Show unnecessary suppression of nullable warnings.
+dotnet_diagnostic.IDE0370.severity = warning
