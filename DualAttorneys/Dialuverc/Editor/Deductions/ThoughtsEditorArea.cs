@@ -13,8 +13,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {
-        internal const string PlaceholderLocaleId = "";
-
         ImmutableList<EditorThought> _thoughts = ImmutableList<EditorThought>.Empty;
         public IReadOnlyList<EditorThought> Thoughts => _thoughts;
 
