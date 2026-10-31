@@ -122,8 +122,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         }
 
         /// <summary>
-        /// Applies all changes done so far on the active builder to the <see cref="Thoughts"/> list.
-        /// <para>If <see cref="ScratchpadSelection.CurrentSelection"/> is <see cref="AddEditEnum.Add"/>, its builder is also reset.</para>
+        /// Applies all changes done so far on the <see cref="_scratchpadsManager.ActiveScratchpad"/> to the <see cref="Thoughts"/> list.
+        /// <para>If <see cref="ScratchpadSelection.CurrentSelection"/> is <see cref="AddEditEnum.Add"/>, its corresponding scratchpad is also reset.</para>
         /// </summary>
         public ThoughtGuid FinishBuilding()
         {
