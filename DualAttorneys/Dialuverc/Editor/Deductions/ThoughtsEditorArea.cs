@@ -53,8 +53,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetNameKey(string nameKey)
         {
+            ArgumentNullException.ThrowIfNull(nameKey, nameof(nameKey));
+
             if (_scratchpadsManager.ActiveScratchpad is null)
-                throw new InvalidOperationException($"Can't call {nameof(SetNameKey)} with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+                throw new InvalidOperationException("Can't set name key of a null scratchpad");
 
             if (nameKey == _scratchpadsManager.ActiveScratchpad.NameKey)
                 return;
@@ -69,8 +71,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetDescriptionKey(string descriptionKey)
         {
+            ArgumentNullException.ThrowIfNull(descriptionKey, nameof(descriptionKey));
+
             if (_scratchpadsManager.ActiveScratchpad is null)
-                throw new InvalidOperationException($"Can't call {nameof(SetDescriptionKey)} with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+                throw new InvalidOperationException($"Can't set description key of a null scratchpad");
 
             if (descriptionKey == _scratchpadsManager.ActiveScratchpad.DescriptionKey)
                 return;
@@ -86,7 +90,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public void SetSide(CharacterSides side)
         {
             if (_scratchpadsManager.ActiveScratchpad is null)
-                throw new InvalidOperationException($"Can't call {nameof(SetSide)} with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+                throw new InvalidOperationException($"Can't set side of a null scratchpad");
 
             if (side == _scratchpadsManager.ActiveScratchpad.Side)
                 return;
@@ -101,8 +105,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public void SetEditorNote(string editorNote)
         {
+            ArgumentNullException.ThrowIfNull(editorNote, nameof(editorNote));
+
             if (_scratchpadsManager.ActiveScratchpad is null)
-                throw new InvalidOperationException($"Can't call {nameof(SetEditorNote)} with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+                throw new InvalidOperationException($"Can't set editor note of a null scratchpad");
 
             if (editorNote == _scratchpadsManager.ActiveScratchpad.EditorNote)
                 return;
@@ -128,10 +134,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                 case AddEditEnum.Edit:
 
                     if (_selectionGuid is null)
-                        throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Edit} mode with null {nameof(_selectionGuid)}");
+                        throw new InvalidOperationException($"Can't commit changes to list with null Guid selection");
 
                     if (_scratchpadsManager.EditScratchpad is null)
-                        throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Edit} mode with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+                        throw new InvalidOperationException($"Can't commit changes to list with null editing scratchpad");
 
                     int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _selectionGuid);
 
@@ -153,7 +159,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                 case AddEditEnum.Add:
 
                     if (_scratchpadsManager.AddScratchpad is null)
-                        throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} in {AddEditEnum.Add} mode with null {nameof(_scratchpadsManager.ActiveScratchpad)}");
+                        throw new InvalidOperationException($"Can't commit new thought to list with null adding scratchpad");
 
                     ThoughtGuid addedGuid = new ThoughtGuid();
 
