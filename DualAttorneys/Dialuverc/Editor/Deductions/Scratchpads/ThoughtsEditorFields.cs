@@ -3,7 +3,7 @@ using DualAttorneys.Dialuverc.Deductions;
 namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 {
     /// <summary>
-    /// Groups all fields exposed through the UI for state management.
+    /// Groups all of <see cref="ThoughtsEditorArea"/>'s fields exposed through the UI for state management.
     /// </summary>
     public record class ThoughtsEditorFields
     {
