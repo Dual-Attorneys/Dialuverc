@@ -129,30 +129,32 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             EndChange();
         }
 
-        public void SetNameLocalization(string value)
+        public void SetNameLocalization(string nameLocalization)
         {
-            if (_scratchpadsManager.ActiveScratchpad is null)
-                throw new InvalidOperationException($"Can not call {nameof(SetNameLocalization)} with a null active scratchpad");
+            ArgumentNullException.ThrowIfNull(nameLocalization, nameof(nameLocalization));
 
-            ArgumentNullException.ThrowIfNull(value);
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException($"Can't set name localization of a null scratchpad");
 
             BeginChange();
 
-            _localizationManager.AddOrSetValue(_scratchpadsManager.ActiveScratchpad.NameKey, value);
+            _scratchpadsManager.ActiveScratchpad =
+                _scratchpadsManager.ActiveScratchpad with { NameLocalization = nameLocalization };
 
             EndChange();
         }
 
-        public void SetDescriptionLocalization(string value)
+        public void SetDescriptionLocalization(string descriptionLocalization)
         {
-            if (_scratchpadsManager.ActiveScratchpad is null)
-                throw new InvalidOperationException($"Can not call {nameof(SetDescriptionLocalization)} with a null active scratchpad");
+            ArgumentNullException.ThrowIfNull(descriptionLocalization, nameof(descriptionLocalization));
 
-            ArgumentNullException.ThrowIfNull(value);
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException($"Can't set description localization of a null scratchpad'");
 
             BeginChange();
 
-            _localizationManager.AddOrSetValue(_scratchpadsManager.ActiveScratchpad.DescriptionKey, value);
+            _scratchpadsManager.ActiveScratchpad =
+                _scratchpadsManager.ActiveScratchpad with { DescriptionLocalization = descriptionLocalization };
 
             EndChange();
         }
@@ -188,6 +190,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
                     _thoughts = _thoughts.SetItem(index, _scratchpadsManager.EditScratchpad.CreateFromCurrentValues(_selectionGuid.Value));
 
+                    UpdateLocalizationForCurrentLocale(_scratchpadsManager.EditScratchpad);
+
                     EndChange();
 
                     return _selectionGuid.Value;
@@ -203,6 +207,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
                     _thoughts = _thoughts.Add(_scratchpadsManager.AddScratchpad.CreateFromCurrentValues(addedGuid));
 
+                    // Before wiping the adding scratchpad.
+                    UpdateLocalizationForCurrentLocale(_scratchpadsManager.AddScratchpad);
+
                     _scratchpadsManager.AddScratchpad = _cachedDefaultScratchpad;
 
                     EndChange();
@@ -212,6 +219,12 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                 default:
                     throw new InvalidOperationException($"{currentSelection} is not a supported mode");
             }
+        }
+
+        void UpdateLocalizationForCurrentLocale(ThoughtsEditorFields source)
+        {
+            _localizationManager.AddOrSetValue(source.NameKey, source.NameLocalization);
+            _localizationManager.AddOrSetValue(source.DescriptionKey, source.DescriptionLocalization);
         }
 
         public bool RemoveThought(ThoughtGuid guid)
@@ -325,7 +338,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            return new ThoughtsEditorState(_thoughts, _scratchpadsManager, _selectionGuid);
+            return new ThoughtsEditorState(_thoughts, _scratchpadsManager, _selectionGuid, _localizationManager);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)

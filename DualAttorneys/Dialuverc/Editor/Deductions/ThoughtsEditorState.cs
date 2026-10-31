@@ -24,7 +24,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public readonly ThoughtGuid? ThoughtSelection;
 
-        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, AddEditScratchpads<ThoughtsEditorFields> scratchpads, ThoughtGuid? thoughtSelection)
+        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, AddEditScratchpads<ThoughtsEditorFields> scratchpads, ThoughtGuid? thoughtSelection, LocalizationStore localizationStore)
         {
             Thoughts = thoughts;
 
@@ -34,6 +34,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             Mode = scratchpads.Selection.Value;
 
             ThoughtSelection = thoughtSelection;
+
+            LocalizationLookup = localizationStore.Lookup;
         }
     }
 }

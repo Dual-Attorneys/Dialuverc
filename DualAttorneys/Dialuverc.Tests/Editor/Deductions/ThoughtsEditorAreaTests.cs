@@ -4,6 +4,7 @@ using Dialuverc.Editor.Base.IO;
 using Dialuverc.Editor.Base.StateTracking;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Observability;
+using Dialuverc.Editor.Base.Localization;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
@@ -439,6 +440,31 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.SetNameLocalization("Thought name");
 
             Assert.That(_area.CurrentStateIndex, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void LocalizationOnlyExistsAfterFinishing()
+        {
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            _area.SetNameLocalization("Thought name");
+            _area.SetDescriptionLocalization("Thought description");
+
+            IReadOnlyLocalizationStore localizationStore = _area.LocalizationManager;
+
+            Assert.That(localizationStore.TryGetValue("nameKey", out string? foundName), Is.False);
+            Assert.That(localizationStore.TryGetValue("descriptionKey", out string? foundDescription), Is.False);
+
+            _area.FinishBuilding();
+
+            Assert.That(localizationStore.TryGetValue("nameKey", out foundName), Is.True);
+            Assert.That(localizationStore.TryGetValue("descriptionKey", out foundDescription), Is.True);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(localizationStore.TryGetValue("nameKey", out foundName), Is.False);
+            Assert.That(localizationStore.TryGetValue("descriptionKey", out foundDescription), Is.False);
         }
 
         #region Helpers
