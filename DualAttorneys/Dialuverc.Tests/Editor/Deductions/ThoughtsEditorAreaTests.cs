@@ -23,19 +23,19 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
 
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad!.RuntimeThought.NameKey, Is.Empty);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.Empty);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.Side, Is.EqualTo(CharacterSides.Any));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad!.NameKey, Is.Empty);
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.DescriptionKey, Is.Empty);
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.Side, Is.EqualTo(CharacterSides.Any));
             Assert.That(_area.ScratchpadsManager.ActiveScratchpad.EditorNote, Is.Empty);
 
             _area.SetNameKey("nameKey");
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.NameKey, Is.EqualTo("nameKey"));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.NameKey, Is.EqualTo("nameKey"));
 
             _area.SetDescriptionKey("descriptionKey");
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.EqualTo("descriptionKey"));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.DescriptionKey, Is.EqualTo("descriptionKey"));
 
             _area.SetSide(CharacterSides.Tychon);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.Side, Is.EqualTo(CharacterSides.Tychon));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.Side, Is.EqualTo(CharacterSides.Tychon));
 
             _area.SetEditorNote("editorNote");
             Assert.That(_area.ScratchpadsManager.ActiveScratchpad.EditorNote, Is.EqualTo("editorNote"));
@@ -55,22 +55,22 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(_area.ScratchpadsManager.ActiveScratchpad!.EditorNote, Is.Empty);
 
             _area.RestorePreviousState(RestoreDirection.Previous);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.Side, Is.EqualTo(CharacterSides.Any));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.Side, Is.EqualTo(CharacterSides.Any));
 
             _area.RestorePreviousState(RestoreDirection.Previous);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.Empty);
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.DescriptionKey, Is.Empty);
 
             _area.RestorePreviousState(RestoreDirection.Previous);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.NameKey, Is.Empty);
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.NameKey, Is.Empty);
 
             _area.RestorePreviousState(RestoreDirection.Next);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.NameKey, Is.EqualTo("nameKey"));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.NameKey, Is.EqualTo("nameKey"));
 
             _area.RestorePreviousState(RestoreDirection.Next);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.DescriptionKey, Is.EqualTo("descriptionKey"));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.DescriptionKey, Is.EqualTo("descriptionKey"));
 
             _area.RestorePreviousState(RestoreDirection.Next);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.RuntimeThought.Side, Is.EqualTo(CharacterSides.Tychon));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.Side, Is.EqualTo(CharacterSides.Tychon));
 
             _area.RestorePreviousState(RestoreDirection.Next);
             Assert.That(_area.ScratchpadsManager.ActiveScratchpad.EditorNote, Is.EqualTo("editorNote"));
@@ -82,7 +82,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
 
             _area.SetNameKey("nameKey");
-            _area.SetDescriptionKey(_area.ScratchpadsManager.ActiveScratchpad!.RuntimeThought.DescriptionKey);
+            _area.SetDescriptionKey(_area.ScratchpadsManager.ActiveScratchpad!.DescriptionKey);
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
@@ -118,14 +118,14 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             PopulateSampleThought();
 
-            EditorThought lastThought = _area.ScratchpadsManager.ActiveScratchpad!;
+            ThoughtsEditorFields lastFieldsState = _area.ScratchpadsManager.ActiveScratchpad!;
 
             _area.FinishBuilding();
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(1));
-            Assert.That(_area.Thoughts[0], Is.EqualTo(lastThought));
+            Assert.That(lastFieldsState.HasChanges(_area.Thoughts[0]), Is.False);
 
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad, Is.Not.EqualTo(lastThought));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad, Is.Not.EqualTo(lastFieldsState));
         }
 
         [Test]
@@ -135,19 +135,19 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             PopulateSampleThought();
 
-            EditorThought lastThought = _area.ScratchpadsManager.ActiveScratchpad!;
+            ThoughtsEditorFields lastFieldsState = _area.ScratchpadsManager.ActiveScratchpad!;
 
             _area.FinishBuilding();
 
             _area.RestorePreviousState(RestoreDirection.Previous);
 
             Assert.That(_area.Thoughts, Is.Empty);
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad, Is.EqualTo(lastThought));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad, Is.EqualTo(lastFieldsState));
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
             Assert.That(_area.Thoughts, Has.Count.EqualTo(1));
-            Assert.That(_area.Thoughts[0], Is.EqualTo(lastThought));
+            Assert.That(lastFieldsState.HasChanges(_area.Thoughts[0]), Is.False);
         }
 
         [Test]
@@ -240,7 +240,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.SelectThought(guid1);
 
             Assert.That(_area.ScratchpadsManager.Selection.CurrentSelection, Is.EqualTo(AddEditEnum.Edit));
-            Assert.That(_area.ScratchpadsManager.ActiveScratchpad, Is.EqualTo(_area.Thoughts[0]));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad!.HasChanges(_area.Thoughts[0]), Is.False);
             Assert.That(changeModeInvokations, Is.EqualTo(1));
             Assert.That(changeSelectInvokations, Is.Zero);
             // When in Add, only OnModeChanged is invoked, which leaves currentSelection null.
@@ -251,7 +251,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(changeModeInvokations, Is.EqualTo(1));
             Assert.That(changeSelectInvokations, Is.EqualTo(1));
             Assert.That(currentSelection, Is.EqualTo(_area.Thoughts[1]));
-            Assert.That(currentSelection, Is.EqualTo(_area.ScratchpadsManager.ActiveScratchpad));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.HasChanges(currentSelection), Is.False);
         }
 
         [Test]
@@ -332,7 +332,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(_area.Thoughts[0].RuntimeThought.Side, Is.EqualTo(CharacterSides.Forger));
             Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo("editedEditorNote"));
 
-            Assert.That(_area.Thoughts[0], Is.EqualTo(_area.ScratchpadsManager.ActiveScratchpad));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad!.HasChanges(_area.Thoughts[0]), Is.False);
         }
 
         [Test]
@@ -348,11 +348,11 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.FinishBuilding();
             _area.RestorePreviousState(RestoreDirection.Previous);
 
-            Assert.That(_area.Thoughts[0], Is.Not.EqualTo(_area.ScratchpadsManager.ActiveScratchpad));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad!.HasChanges(_area.Thoughts[0]), Is.True);
 
             _area.RestorePreviousState(RestoreDirection.Next);
 
-            Assert.That(_area.Thoughts[0], Is.EqualTo(_area.ScratchpadsManager.ActiveScratchpad));
+            Assert.That(_area.ScratchpadsManager.ActiveScratchpad.HasChanges(_area.Thoughts[0]), Is.False);
         }
 
         [Test]
@@ -421,7 +421,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
         private class TestThoughtsEditorArea : ThoughtsEditorArea
         {
-            public new int CurrentStateIndex => base.CurrentState;
+            public new int CurrentStateIndex => base.CurrentStateIndex;
         }
 
         #endregion

@@ -11,8 +11,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
     {
         public readonly ImmutableList<EditorThought> Thoughts;
 
-        public readonly EditorThought? AddBuilder;
-        public readonly EditorThought? EditBuilder;
+        public readonly ThoughtsEditorFields? AddScratchpad;
+        public readonly ThoughtsEditorFields? EditScratchpad;
 
         public readonly AddEditEnum Mode;
 
@@ -21,12 +21,15 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public readonly ThoughtGuid? ThoughtSelection;
 
-        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, EditorThought? addBuilder, EditorThought? editBuilder, AddEditEnum mode, ThoughtGuid? thoughtSelection)
+        public ThoughtsEditorState(ImmutableList<EditorThought> thoughts, AddEditScratchpads<ThoughtsEditorFields> scratchpads, ThoughtGuid? thoughtSelection)
         {
             Thoughts = thoughts;
-            AddBuilder = addBuilder;
-            EditBuilder = editBuilder;
-            Mode = mode;
+
+            AddScratchpad = scratchpads.AddScratchpad;
+            EditScratchpad = scratchpads.EditScratchpad;
+
+            Mode = scratchpads.Selection.CurrentSelection;
+
             ThoughtSelection = thoughtSelection;
         }
     }
