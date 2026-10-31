@@ -14,12 +14,12 @@ namespace Dialuverc.Editor.Base.StateTracking
         readonly List<T> _savedStates = new List<T>();
         protected IReadOnlyList<T> SavedStates => _savedStates;
 
-        protected int CurrentState { get; private set; }
+        protected int CurrentStateIndex { get; private set; }
 
         protected bool IsRestoringPreviousState { get; private set; }
 
-        public bool CanUndo => _savedStates.Count > 0 && CurrentState > 0;
-        public bool CanRedo => CurrentState < _savedStates.Count - 1;
+        public bool CanUndo => _savedStates.Count > 0 && CurrentStateIndex > 0;
+        public bool CanRedo => CurrentStateIndex < _savedStates.Count - 1;
 
         /// <summary>
         /// Invoked when state is saved or restored.
@@ -59,18 +59,18 @@ namespace Dialuverc.Editor.Base.StateTracking
             if (stateToSave is null)
                 throw new InvalidOperationException($"Can't save a null state");
 
-            if (_savedStates.Count > 0 && CheckStateEquality(_savedStates[CurrentState], stateToSave))
+            if (_savedStates.Count > 0 && CheckStateEquality(_savedStates[CurrentStateIndex], stateToSave))
                 return;
 
-            if (CurrentState < _savedStates.Count - 1)
-                _savedStates.RemoveRange(CurrentState + 1, _savedStates.Count - CurrentState - 1);
+            if (CurrentStateIndex < _savedStates.Count - 1)
+                _savedStates.RemoveRange(CurrentStateIndex + 1, _savedStates.Count - CurrentStateIndex - 1);
 
             if (_savedStates.Count >= MaxStates)
                 _savedStates.RemoveAt(0);
 
             _savedStates.Add(stateToSave);
 
-            CurrentState = _savedStates.Count - 1;
+            CurrentStateIndex = _savedStates.Count - 1;
 
             // This will get called twice on the first commit (MakeSureBaseStateIsSaved forces a Commit).
             OnStateChanged?.Invoke();
@@ -84,7 +84,7 @@ namespace Dialuverc.Editor.Base.StateTracking
             if (_savedStates.Count == 0)
                 return;
 
-            int index = CurrentState + (int)direction;
+            int index = CurrentStateIndex + (int)direction;
 
             if (index < 0 || index >= _savedStates.Count)
                 return;
@@ -93,7 +93,7 @@ namespace Dialuverc.Editor.Base.StateTracking
 
             ApplyRestoredState(_savedStates[index]);
 
-            CurrentState = index;
+            CurrentStateIndex = index;
 
             IsRestoringPreviousState = false;
 
@@ -115,7 +115,7 @@ namespace Dialuverc.Editor.Base.StateTracking
 
             _savedStates.Clear();
 
-            CurrentState = default;
+            CurrentStateIndex = default;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Dialuverc.Editor.Base
 
         // Do not check for null here as default state *could* be null.
         public bool HasUnsavedChanges => SavedStates.Count > 0 &&
-            !CheckStateEquality(_lastSavedState, SavedStates[CurrentState]);
+            !CheckStateEquality(_lastSavedState, SavedStates[CurrentStateIndex]);
 
         protected override void MakeSureBaseStateIsSaved()
         {
@@ -41,7 +41,7 @@ namespace Dialuverc.Editor.Base
             if (SavedStates.Count == 0)
                 return;
 
-            _lastSavedState = SavedStates[CurrentState];
+            _lastSavedState = SavedStates[CurrentStateIndex];
         }
 
         public virtual IReadOnlyList<Problem> Verify() { return Array.Empty<Problem>(); }
