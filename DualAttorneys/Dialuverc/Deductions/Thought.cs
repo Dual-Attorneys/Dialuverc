@@ -14,11 +14,8 @@ namespace DualAttorneys.Dialuverc.Deductions
 
         public Thought(ThoughtGuid guid, string nameKey, string descriptionKey, CharacterSides side)
         {
-            if (nameKey is null)
-                throw new ArgumentNullException(nameof(nameKey), "Name can't be null");
-
-            if (descriptionKey is null)
-                throw new ArgumentNullException(nameof(descriptionKey), "Description can't be null");
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(nameKey, nameof(nameKey));
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(descriptionKey, nameof(descriptionKey));
 
             Guid = guid;
 
