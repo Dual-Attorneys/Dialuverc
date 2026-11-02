@@ -1,3 +1,4 @@
+using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
@@ -7,6 +8,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
     /// </summary>
     public class ThoughtsFilter
     {
+        readonly IReadOnlyLocalizationStore _localizationStore;
+
         public CharacterSides SideFilter { get; set; } = CharacterSides.Any;
 
         /// <summary>
@@ -20,6 +23,13 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public bool Strict { get; set; } = false;
 
+        public ThoughtsFilter(IReadOnlyLocalizationStore localizationStore)
+        {
+            ArgumentNullException.ThrowIfNull(localizationStore, nameof(localizationStore));
+
+            _localizationStore = localizationStore;
+        }
+
         bool PassesSidesFilter(CharacterSides side)
         {
             if (SideFilter == side)
@@ -32,20 +42,20 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             return false;
         }
 
-        bool PassesNameKeyFilter(string nameKey)
+        bool PassesNameFilter(string nameKey)
         {
-            if (nameKey is null)
-                throw new ArgumentNullException(nameof(nameKey), $"A {nameof(Thought)} can't have a null name key");
-
             if (string.IsNullOrWhiteSpace(NameKeyFilter))
                 return true;
 
-            return nameKey.Contains(NameKeyFilter, StringComparison.OrdinalIgnoreCase);
+            if (!_localizationStore.TryGetValue(nameKey, out string? foundValue))
+                return true;
+
+            return foundValue.Contains(NameKeyFilter, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
         /// Whether the <paramref name="thought"/> passes all current filters.
         /// </summary>
-        public bool PassesAll(Thought thought) => PassesSidesFilter(thought.Side) && PassesNameKeyFilter(thought.NameKey);
+        public bool PassesAll(Thought thought) => PassesSidesFilter(thought.Side) && PassesNameFilter(thought.NameKey);
     }
 }

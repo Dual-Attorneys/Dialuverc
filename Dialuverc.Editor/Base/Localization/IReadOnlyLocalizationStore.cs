@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dialuverc.Editor.Base.Localization
 {
@@ -7,6 +8,6 @@ namespace Dialuverc.Editor.Base.Localization
     /// </summary>
     public interface IReadOnlyLocalizationStore : INotifyCollectionChanged
     {
-        public bool TryGetValue(string key, out string? value);
+        public bool TryGetValue(string key, [NotNullWhen(true)] out string? value);
     }
 }
