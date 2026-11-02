@@ -1,6 +1,7 @@
 using Dialuverc.Editor.Base.Observability;
 using System.Collections.Immutable;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dialuverc.Editor.Base.Localization
 {
@@ -61,7 +62,7 @@ namespace Dialuverc.Editor.Base.Localization
                     new KeyValuePair<string, string>(key, value))));
         }
 
-        public bool TryGetValue(string key, out string? value)
+        public bool TryGetValue(string key, [NotNullWhen(true)] out string? value)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(key, nameof(key));
 

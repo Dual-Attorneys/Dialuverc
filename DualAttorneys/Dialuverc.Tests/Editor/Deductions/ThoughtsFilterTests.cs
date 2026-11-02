@@ -68,13 +68,13 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void AllPassWithBlankOrNullString()
         {
-            _filter.NameKeyFilter = "       ";
+            _filter.TextFilter = "       ";
 
             Assert.That(_filter.PassesAll(_tychonThought), Is.True);
             Assert.That(_filter.PassesAll(_forgerThought), Is.True);
             Assert.That(_filter.PassesAll(_anyThought), Is.True);
 
-            _filter.NameKeyFilter = null;
+            _filter.TextFilter = null;
 
             Assert.That(_filter.PassesAll(_tychonThought), Is.True);
             Assert.That(_filter.PassesAll(_forgerThought), Is.True);
@@ -86,7 +86,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             Assert.That(_forgerThought.NameKey.All(c => char.IsUpper(c)), Is.False);
 
-            _filter.NameKeyFilter = _forgerThought.NameKey.ToUpper();
+            _filter.TextFilter = _forgerThought.NameKey.ToUpper();
 
             Assert.That(_filter.PassesAll(_tychonThought), Is.False);
             Assert.That(_filter.PassesAll(_forgerThought), Is.True);
@@ -96,7 +96,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void PartialStringMatchPasses()
         {
-            _filter.NameKeyFilter = "One";
+            _filter.TextFilter = "One";
 
             Assert.That(_filter.PassesAll(_tychonThought), Is.True);
             Assert.That(_filter.PassesAll(_forgerThought), Is.False);
@@ -106,7 +106,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void NoPassFilterCombo()
         {
-            _filter.NameKeyFilter = "Two";
+            _filter.TextFilter = "Two";
             _filter.SideFilter = CharacterSides.Tychon;
 
             Assert.That(_filter.PassesAll(_tychonThought), Is.False);
