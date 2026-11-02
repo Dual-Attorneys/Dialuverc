@@ -13,7 +13,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public CharacterSides SideFilter { get; set; } = CharacterSides.Any;
 
         /// <summary>
-        /// An always-case-insensitive string that must be contained in a <see cref="Thought"/>'s name OR description to pass.
+        /// An always-case-insensitive string that must be contained in a <see cref="Thought"/>'s localized name OR description to pass.
         /// </summary>
         public string TextFilter { get; set; } = string.Empty;
 
