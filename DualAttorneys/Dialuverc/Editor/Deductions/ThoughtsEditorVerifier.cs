@@ -14,19 +14,19 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             if (scratchpads.AddScratchpad is not null)
             {
                 if (localizationStore.TryGetValue(scratchpads.AddScratchpad.NameKey, out string? duplicateNameKey))
-                    VerifyPossibleKeyDuplication(duplicateNameKey!, t => t.RuntimeThought.NameKey, thoughts, problems);
+                    VerifyPossibleKeyDuplication(duplicateNameKey, t => t.RuntimeThought.NameKey, thoughts, problems);
 
                 if (localizationStore.TryGetValue(scratchpads.AddScratchpad.DescriptionKey, out string? duplicateDescriptionKey))
-                    VerifyPossibleKeyDuplication(duplicateDescriptionKey!, t => t.RuntimeThought.DescriptionKey, thoughts, problems);
+                    VerifyPossibleKeyDuplication(duplicateDescriptionKey, t => t.RuntimeThought.DescriptionKey, thoughts, problems);
             }
 
             if (scratchpads.EditScratchpad is not null)
             {
                 if (localizationStore.TryGetValue(scratchpads.EditScratchpad.NameKey, out string? duplicateNameKey))
-                    VerifyPossibleKeyDuplication(duplicateNameKey!, t => t.RuntimeThought.NameKey, thoughts, problems);
+                    VerifyPossibleKeyDuplication(duplicateNameKey, t => t.RuntimeThought.NameKey, thoughts, problems);
 
                 if (localizationStore.TryGetValue(scratchpads.EditScratchpad.DescriptionKey, out string? duplicateDescriptionKey))
-                    VerifyPossibleKeyDuplication(duplicateDescriptionKey!, t => t.RuntimeThought.DescriptionKey, thoughts, problems);
+                    VerifyPossibleKeyDuplication(duplicateDescriptionKey, t => t.RuntimeThought.DescriptionKey, thoughts, problems);
             }
 
             return problems;
