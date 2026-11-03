@@ -29,7 +29,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             void AssertForNFields(int fields)
             {
-                IReadOnlyList<Problem> foundProblems = ThoughtsEditorVerifier.Run(_scratchpads, _thoughts, _localizationStore);
+                IReadOnlyList<Problem> foundProblems = ThoughtsEditorVerifier.Run(_scratchpads, null, _thoughts, _localizationStore);
 
                 Assert.That(foundProblems, Has.Count.EqualTo(fields));
                 Assert.That(foundProblems.Count(p => p.Severity == ProblemSeverity.Error), Is.EqualTo(fields));
@@ -71,6 +71,31 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             };
 
             AssertForNFields(4);
+        }
+
+        [Test]
+        public void EditedThoughtNotCountedForDuplication()
+        {
+            ThoughtGuid editedGuid = new ThoughtGuid();
+
+            _thoughts.Add(new EditorThought(new Thought(editedGuid, "nameKey", "descriptionKey", CharacterSides.Any)));
+
+            _localizationStore.Lookup.Add("nameKey", "value");
+            _localizationStore.Lookup.Add("descriptionKey", "value");
+
+            _scratchpads.EditScratchpad = new ThoughtsEditorFields()
+            {
+                NameKey = "nameKey",
+                DescriptionKey = "descriptionKey",
+            };
+
+            IReadOnlyList<Problem> foundProblems = ThoughtsEditorVerifier.Run(_scratchpads, editedGuid, _thoughts, _localizationStore);
+
+            Assert.That(foundProblems, Is.Empty);
+
+            foundProblems = ThoughtsEditorVerifier.Run(_scratchpads, new ThoughtGuid(), _thoughts, _localizationStore);
+
+            Assert.That(foundProblems, Is.Not.Empty);
         }
 
         // Mocks a localization store for a single locale.

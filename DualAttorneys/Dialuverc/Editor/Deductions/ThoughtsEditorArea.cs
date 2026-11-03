@@ -362,7 +362,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             ScratchpadsManager.Selection.ChangeValue(newState.Mode, invokeEvent: false);
         }
 
-        public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(_scratchpadsManager, _thoughts, _localizationManager);
+        public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(_scratchpadsManager, _selectionGuid, _thoughts, _localizationManager);
 
         #endregion
     }

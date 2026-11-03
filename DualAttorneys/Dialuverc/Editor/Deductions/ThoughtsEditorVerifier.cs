@@ -1,40 +1,59 @@
 using Dialuverc.Editor.Base.Extensions;
 using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Verifier;
+using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     internal static class ThoughtsEditorVerifier
     {
-        public static IReadOnlyList<Problem> Run(AddEditScratchpads<ThoughtsEditorFields> scratchpads, IList<EditorThought> thoughts, IReadOnlyLocalizationStore localizationStore)
+        public static IReadOnlyList<Problem> Run(AddEditScratchpads<ThoughtsEditorFields> scratchpads, ThoughtGuid? selectionGuid, IList<EditorThought> thoughts, IReadOnlyLocalizationStore localizationStore)
         {
             List<Problem> problems = new List<Problem>();
 
             if (scratchpads.AddScratchpad is not null)
             {
-                if (localizationStore.TryGetValue(scratchpads.AddScratchpad.NameKey, out string? duplicateNameKey))
-                    VerifyPossibleKeyDuplication(scratchpads.AddScratchpad.NameKey, t => t.RuntimeThought.NameKey, thoughts, problems);
+                string nameKey = scratchpads.AddScratchpad.NameKey;
 
-                if (localizationStore.TryGetValue(scratchpads.AddScratchpad.DescriptionKey, out string? duplicateDescriptionKey))
-                    VerifyPossibleKeyDuplication(scratchpads.AddScratchpad.DescriptionKey, t => t.RuntimeThought.DescriptionKey, thoughts, problems);
+                if (localizationStore.TryGetValue(nameKey, out string? duplicateNameKey))
+                    VerifyPossibleKeyDuplication(nameKey,
+                        t => t.RuntimeThought.NameKey == nameKey,
+                        thoughts, problems);
+
+                string descriptionKey = scratchpads.AddScratchpad.DescriptionKey;
+
+                if (localizationStore.TryGetValue(descriptionKey, out string? duplicateDescriptionKey))
+                    VerifyPossibleKeyDuplication(descriptionKey,
+                        t => t.RuntimeThought.DescriptionKey == descriptionKey,
+                        thoughts, problems);
             }
 
+            // Check whether the match's Guid is the same as the thought we're editing.
+            // If that's the case, there's no actual duplicated keys.
             if (scratchpads.EditScratchpad is not null)
             {
-                if (localizationStore.TryGetValue(scratchpads.EditScratchpad.NameKey, out string? duplicateNameKey))
-                    VerifyPossibleKeyDuplication(scratchpads.EditScratchpad.NameKey, t => t.RuntimeThought.NameKey, thoughts, problems);
+                string nameKey = scratchpads.EditScratchpad.NameKey;
 
-                if (localizationStore.TryGetValue(scratchpads.EditScratchpad.DescriptionKey, out string? duplicateDescriptionKey))
-                    VerifyPossibleKeyDuplication(scratchpads.EditScratchpad.DescriptionKey, t => t.RuntimeThought.DescriptionKey, thoughts, problems);
+                if (localizationStore.TryGetValue(nameKey, out string? duplicateNameKey))
+                    VerifyPossibleKeyDuplication(nameKey,
+                        t => t.RuntimeThought.NameKey == nameKey && t.RuntimeThought.Guid != selectionGuid,
+                        thoughts, problems);
+
+                string descriptionKey = scratchpads.EditScratchpad.DescriptionKey;
+
+                if (localizationStore.TryGetValue(descriptionKey, out string? duplicateDescriptionKey))
+                    VerifyPossibleKeyDuplication(descriptionKey,
+                        t => t.RuntimeThought.DescriptionKey == descriptionKey && t.RuntimeThought.Guid != selectionGuid,
+                        thoughts, problems);
             }
 
             return problems;
         }
 
-        static void VerifyPossibleKeyDuplication(string keyToVerify, Func<EditorThought, string> getter, IList<EditorThought> thoughts,List<Problem> problemsList)
+        static void VerifyPossibleKeyDuplication(string keyToVerify, Predicate<EditorThought> match, IList<EditorThought> thoughts, List<Problem> problemsList)
         {
-            int indexOfThought = thoughts.FindIndex(t => getter(t) == keyToVerify);
+            int indexOfThought = thoughts.FindIndex(match);
 
             // Allow re-defining a key when no Thought is actually using it.
             if (indexOfThought < 0)
