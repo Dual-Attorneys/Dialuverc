@@ -1,6 +1,5 @@
 using Dialuverc.Editor.Base.Observability;
 using System.Collections.Immutable;
-using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Dialuverc.Editor.Base.Localization
