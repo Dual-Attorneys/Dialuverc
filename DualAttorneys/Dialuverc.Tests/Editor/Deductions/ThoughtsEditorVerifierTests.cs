@@ -1,7 +1,4 @@
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
-    internal class ThoughtsEditorVerifierTests
-    {
-
-    }
+    internal class ThoughtsEditorVerifierTests { }
 }
