@@ -14,10 +14,7 @@ namespace Dialuverc.Editor.Base.Localization
 
         public string KeysNamespace { get; private set; }
 
-        /// <summary>
-        /// Notifies consumers that the key-value pair they're using may be outdated (or no longer existing).
-        /// </summary>
-        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+        public event EventHandler<DictionaryChangeEventArgs<string, ICollection<KeyValuePair<string, string?>>>>? CollectionChanged;
 
         // Keyed by locale and then by key.
         public ImmutableDictionary<string, ImmutableDictionary<string, string>> Lookup { get; set; }
@@ -39,27 +36,55 @@ namespace Dialuverc.Editor.Base.Localization
 
             ThrowIfLocaleChoiceIsInvalid();
 
-            NotifyCollectionChangedAction changeType;
+            DictionaryChangeEventArgs<string, ICollection<KeyValuePair<string, string?>>> eventArgs;
 
             if (!Lookup.TryGetValue(_localeChoice.Value!, out ImmutableDictionary<string, string>? lookupForKey))
             {
                 lookupForKey = ImmutableDictionary<string, string>.Empty.Add(key, value);
 
-                changeType = NotifyCollectionChangedAction.Add;
+                eventArgs = new DictionaryChangeEventArgs<string, ICollection<KeyValuePair<string, string?>>>
+                (
+                    DictionaryChangeType.Add,
+                    new KeyValuePair<string, ICollection<KeyValuePair<string, string?>>>
+                    (
+                        _localeChoice.Value!,
+                        new KeyValuePair<string, string?>[]
+                        {
+                            new KeyValuePair<string, string?>(key, value)
+                        }
+                    )
+                );
             }
             else
             {
-                lookupForKey = lookupForKey.SetItem(key, value);
+                lookupForKey.TryGetValue(key, out string? previousValue);
 
-                changeType = NotifyCollectionChangedAction.Replace;
+                eventArgs = new DictionaryChangeEventArgs<string, ICollection<KeyValuePair<string, string?>>>
+                (
+                    new KeyValuePair<string, ICollection<KeyValuePair<string, string?>>>
+                    (
+                        _localeChoice.Value!,
+                        new KeyValuePair<string, string?>[]
+                        {
+                            new KeyValuePair<string, string?>(key, value)
+                        }
+                    ),
+                    new KeyValuePair<string, ICollection<KeyValuePair<string, string?>>>
+                    (
+                        _localeChoice.Value!,
+                        new KeyValuePair<string, string?>[]
+                        {
+                            new KeyValuePair<string, string?>(key, previousValue)
+                        }
+                    )
+                );
+
+                lookupForKey = lookupForKey.SetItem(key, value);
             }
 
             Lookup = Lookup.SetItem(_localeChoice.Value!, lookupForKey);
 
-            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(changeType,
-                new KeyValuePair<string, KeyValuePair<string, string>>(
-                    _localeChoice.Value!,
-                    new KeyValuePair<string, string>(key, value))));
+            CollectionChanged?.Invoke(this, eventArgs);
         }
 
         public bool TryGetValue(string key, [NotNullWhen(true)] out string? value)
