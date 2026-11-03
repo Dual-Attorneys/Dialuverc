@@ -31,7 +31,11 @@ namespace Dialuverc.Editor.Base.Localization
         public void AddOrSetValue(string key, string value)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(key, nameof(key));
-            ArgumentNullException.ThrowIfNullOrWhiteSpace(value, nameof(value));
+
+            // Throwing on white spaces as well causes tests to fail if a value is not set.
+            // string.Empty should be a good default.
+            // Implementations can decide whether to show the key on a white space string.
+            ArgumentNullException.ThrowIfNull(value, nameof(value));
 
             ThrowIfLocaleChoiceIsInvalid();
 

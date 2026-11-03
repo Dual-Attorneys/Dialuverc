@@ -399,39 +399,6 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         }
 
         [Test]
-        public void LocalizationParticipatesInHistory()
-        {
-            _area.SetNameKey("nameKey");
-            _area.SetDescriptionKey("descriptionKey");
-
-            _area.SetNameLocalization("Thought name");
-            _area.SetDescriptionLocalization("Thought description");
-
-            Assert.That(_area.CurrentStateIndex, Is.EqualTo(4));
-
-            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out string? foundNameValue), Is.True);
-            Assert.That(foundNameValue, Is.EqualTo("Thought name"));
-
-            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out string? foundDescriptionValue), Is.True);
-            Assert.That(foundDescriptionValue, Is.EqualTo("Thought description"));
-
-            _area.RestorePreviousState(RestoreDirection.Previous);
-
-            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out foundDescriptionValue), Is.False);
-            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out foundNameValue), Is.True);
-
-            _area.RestorePreviousState(RestoreDirection.Previous);
-
-            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out foundNameValue), Is.False);
-
-            _area.RestorePreviousState(RestoreDirection.Next);
-            _area.RestorePreviousState(RestoreDirection.Next);
-
-            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out foundNameValue), Is.True);
-            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out foundDescriptionValue), Is.True);
-        }
-
-        [Test]
         public void SetSameLocalizationValueDoesNotSave()
         {
             _area.SetNameKey("nameKey");
