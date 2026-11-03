@@ -18,8 +18,12 @@ namespace Dialuverc.Editor.Tests.Base
         [Test]
         public void AddKeyValuePairEventFiresCorrectly()
         {
+            bool eventFired = false;
+
             _localizationStore.CollectionChanged += (sender, args) =>
             {
+                eventFired = true;
+
                 Assert.That(sender, Is.EqualTo(_localizationStore));
                 Assert.That(args.NewItems, Has.Count.EqualTo(1));
                 Assert.That(args.OldItems, Is.Null);
@@ -37,15 +41,21 @@ namespace Dialuverc.Editor.Tests.Base
             };
 
             _localizationStore.AddOrSetValue("key", "value");
+
+            Assert.That(eventFired, Is.True);
         }
 
         [Test]
         public void ReplaceValueEventFiresCorrectly()
         {
+            bool eventFired = false;
+
             _localizationStore.AddOrSetValue("key", "oldValue");
 
             _localizationStore.CollectionChanged += (sender, args) =>
             {
+                eventFired = true;
+
                 Assert.That(sender, Is.EqualTo(_localizationStore));
                 Assert.That(args.NewItems, Has.Count.EqualTo(1));
                 Assert.That(args.OldItems, Has.Count.EqualTo(1));
@@ -73,11 +83,15 @@ namespace Dialuverc.Editor.Tests.Base
             };
 
             _localizationStore.AddOrSetValue("key", "newValue");
+
+            Assert.That(eventFired, Is.True);
         }
 
         [Test]
         public void RemoveKeyEventFiresCorrectly()
         {
+            bool eventFired = false;
+
             _localizationStore.AddOrSetValue("key", "it-IT");
             _localizationStore.AddOrSetValue("differentKey", "it-IT");
 
@@ -89,6 +103,8 @@ namespace Dialuverc.Editor.Tests.Base
 
             _localizationStore.CollectionChanged += (sender, args) =>
             {
+                eventFired = true;
+
                 Assert.That(sender, Is.EqualTo(_localizationStore));
                 Assert.That(args.NewItems, Is.Null);
                 Assert.That(args.OldItems, Has.Count.EqualTo(2));
@@ -117,6 +133,8 @@ namespace Dialuverc.Editor.Tests.Base
             };
 
             _localizationStore.RemoveKeyForAllLocales("key");
+
+            Assert.That(eventFired, Is.True);
         }
     }
 }
