@@ -74,5 +74,49 @@ namespace Dialuverc.Editor.Tests.Base
 
             _localizationStore.AddOrSetValue("key", "newValue");
         }
+
+        [Test]
+        public void RemoveKeyEventFiresCorrectly()
+        {
+            _localizationStore.AddOrSetValue("key", "it-IT");
+            _localizationStore.AddOrSetValue("differentKey", "it-IT");
+
+            _localeChoice.ChangeValue("en-US");
+            _localizationStore.AddOrSetValue("key", "en-US");
+
+            _localeChoice.ChangeValue("en-BR");
+            _localizationStore.AddOrSetValue("differentKey", "en-BR");
+
+            _localizationStore.CollectionChanged += (sender, args) =>
+            {
+                Assert.That(sender, Is.EqualTo(_localizationStore));
+                Assert.That(args.NewItems, Is.Null);
+                Assert.That(args.OldItems, Has.Count.EqualTo(2));
+                Assert.That(args.ChangeType, Is.EqualTo(DictionaryChangeType.Remove));
+
+                var ITRemoval = args.OldItems.FirstOrDefault(i => i.Key == "it-IT");
+                var USRemoval = args.OldItems.FirstOrDefault(i => i.Key == "en-US");
+
+                // KVP is a struct, which forces us to check whether the values INSIDE are default or valid.
+                // No need to check the "different key" case individually, as checking for Count == 2 and both keys being valid
+                // result in the same conclusion.
+                Assert.That(ITRemoval.Key, Is.Not.Null);
+                Assert.That(USRemoval.Key, Is.Not.Null);
+
+                Assert.That(ITRemoval.Value, Has.Count.EqualTo(1));
+                Assert.That(USRemoval.Value, Has.Count.EqualTo(1));
+
+                var innerITRemoval = ITRemoval.Value.First();
+                var innerUSRemoval = USRemoval.Value.First();
+
+                Assert.That(innerITRemoval.Key, Is.EqualTo("key"));
+                Assert.That(innerITRemoval.Value, Is.EqualTo("it-IT"));
+
+                Assert.That(innerUSRemoval.Key, Is.EqualTo("key"));
+                Assert.That(innerUSRemoval.Value, Is.EqualTo("en-US"));
+            };
+
+            _localizationStore.RemoveKeyForAllLocales("key");
+        }
     }
 }
