@@ -363,7 +363,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         public void ExportAndImportForEditor()
         {
             ThoughtGuid firstThoughtGuid = AddSampleThoughtToList();
-            ThoughtGuid secondThoughtGuid = AddSampleThoughtToList();
+            ThoughtGuid secondThoughtGuid = AddSampleThoughtToList(1);
 
             EditorThought firstThoughtInfo = _area.Thoughts[0];
             EditorThought secondThoughtInfo = _area.Thoughts[1];
