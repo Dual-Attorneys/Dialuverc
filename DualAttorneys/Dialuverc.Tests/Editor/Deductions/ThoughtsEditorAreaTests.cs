@@ -474,6 +474,14 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out _), Is.False);
             Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out _), Is.False);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out string? foundNameValue), Is.True);
+            Assert.That(foundNameValue, Is.EqualTo("Thought name"));
+
+            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out string? foundDescriptionValue), Is.True);
+            Assert.That(foundDescriptionValue, Is.EqualTo("Thought description"));
         }
 
         #region Helpers
