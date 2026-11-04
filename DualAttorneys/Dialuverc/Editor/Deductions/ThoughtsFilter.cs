@@ -1,3 +1,4 @@
+using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
@@ -7,18 +8,27 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
     /// </summary>
     public class ThoughtsFilter
     {
+        readonly IReadOnlyLocalizationStore _localizationStore;
+
         public CharacterSides SideFilter { get; set; } = CharacterSides.Any;
 
         /// <summary>
-        /// An always-case-insensitive string that must be contained in <see cref="Thought.NameKey"/> to pass.
+        /// An always-case-insensitive string that must be contained in a <see cref="Thought"/>'s localized name OR description to pass.
         /// </summary>
-        public string NameKeyFilter { get; set; } = string.Empty;
+        public string TextFilter { get; set; } = string.Empty;
 
         /// <summary>
         /// Whether passing the filter requires an exact <see cref="CharacterSides"/> match.
         /// <para>When <see langword="false"/>, <see cref="CharacterSides.Any"/> passes for all sides.</para>
         /// </summary>
         public bool Strict { get; set; } = false;
+
+        public ThoughtsFilter(IReadOnlyLocalizationStore localizationStore)
+        {
+            ArgumentNullException.ThrowIfNull(localizationStore, nameof(localizationStore));
+
+            _localizationStore = localizationStore;
+        }
 
         bool PassesSidesFilter(CharacterSides side)
         {
@@ -32,20 +42,26 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             return false;
         }
 
-        bool PassesNameKeyFilter(string nameKey)
+        bool PassesTextFilter(string localizationKey)
         {
-            if (nameKey is null)
-                throw new ArgumentNullException(nameof(nameKey), $"A {nameof(Thought)} can't have a null name key");
-
-            if (string.IsNullOrWhiteSpace(NameKeyFilter))
+            // We probably do not want to throw on null if this is UI-facing.
+            if (string.IsNullOrWhiteSpace(localizationKey))
                 return true;
 
-            return nameKey.Contains(NameKeyFilter, StringComparison.OrdinalIgnoreCase);
+            if (string.IsNullOrWhiteSpace(TextFilter))
+                return true;
+
+            if (!_localizationStore.TryGetValue(localizationKey, out string? foundValue))
+                return true;
+
+            return foundValue.Contains(TextFilter, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
         /// Whether the <paramref name="thought"/> passes all current filters.
         /// </summary>
-        public bool PassesAll(Thought thought) => PassesSidesFilter(thought.Side) && PassesNameKeyFilter(thought.NameKey);
+        public bool PassesAll(Thought thought) =>
+            PassesSidesFilter(thought.Side) &&
+            (PassesTextFilter(thought.NameKey) || (PassesTextFilter(thought.DescriptionKey)));
     }
 }

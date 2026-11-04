@@ -1,72 +1,65 @@
+using Dialuverc.Editor.Base.Extensions;
+using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Verifier;
 using DualAttorneys.Dialuverc.Deductions;
+using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
     internal static class ThoughtsEditorVerifier
     {
-        const string _unformattedDuplicateMessage = "Duplicate {0} '{1}' at indices {2}.";
-
-        public static IReadOnlyList<Problem> Run(IReadOnlyList<EditorThought> thoughts)
+        public static IReadOnlyList<Problem> Run(AddEditScratchpads<ThoughtsEditorFields> scratchpads, ThoughtGuid? selectionGuid, IList<EditorThought> thoughts, IReadOnlyLocalizationStore localizationStore)
         {
-            List<Problem> allProblems = new List<Problem>();
+            List<Problem> problems = new List<Problem>();
 
-            DuplicatesInfo[] nameDuplicates = GetDuplicates(thoughts, t => t.RuntimeThought.NameKey);
-            DuplicatesInfo[] descriptionDuplicates = GetDuplicates(thoughts, t => t.RuntimeThought.DescriptionKey);
-
-            // Names may be used as a human-readable way to get to a GUID.
-            // Descriptions can "safely" be duplicate.
-            AddDuplicationProblems(allProblems, nameDuplicates, nameof(Thought.NameKey), ProblemSeverity.Error);
-            AddDuplicationProblems(allProblems, descriptionDuplicates, nameof(Thought.DescriptionKey), ProblemSeverity.Warning);
-
-            return allProblems;
-        }
-
-        static DuplicatesInfo[] GetDuplicates(IReadOnlyList<EditorThought> thoughts, Func<EditorThought, string> criteria)
-        {
-            DuplicatesInfo[] duplicatesInfo =
-                thoughts.Select((t, i) => new ValueTuple<EditorThought, int>(t, i))
-                .GroupBy(a => criteria(a.Item1))
-                .Where(g => g.Count() > 1)
-                .Select(g => new DuplicatesInfo(
-                    g.Key,
-                    g.Select(e => e.Item2).ToArray()))
-                .ToArray();
-
-            return duplicatesInfo;
-        }
-
-        static void AddDuplicationProblems(List<Problem> problemsCollection, DuplicatesInfo[] duplicatesInfoCollection, string propertyName, ProblemSeverity severity)
-        {
-            foreach (DuplicatesInfo duplicatesInfo in duplicatesInfoCollection)
+            if (scratchpads.AddScratchpad is not null)
             {
-                Problem problem = new Problem(severity,
-                    string.Format(_unformattedDuplicateMessage, propertyName, duplicatesInfo.Value, string.Join(", ", duplicatesInfo.Indices)));
+                string nameKey = scratchpads.AddScratchpad.NameKey;
 
-                problemsCollection.Add(problem);
+                if (localizationStore.TryGetValue(nameKey, out string? duplicateNameKey))
+                    VerifyPossibleKeyDuplication(nameKey,
+                        t => t.RuntimeThought.NameKey == nameKey,
+                        thoughts, problems);
+
+                string descriptionKey = scratchpads.AddScratchpad.DescriptionKey;
+
+                if (localizationStore.TryGetValue(descriptionKey, out string? duplicateDescriptionKey))
+                    VerifyPossibleKeyDuplication(descriptionKey,
+                        t => t.RuntimeThought.DescriptionKey == descriptionKey,
+                        thoughts, problems);
             }
+
+            // Check whether the match's Guid is the same as the thought we're editing.
+            // If that's the case, there's no actual duplicated keys.
+            if (scratchpads.EditScratchpad is not null)
+            {
+                string nameKey = scratchpads.EditScratchpad.NameKey;
+
+                if (localizationStore.TryGetValue(nameKey, out string? duplicateNameKey))
+                    VerifyPossibleKeyDuplication(nameKey,
+                        t => t.RuntimeThought.NameKey == nameKey && t.RuntimeThought.Guid != selectionGuid,
+                        thoughts, problems);
+
+                string descriptionKey = scratchpads.EditScratchpad.DescriptionKey;
+
+                if (localizationStore.TryGetValue(descriptionKey, out string? duplicateDescriptionKey))
+                    VerifyPossibleKeyDuplication(descriptionKey,
+                        t => t.RuntimeThought.DescriptionKey == descriptionKey && t.RuntimeThought.Guid != selectionGuid,
+                        thoughts, problems);
+            }
+
+            return problems;
         }
 
-        /// <summary>
-        /// Contains information on a <see cref="Value"/> that is duplicated across multiple <see cref="Thought"/>s in the same collection.
-        /// </summary>
-        readonly struct DuplicatesInfo
+        static void VerifyPossibleKeyDuplication(string keyToVerify, Predicate<EditorThought> match, IList<EditorThought> thoughts, List<Problem> problemsList)
         {
-            /// <summary>
-            /// The duplicate value.
-            /// </summary>
-            public readonly string Value;
+            int indexOfThought = thoughts.FindIndex(match);
 
-            /// <summary>
-            /// The indices which contain the duplicate values.
-            /// </summary>
-            public readonly int[] Indices;
+            // Allow re-defining a key when no Thought is actually using it.
+            if (indexOfThought < 0)
+                return;
 
-            public DuplicatesInfo(string value, int[] indices)
-            {
-                Value = value;
-                Indices = indices;
-            }
+            problemsList.Add(new Problem(ProblemSeverity.Error, $"Key \"{keyToVerify}\" is already defined for thought at index {indexOfThought}."));
         }
     }
 }

@@ -1,16 +1,17 @@
 using Dialuverc.Editor.Base;
 using Dialuverc.Editor.Base.IO;
 using Dialuverc.Editor.Base.Verifier;
-using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Scratchpads;
+using Dialuverc.Editor.Base.Localization;
+using Dialuverc.Editor.Base.Observability;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions
 {
-    public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>, IHasLocalizableKeysFlatFile
+    public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {
         ImmutableList<EditorThought> _thoughts = ImmutableList<EditorThought>.Empty;
         public IReadOnlyList<EditorThought> Thoughts => _thoughts;
@@ -26,6 +27,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         readonly AddEditScratchpads<ThoughtsEditorFields> _scratchpadsManager;
         public IScratchpadsManager<AddEditEnum, ThoughtsEditorFields> ScratchpadsManager => _scratchpadsManager;
 
+        readonly LocalizationStore _localizationManager;
+        public IReadOnlyLocalizationStore LocalizationManager => _localizationManager;
+
         // Records are immutable, making changes to this requires creating a new instance.
         readonly ThoughtsEditorFields _cachedDefaultScratchpad = new ThoughtsEditorFields();
 
@@ -33,11 +37,13 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         readonly IImportable[] _cachedImportables;
 
-        public ThoughtsEditorArea()
+        public ThoughtsEditorArea(IReadOnlyObservableValue<string> localeChoice)
         {
             _scratchpadsManager = new AddEditScratchpads<ThoughtsEditorFields>(AddEditEnum.Add);
 
             _scratchpadsManager.AddScratchpad = _cachedDefaultScratchpad;
+
+            _localizationManager = new LocalizationStore(localeChoice, "thoughts");
 
             _editorThoughtsImportable = new JsonImportable<ImmutableList<EditorThought>>(nameof(ThoughtsEditorArea), GetEditorThoughtsForImportable, OnEditorThoughtsImported, new JsonSerializerOptions
             {
@@ -121,13 +127,43 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             EndChange();
         }
 
+        public void SetNameLocalization(string nameLocalization)
+        {
+            ArgumentNullException.ThrowIfNull(nameLocalization, nameof(nameLocalization));
+
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException($"Can't set name localization of a null scratchpad");
+
+            BeginChange();
+
+            _scratchpadsManager.ActiveScratchpad =
+                _scratchpadsManager.ActiveScratchpad with { NameLocalization = nameLocalization };
+
+            EndChange();
+        }
+
+        public void SetDescriptionLocalization(string descriptionLocalization)
+        {
+            ArgumentNullException.ThrowIfNull(descriptionLocalization, nameof(descriptionLocalization));
+
+            if (_scratchpadsManager.ActiveScratchpad is null)
+                throw new InvalidOperationException($"Can't set description localization of a null scratchpad'");
+
+            BeginChange();
+
+            _scratchpadsManager.ActiveScratchpad =
+                _scratchpadsManager.ActiveScratchpad with { DescriptionLocalization = descriptionLocalization };
+
+            EndChange();
+        }
+
         /// <summary>
         /// Applies all changes done so far on the <see cref="_scratchpadsManager.ActiveScratchpad"/> to the <see cref="Thoughts"/> list.
         /// <para>If <see cref="ScratchpadSelection.CurrentSelection"/> is <see cref="AddEditEnum.Add"/>, its corresponding scratchpad is also reset.</para>
         /// </summary>
         public ThoughtGuid FinishBuilding()
         {
-            AddEditEnum currentSelection = _scratchpadsManager.Selection.CurrentSelection;
+            AddEditEnum currentSelection = _scratchpadsManager.Selection.Value;
 
             switch (currentSelection)
             {
@@ -152,6 +188,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
                     _thoughts = _thoughts.SetItem(index, _scratchpadsManager.EditScratchpad.CreateFromCurrentValues(_selectionGuid.Value));
 
+                    AddOrSetValuesForCurrentLocale(_scratchpadsManager.EditScratchpad);
+
                     EndChange();
 
                     return _selectionGuid.Value;
@@ -161,9 +199,21 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     if (_scratchpadsManager.AddScratchpad is null)
                         throw new InvalidOperationException($"Can't commit new thought to list with null adding scratchpad");
 
+                    // To enforce the assumption of keys being defined from a single source at most.
+                    // TODO: This error path may need better internal handling.
+                    // Verifier should take care of surfacing the error to the user.
+                    if (_localizationManager.TryGetValue(_scratchpadsManager.AddScratchpad.NameKey, out _))
+                        throw new InvalidOperationException($"Name key \"{_scratchpadsManager.AddScratchpad.NameKey}\" is already defined in a different thought");
+
+                    if (_localizationManager.TryGetValue(_scratchpadsManager.AddScratchpad.DescriptionKey, out _))
+                        throw new InvalidOperationException($"Description key \"{_scratchpadsManager.AddScratchpad.DescriptionKey}\" is already defined in a different thought");
+
                     ThoughtGuid addedGuid = new ThoughtGuid();
 
                     BeginChange();
+
+                    // Before wiping the adding scratchpad.
+                    AddOrSetValuesForCurrentLocale(_scratchpadsManager.AddScratchpad);
 
                     _thoughts = _thoughts.Add(_scratchpadsManager.AddScratchpad.CreateFromCurrentValues(addedGuid));
 
@@ -178,18 +228,29 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             }
         }
 
+        void AddOrSetValuesForCurrentLocale(ThoughtsEditorFields source)
+        {
+            _localizationManager.AddOrSetValue(source.NameKey, source.NameLocalization);
+            _localizationManager.AddOrSetValue(source.DescriptionKey, source.DescriptionLocalization);
+        }
+
         public bool RemoveThought(ThoughtGuid guid)
         {
-            int foundThought = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
+            int foundThoughtIndex = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
             // Don't throw if we remove a thought that doesn't exist
             // since it not existing results in the same state as it being removed.
-            if (foundThought < 0)
+            if (foundThoughtIndex < 0)
                 return false;
 
             BeginChange();
 
-            _thoughts = _thoughts.RemoveAt(foundThought);
+            EditorThought foundThought = _thoughts[foundThoughtIndex];
+
+            _localizationManager.RemoveKeyForAllLocales(foundThought.RuntimeThought.NameKey);
+            _localizationManager.RemoveKeyForAllLocales(foundThought.RuntimeThought.DescriptionKey);
+
+            _thoughts = _thoughts.RemoveAt(foundThoughtIndex);
 
             if (guid == _selectionGuid)
                 SelectThought(null);
@@ -259,7 +320,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _selectionGuid = guid;
 
-            if (!_scratchpadsManager.Selection.ChangeSelection(AddEditEnum.Edit))
+            if (!_scratchpadsManager.Selection.ChangeValue(AddEditEnum.Edit))
                 OnThoughtSelectionChanged?.Invoke(foundThought);
         }
 
@@ -272,11 +333,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         void OnEditorThoughtsImported(ImmutableList<EditorThought>? imported)
         {
             // TODO: Proper error handling.
-            // This probably should not be done in a transaction.
-
             if (imported is null)
                 return;
 
+            // This probably should not be done in a transaction.
             BeginChange();
 
             _thoughts = imported;
@@ -290,7 +350,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            return new ThoughtsEditorState(_thoughts, _scratchpadsManager, _selectionGuid);
+            return new ThoughtsEditorState(_thoughts, _scratchpadsManager, _selectionGuid, _localizationManager);
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)
@@ -298,7 +358,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             // Selecting a thought or changing modes is not a state change.
             return a.Thoughts == b.Thoughts &&
                 a.AddScratchpad == b.AddScratchpad &&
-                a.EditScratchpad == b.EditScratchpad;
+                a.EditScratchpad == b.EditScratchpad &&
+                a.LocalizationLookup == b.LocalizationLookup;
         }
 
         protected override void ApplyRestoredState(ThoughtsEditorState newState)
@@ -308,29 +369,14 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _scratchpadsManager.AddScratchpad = newState.AddScratchpad;
             _scratchpadsManager.EditScratchpad = newState.EditScratchpad;
 
+            _localizationManager.Lookup = newState.LocalizationLookup;
+
             _selectionGuid = newState.ThoughtSelection;
 
-            ScratchpadsManager.Selection.ChangeSelection(newState.Mode, invokeEvent: false);
+            ScratchpadsManager.Selection.ChangeValue(newState.Mode, invokeEvent: false);
         }
 
-        public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(Thoughts);
-
-        // This is what was on 'ThoughtsEditorPage' in Dual-Attorneys.
-        // IHasLocalizableKeysFlatFile requires this to be implemented
-        // so I thought that it should've been moved here.
-        // Note: we are already in the so called "_editorArea" so it's just Thoughts
-        public IReadOnlySet<string> GetLocalizableKeysFlatFile()
-        {
-            HashSet<string> keys = new HashSet<string>();
-
-            foreach (EditorThought editorThought in Thoughts)
-            {
-                keys.Add(editorThought.RuntimeThought.NameKey);
-                keys.Add(editorThought.RuntimeThought.DescriptionKey);
-            }
-
-            return keys;
-        }
+        public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(_scratchpadsManager, _selectionGuid, _thoughts, _localizationManager);
 
         #endregion
     }

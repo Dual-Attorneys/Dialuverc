@@ -1,3 +1,5 @@
+using Dialuverc.Editor.Base.Localization;
+using Dialuverc.Editor.Base.Observability;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 
@@ -5,113 +7,94 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
     internal class ThoughtsFilterTests
     {
-        ThoughtsFilter _filter;
+        LocalizationStore _localizationStore;
 
-        Thought _tychonThought = new Thought(new ThoughtGuid(), "nameKeyOne", "descriptionKeyOne", CharacterSides.Tychon);
-        Thought _forgerThought = new Thought(new ThoughtGuid(), "nameKeyTwo", "descriptionKeyTwo", CharacterSides.Forger);
-        Thought _anyThought = new Thought(new ThoughtGuid(), "nameKeyThree", "descriptionKeyThree", CharacterSides.Any);
+        ThoughtsFilter _filter;
 
         [SetUp]
         public void SetUp()
         {
-            _filter = new ThoughtsFilter();
+            _localizationStore = new LocalizationStore(new ObservableValue<string>("it-IT"), "test.thoughtsFilter");
+
+            _filter = new ThoughtsFilter(_localizationStore);
         }
 
         [Test]
-        public void AllPassWithNoFilter()
+        public void SideFilteringNotStrict()
         {
-            Assert.That(_filter.PassesAll(_tychonThought), Is.True);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.True);
-            Assert.That(_filter.PassesAll(_anyThought), Is.True);
-        }
+            Thought tychonThought = new Thought(new ThoughtGuid(), "_", "_", CharacterSides.Tychon);
+            Thought forgerThought = new Thought(new ThoughtGuid(), "_", "_", CharacterSides.Forger);
+            Thought anyThought = new Thought(new ThoughtGuid(), "_", "_", CharacterSides.Any);
 
-        [Test]
-        public void AnySidePassesNotStrict()
-        {
             _filter.SideFilter = CharacterSides.Tychon;
 
-            Assert.That(_filter.PassesAll(_tychonThought), Is.True);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.False);
-            Assert.That(_filter.PassesAll(_anyThought), Is.True);
+            Assert.That(_filter.PassesAll(tychonThought), Is.True);
+            Assert.That(_filter.PassesAll(forgerThought), Is.False);
+            Assert.That(_filter.PassesAll(anyThought), Is.True);
 
             _filter.SideFilter = CharacterSides.Forger;
 
-            Assert.That(_filter.PassesAll(_tychonThought), Is.False);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.True);
-            Assert.That(_filter.PassesAll(_anyThought), Is.True);
+            Assert.That(_filter.PassesAll(tychonThought), Is.False);
+            Assert.That(_filter.PassesAll(forgerThought), Is.True);
+            Assert.That(_filter.PassesAll(anyThought), Is.True);
         }
 
         [Test]
-        public void AnySideDoesNotPassStrict()
+        public void SideFilteringStrict()
         {
+            Thought tychonThought = new Thought(new ThoughtGuid(), "_", "_", CharacterSides.Tychon);
+            Thought forgerThought = new Thought(new ThoughtGuid(), "_", "_", CharacterSides.Forger);
+            Thought anyThought = new Thought(new ThoughtGuid(), "_", "_", CharacterSides.Any);
+
             _filter.Strict = true;
 
             _filter.SideFilter = CharacterSides.Tychon;
 
-            Assert.That(_filter.PassesAll(_tychonThought), Is.True);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.False);
-            Assert.That(_filter.PassesAll(_anyThought), Is.False);
+            Assert.That(_filter.PassesAll(tychonThought), Is.True);
+            Assert.That(_filter.PassesAll(forgerThought), Is.False);
+            Assert.That(_filter.PassesAll(anyThought), Is.False);
 
             _filter.SideFilter = CharacterSides.Forger;
 
-            Assert.That(_filter.PassesAll(_tychonThought), Is.False);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.True);
-            Assert.That(_filter.PassesAll(_anyThought), Is.False);
+            Assert.That(_filter.PassesAll(tychonThought), Is.False);
+            Assert.That(_filter.PassesAll(forgerThought), Is.True);
+            Assert.That(_filter.PassesAll(anyThought), Is.False);
 
             _filter.SideFilter = CharacterSides.Any;
 
-            Assert.That(_filter.PassesAll(_tychonThought), Is.False);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.False);
-            Assert.That(_filter.PassesAll(_anyThought), Is.True);
+            Assert.That(_filter.PassesAll(tychonThought), Is.False);
+            Assert.That(_filter.PassesAll(forgerThought), Is.False);
+            Assert.That(_filter.PassesAll(anyThought), Is.True);
         }
 
         [Test]
-        public void AllPassWithBlankOrNullString()
+        public void TextFileringFullMatch()
         {
-            _filter.NameKeyFilter = "       ";
+            _localizationStore.AddOrSetValue("key1", "value1");
+            _localizationStore.AddOrSetValue("key2", "value2");
 
-            Assert.That(_filter.PassesAll(_tychonThought), Is.True);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.True);
-            Assert.That(_filter.PassesAll(_anyThought), Is.True);
+            Thought thoughtA = new Thought(new ThoughtGuid(), "key1", "key2", CharacterSides.Any);
+            Thought thoughtB = new Thought(new ThoughtGuid(), "key2", "key1", CharacterSides.Any);
 
-            _filter.NameKeyFilter = null;
+            _filter.TextFilter = "value1";
 
-            Assert.That(_filter.PassesAll(_tychonThought), Is.True);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.True);
-            Assert.That(_filter.PassesAll(_anyThought), Is.True);
+            Assert.That(_filter.PassesAll(thoughtA), Is.True);
+            Assert.That(_filter.PassesAll(thoughtB), Is.True);
         }
 
         [Test]
-        public void StringIsCaseInsensitive()
+        public void TextFileringPartialMatch()
         {
-            Assert.That(_forgerThought.NameKey.All(c => char.IsUpper(c)), Is.False);
+            _localizationStore.AddOrSetValue("key1", "value1");
+            _localizationStore.AddOrSetValue("key2", "value2");
 
-            _filter.NameKeyFilter = _forgerThought.NameKey.ToUpper();
+            Thought thoughtA = new Thought(new ThoughtGuid(), "key1", "key2", CharacterSides.Any);
+            Thought thoughtB = new Thought(new ThoughtGuid(), "key2", "key1", CharacterSides.Any);
 
-            Assert.That(_filter.PassesAll(_tychonThought), Is.False);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.True);
-            Assert.That(_filter.PassesAll(_anyThought), Is.False);
-        }
+            _filter.TextFilter = "val";
 
-        [Test]
-        public void PartialStringMatchPasses()
-        {
-            _filter.NameKeyFilter = "One";
-
-            Assert.That(_filter.PassesAll(_tychonThought), Is.True);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.False);
-            Assert.That(_filter.PassesAll(_anyThought), Is.False);
-        }
-
-        [Test]
-        public void NoPassFilterCombo()
-        {
-            _filter.NameKeyFilter = "Two";
-            _filter.SideFilter = CharacterSides.Tychon;
-
-            Assert.That(_filter.PassesAll(_tychonThought), Is.False);
-            Assert.That(_filter.PassesAll(_forgerThought), Is.False);
-            Assert.That(_filter.PassesAll(_anyThought), Is.False);
+            Assert.That(_filter.PassesAll(thoughtA), Is.True);
+            Assert.That(_filter.PassesAll(thoughtB), Is.True);
         }
     }
 }

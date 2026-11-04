@@ -14,6 +14,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 
         public string EditorNote { get; init; } = string.Empty;
 
+        public string NameLocalization { get; init; } = string.Empty;
+        public string DescriptionLocalization { get; init; } = string.Empty;
+
         /// <summary>
         /// Checks if any changes were made by comparing current values with the given <see cref="EditorThought"/>.
         /// </summary>

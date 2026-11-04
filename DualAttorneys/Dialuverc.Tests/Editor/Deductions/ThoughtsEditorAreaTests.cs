@@ -1,27 +1,31 @@
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 using Dialuverc.Editor.Base.IO;
-
 using Dialuverc.Editor.Base.StateTracking;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
+using Dialuverc.Editor.Base.Observability;
+using Dialuverc.Editor.Base.Localization;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
     internal class ThoughtsEditorAreaTests
     {
+        ObservableValue<string> _localeChoice;
         TestThoughtsEditorArea _area;
 
         [SetUp]
         public void SetUp()
         {
-            _area = new TestThoughtsEditorArea();
+            _localeChoice = new ObservableValue<string>("it-IT");
+
+            _area = new TestThoughtsEditorArea(_localeChoice);
         }
 
         [Test]
         // Should be enough to test both Add and Edit scratchpads, assuming ActiveScratchpad works properly.
         public void SetProperties()
         {
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             Assert.That(_area.ScratchpadsManager.ActiveScratchpad!.NameKey, Is.Empty);
             Assert.That(_area.ScratchpadsManager.ActiveScratchpad.DescriptionKey, Is.Empty);
@@ -44,7 +48,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void SetPropertiesHistory()
         {
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             _area.SetNameKey("nameKey");
             _area.SetDescriptionKey("descriptionKey");
@@ -79,7 +83,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void ChangingPropertyWithSameValueDoesNotSave()
         {
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             _area.SetNameKey("nameKey");
             _area.SetDescriptionKey(_area.ScratchpadsManager.ActiveScratchpad!.DescriptionKey);
@@ -92,7 +96,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void FinishBuildingWithNoChangesIsNoOp()
         {
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             _area.SetNameKey("nameKey");
             _area.SetDescriptionKey("descriptionKey");
@@ -114,7 +118,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             Assert.That(_area.Thoughts, Is.Empty);
 
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             PopulateSampleThought();
 
@@ -131,7 +135,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void AddThoughtToListHistory()
         {
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             PopulateSampleThought();
 
@@ -221,13 +225,13 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [Test]
         public void SelectInvokesCorrectEvent()
         {
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             int changeModeInvokations = 0;
             int changeSelectInvokations = 0;
             EditorThought? currentSelection = null;
 
-            _area.ScratchpadsManager.Selection.SelectionChanged += (_) => { changeModeInvokations++; };
+            _area.ScratchpadsManager.Selection.ValueChanged += (_) => { changeModeInvokations++; };
             _area.OnThoughtSelectionChanged += (selection) =>
             {
                 changeSelectInvokations++;
@@ -239,7 +243,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.SelectThought(guid1);
 
-            Assert.That(_area.ScratchpadsManager.Selection.CurrentSelection, Is.EqualTo(AddEditEnum.Edit));
+            Assert.That(_area.ScratchpadsManager.Selection.Value, Is.EqualTo(AddEditEnum.Edit));
             Assert.That(_area.ScratchpadsManager.ActiveScratchpad!.HasChanges(_area.Thoughts[0]), Is.False);
             Assert.That(changeModeInvokations, Is.EqualTo(1));
             Assert.That(changeSelectInvokations, Is.Zero);
@@ -247,7 +251,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.SelectThought(guid2);
 
-            Assert.That(_area.ScratchpadsManager.Selection.CurrentSelection, Is.EqualTo(AddEditEnum.Edit));
+            Assert.That(_area.ScratchpadsManager.Selection.Value, Is.EqualTo(AddEditEnum.Edit));
             Assert.That(changeModeInvokations, Is.EqualTo(1));
             Assert.That(changeSelectInvokations, Is.EqualTo(1));
             Assert.That(currentSelection, Is.EqualTo(_area.Thoughts[1]));
@@ -259,7 +263,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             ThoughtGuid guid = AddSampleThoughtToList();
 
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Edit);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Edit);
 
             int eventInvokations = 0;
 
@@ -280,7 +284,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             ThoughtGuid guid = AddSampleThoughtToList();
 
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Edit);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Edit);
 
             _area.SelectThought(guid);
 
@@ -297,7 +301,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             ThoughtGuid guid = AddSampleThoughtToList();
 
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Edit);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Edit);
 
             int eventInvokations = 0;
             EditorThought? currentSelection = null;
@@ -359,7 +363,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         public void ExportAndImportForEditor()
         {
             ThoughtGuid firstThoughtGuid = AddSampleThoughtToList();
-            ThoughtGuid secondThoughtGuid = AddSampleThoughtToList();
+            ThoughtGuid secondThoughtGuid = AddSampleThoughtToList(1);
 
             EditorThought firstThoughtInfo = _area.Thoughts[0];
             EditorThought secondThoughtInfo = _area.Thoughts[1];
@@ -394,6 +398,92 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             }
         }
 
+        [Test]
+        public void SetSameLocalizationValueDoesNotSave()
+        {
+            _area.SetNameKey("nameKey");
+
+            _area.SetNameLocalization("Thought name");
+            _area.SetNameLocalization("Thought name");
+
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void LocalizationOnlyExistsAfterFinishing()
+        {
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            _area.SetNameLocalization("Thought name");
+            _area.SetDescriptionLocalization("Thought description");
+
+            IReadOnlyLocalizationStore localizationStore = _area.LocalizationManager;
+
+            Assert.That(localizationStore.TryGetValue("nameKey", out string? foundName), Is.False);
+            Assert.That(localizationStore.TryGetValue("descriptionKey", out string? foundDescription), Is.False);
+
+            _area.FinishBuilding();
+
+            Assert.That(localizationStore.TryGetValue("nameKey", out foundName), Is.True);
+            Assert.That(localizationStore.TryGetValue("descriptionKey", out foundDescription), Is.True);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(localizationStore.TryGetValue("nameKey", out foundName), Is.False);
+            Assert.That(localizationStore.TryGetValue("descriptionKey", out foundDescription), Is.False);
+        }
+
+        [Test]
+        public void AddSameKeysMultipleTimesThrows()
+        {
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            Assert.That(_area.FinishBuilding, Throws.Nothing);
+
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(3));
+
+            _area.SetNameKey("nameKey");
+
+            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>().With.Message.Contains("name"));
+
+            // FinishBuilding should not have saved state.
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(4));
+
+            _area.SetNameKey("differentNameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>().With.Message.Contains("description"));
+
+            // FinishBuilding should not have saved state.
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void RemoveThoughtRemovesLocalization()
+        {
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+            _area.SetNameLocalization("Thought name");
+            _area.SetDescriptionLocalization("Thought description");
+
+            ThoughtGuid toRemove = _area.FinishBuilding();
+
+            _area.RemoveThought(toRemove);
+
+            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out _), Is.False);
+            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out _), Is.False);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out string? foundNameValue), Is.True);
+            Assert.That(foundNameValue, Is.EqualTo("Thought name"));
+
+            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out string? foundDescriptionValue), Is.True);
+            Assert.That(foundDescriptionValue, Is.EqualTo("Thought description"));
+        }
+
         #region Helpers
 
         void PopulateSampleThought(int offset = 0)
@@ -406,15 +496,15 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
         ThoughtGuid AddSampleThoughtToList(int offset = 0)
         {
-            AddEditEnum previousMode = _area.ScratchpadsManager.Selection.CurrentSelection;
+            AddEditEnum previousMode = _area.ScratchpadsManager.Selection.Value;
 
-            _area.ScratchpadsManager.Selection.ChangeSelection(AddEditEnum.Add);
+            _area.ScratchpadsManager.Selection.ChangeValue(AddEditEnum.Add);
 
             PopulateSampleThought(offset);
 
             ThoughtGuid guid = _area.FinishBuilding();
 
-            _area.ScratchpadsManager.Selection.ChangeSelection(previousMode);
+            _area.ScratchpadsManager.Selection.ChangeValue(previousMode);
 
             return guid;
         }
@@ -422,6 +512,11 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         private class TestThoughtsEditorArea : ThoughtsEditorArea
         {
             public new int CurrentStateIndex => base.CurrentStateIndex;
+
+            public TestThoughtsEditorArea(IReadOnlyObservableValue<string> localeChoice)
+                : base(localeChoice)
+            {
+            }
         }
 
         #endregion
