@@ -434,6 +434,48 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(localizationStore.TryGetValue("descriptionKey", out foundDescription), Is.False);
         }
 
+        [Test]
+        public void AddSameKeysMultipleTimesThrows()
+        {
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            Assert.That(_area.FinishBuilding, Throws.Nothing);
+
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(3));
+
+            _area.SetNameKey("nameKey");
+
+            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>().With.Message.Contains("name"));
+
+            // FinishBuilding should not have saved state.
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(4));
+
+            _area.SetNameKey("differentNameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>().With.Message.Contains("description"));
+
+            // FinishBuilding should not have saved state.
+            Assert.That(_area.CurrentStateIndex, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void RemoveThoughtRemovesLocalization()
+        {
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+            _area.SetNameLocalization("Thought name");
+            _area.SetDescriptionLocalization("Thought description");
+
+            ThoughtGuid toRemove = _area.FinishBuilding();
+
+            _area.RemoveThought(toRemove);
+
+            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out _), Is.False);
+            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out _), Is.False);
+        }
+
         #region Helpers
 
         void PopulateSampleThought(int offset = 0)

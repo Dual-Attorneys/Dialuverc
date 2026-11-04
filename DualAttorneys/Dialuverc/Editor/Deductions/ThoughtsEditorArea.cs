@@ -188,7 +188,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
                     _thoughts = _thoughts.SetItem(index, _scratchpadsManager.EditScratchpad.CreateFromCurrentValues(_selectionGuid.Value));
 
-                    UpdateLocalizationForCurrentLocale(_scratchpadsManager.EditScratchpad);
+                    AddOrSetValuesForCurrentLocale(_scratchpadsManager.EditScratchpad);
 
                     EndChange();
 
@@ -199,14 +199,23 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
                     if (_scratchpadsManager.AddScratchpad is null)
                         throw new InvalidOperationException($"Can't commit new thought to list with null adding scratchpad");
 
+                    // To enforce the assumption of keys being defined from a single source at most.
+                    // TODO: This error path may need better internal handling.
+                    // Verifier should take care of surfacing the error to the user.
+                    if (_localizationManager.TryGetValue(_scratchpadsManager.AddScratchpad.NameKey, out _))
+                        throw new InvalidOperationException($"Name key \"{_scratchpadsManager.AddScratchpad.NameKey}\" is already defined in a different thought");
+
+                    if (_localizationManager.TryGetValue(_scratchpadsManager.AddScratchpad.DescriptionKey, out _))
+                        throw new InvalidOperationException($"Description key \"{_scratchpadsManager.AddScratchpad.DescriptionKey}\" is already defined in a different thought");
+
                     ThoughtGuid addedGuid = new ThoughtGuid();
 
                     BeginChange();
 
-                    _thoughts = _thoughts.Add(_scratchpadsManager.AddScratchpad.CreateFromCurrentValues(addedGuid));
-
                     // Before wiping the adding scratchpad.
-                    UpdateLocalizationForCurrentLocale(_scratchpadsManager.AddScratchpad);
+                    AddOrSetValuesForCurrentLocale(_scratchpadsManager.AddScratchpad);
+
+                    _thoughts = _thoughts.Add(_scratchpadsManager.AddScratchpad.CreateFromCurrentValues(addedGuid));
 
                     _scratchpadsManager.AddScratchpad = _cachedDefaultScratchpad;
 
@@ -219,7 +228,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             }
         }
 
-        void UpdateLocalizationForCurrentLocale(ThoughtsEditorFields source)
+        void AddOrSetValuesForCurrentLocale(ThoughtsEditorFields source)
         {
             _localizationManager.AddOrSetValue(source.NameKey, source.NameLocalization);
             _localizationManager.AddOrSetValue(source.DescriptionKey, source.DescriptionLocalization);
@@ -227,16 +236,21 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public bool RemoveThought(ThoughtGuid guid)
         {
-            int foundThought = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
+            int foundThoughtIndex = _thoughts.FindIndex(thought => thought.RuntimeThought.Guid == guid);
 
             // Don't throw if we remove a thought that doesn't exist
             // since it not existing results in the same state as it being removed.
-            if (foundThought < 0)
+            if (foundThoughtIndex < 0)
                 return false;
 
             BeginChange();
 
-            _thoughts = _thoughts.RemoveAt(foundThought);
+            EditorThought foundThought = _thoughts[foundThoughtIndex];
+
+            _localizationManager.RemoveKeyForAllLocales(foundThought.RuntimeThought.NameKey);
+            _localizationManager.RemoveKeyForAllLocales(foundThought.RuntimeThought.DescriptionKey);
+
+            _thoughts = _thoughts.RemoveAt(foundThoughtIndex);
 
             if (guid == _selectionGuid)
                 SelectThought(null);
