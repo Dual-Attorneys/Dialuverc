@@ -24,8 +24,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// </summary>
         public event Action<EditorThought?>? OnThoughtSelectionChanged;
 
+        readonly public ObservableValue<AddEditEnum> ScratchpadSelection;
         readonly AddEditScratchpads<ThoughtsEditorFields> _scratchpadsManager;
-        public IScratchpadsManager<AddEditEnum, ThoughtsEditorFields> ScratchpadsManager => _scratchpadsManager;
+        public IScratchpadsManager<ThoughtsEditorFields> ScratchpadsManager => _scratchpadsManager;
 
         readonly LocalizationStore _localizationManager;
         public IReadOnlyLocalizationStore LocalizationManager => _localizationManager;
@@ -39,7 +40,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public ThoughtsEditorArea(IReadOnlyObservableValue<string> localeChoice)
         {
-            _scratchpadsManager = new AddEditScratchpads<ThoughtsEditorFields>(AddEditEnum.Add);
+            ScratchpadSelection = new ObservableValue<AddEditEnum>(AddEditEnum.Add);
+
+            _scratchpadsManager = new AddEditScratchpads<ThoughtsEditorFields>(ScratchpadSelection);
 
             _scratchpadsManager.AddScratchpad = _cachedDefaultScratchpad;
 
@@ -320,7 +323,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _selectionGuid = guid;
 
-            if (!_scratchpadsManager.Selection.ChangeValue(AddEditEnum.Edit))
+            if (!ScratchpadSelection.ChangeValue(AddEditEnum.Edit))
                 OnThoughtSelectionChanged?.Invoke(foundThought);
         }
 
@@ -373,7 +376,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _selectionGuid = newState.ThoughtSelection;
 
-            ScratchpadsManager.Selection.ChangeValue(newState.Mode, invokeEvent: false);
+            ScratchpadSelection.ChangeValue(newState.Mode, invokeEvent: false);
         }
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(_scratchpadsManager, _selectionGuid, _thoughts, _localizationManager);
