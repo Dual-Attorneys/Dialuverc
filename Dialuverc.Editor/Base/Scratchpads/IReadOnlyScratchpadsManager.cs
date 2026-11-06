@@ -1,5 +1,3 @@
-using Dialuverc.Editor.Base.Observability;
-
 namespace Dialuverc.Editor.Base.Scratchpads
 {
     /// <summary>
