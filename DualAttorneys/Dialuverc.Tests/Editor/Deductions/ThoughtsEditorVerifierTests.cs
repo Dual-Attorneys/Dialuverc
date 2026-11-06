@@ -10,6 +10,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
     internal class ThoughtsEditorVerifierTests
     {
+        ObservableValue<AddEditEnum> _scratchpadSelection;
         AddEditScratchpads<ThoughtsEditorFields> _scratchpads;
         List<EditorThought> _thoughts;
 
@@ -18,7 +19,8 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         [SetUp]
         public void SetUp()
         {
-            _scratchpads = new AddEditScratchpads<ThoughtsEditorFields>(AddEditEnum.Add);
+            _scratchpadSelection = new ObservableValue<AddEditEnum>(AddEditEnum.Add);
+            _scratchpads = new AddEditScratchpads<ThoughtsEditorFields>(_scratchpadSelection);
             _thoughts = new List<EditorThought>();
 
             _localizationStore = new TestLocalizationStore();

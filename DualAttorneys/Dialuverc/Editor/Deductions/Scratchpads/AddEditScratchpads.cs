@@ -3,17 +3,17 @@ using Dialuverc.Editor.Base.Scratchpads;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 {
-    public class AddEditScratchpads<T> : IScratchpadsManager<AddEditEnum, T>
+    public class AddEditScratchpads<T> : IReadOnlyScratchpadsManager<T>
     {
-        public ObservableValue<AddEditEnum> Selection { get; private set; }
+        public IReadOnlyObservableValue<AddEditEnum> Selection { get; private set; }
 
-        public AddEditScratchpads(AddEditEnum defaultValue)
+        public AddEditScratchpads(IReadOnlyObservableValue<AddEditEnum> selection)
         {
             // In similar spirit to exhaustive switches.
-            if (defaultValue != AddEditEnum.Add && defaultValue != AddEditEnum.Edit)
-                throw new InvalidOperationException($"{defaultValue} does not map to a valid scratchpad");
+            if (selection.Value != AddEditEnum.Add && selection.Value != AddEditEnum.Edit)
+                throw new InvalidOperationException($"{selection} does not map to a valid scratchpad");
 
-            Selection = new ObservableValue<AddEditEnum>(defaultValue);
+            Selection = selection;
         }
 
         public T? AddScratchpad { get; set; }
