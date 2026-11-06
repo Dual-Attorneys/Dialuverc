@@ -3,7 +3,7 @@ using Dialuverc.Editor.Base.Scratchpads;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 {
-    public class AddEditScratchpads<T> : IScratchpadsManager<T>
+    public class AddEditScratchpads<T> : IReadOnlyScratchpadsManager<T>
     {
         public IReadOnlyObservableValue<AddEditEnum> Selection { get; private set; }
 

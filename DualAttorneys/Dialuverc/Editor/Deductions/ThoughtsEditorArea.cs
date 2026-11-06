@@ -26,7 +26,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         readonly public ObservableValue<AddEditEnum> ScratchpadSelection;
         readonly AddEditScratchpads<ThoughtsEditorFields> _scratchpadsManager;
-        public IScratchpadsManager<ThoughtsEditorFields> ScratchpadsManager => _scratchpadsManager;
+        public IReadOnlyScratchpadsManager<ThoughtsEditorFields> ScratchpadsManager => _scratchpadsManager;
 
         readonly LocalizationStore _localizationManager;
         public IReadOnlyLocalizationStore LocalizationManager => _localizationManager;
