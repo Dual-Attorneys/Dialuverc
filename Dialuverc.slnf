@@ -1,0 +1,11 @@
+{
+  "solution": {
+    "path": "Dialuverc.slnx",
+    "projects": [
+      "Dialuverc.Editor.Benchmarks\\Dialuverc.Editor.Benchmarks.csproj",
+      "Dialuverc.Editor.Tests\\Dialuverc.Editor.Tests.csproj",
+      "Dialuverc.Editor\\Dialuverc.Editor.csproj",
+      "Dialuverc\\Dialuverc.csproj"
+    ]
+  }
+}
