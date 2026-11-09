@@ -3,7 +3,7 @@ using Dialuverc.Editor.Base.Project;
 
 namespace Dialuverc.Editor.Tests.Base
 {
-    internal class DialuvercProjectTests
+    internal class ProjectTests
     {
         [Test]
         public void SaveSuccessCreatesBackup()
@@ -24,10 +24,10 @@ namespace Dialuverc.Editor.Tests.Base
             string firstContent = "Hello";
             string secondContent = "World";
 
-            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(DialuvercProjectTests)))
+            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(ProjectTests)))
             {
-                DialuvercProject project = new DialuvercProject(
-                    Path.Combine(tempStorage.AbsoluteFolderPath, "DialuvercProject"),
+                Project project = new Project(
+                    Path.Combine(tempStorage.AbsoluteFolderPath, "Project"),
                     trackables);
 
                 string filePath = Path.Combine(project.ContentFolderPath, importables[0].ExportPath);
@@ -94,10 +94,10 @@ namespace Dialuverc.Editor.Tests.Base
             string firstContent = "Hello";
             string secondContent = "World";
 
-            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(DialuvercProjectTests)))
+            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(ProjectTests)))
             {
-                DialuvercProject project = new DialuvercProject(
-                    Path.Combine(tempStorage.AbsoluteFolderPath, "DialuvercProject"),
+                Project project = new Project(
+                    Path.Combine(tempStorage.AbsoluteFolderPath, "Project"),
                     trackables);
 
                 string filePath = Path.Combine(project.ContentFolderPath, importables[0].ExportPath);
@@ -128,7 +128,7 @@ namespace Dialuverc.Editor.Tests.Base
                 _exportables = exportables;
             }
 
-            // This is usually needed by DialuvercProject, but not for tests.
+            // This is usually needed by Project, but not for tests.
             public void ClearStatesHistory() => throw new NotImplementedException();
 
             public IEnumerable<IImportable> GetEditorImportables() => _importables;

@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Dialuverc.Editor.Base.Project
 {
-    public class DialuvercProject
+    public class Project
     {
         public string ProjectFolderPath { get; private set; }
         public string ContentFolderPath { get; private set; }
@@ -11,7 +11,7 @@ namespace Dialuverc.Editor.Base.Project
 
         readonly IEnumerable<IEditorProjectTrackable> _projectTrackables;
 
-        public DialuvercProject(string folderPath, IEnumerable<IEditorProjectTrackable> projectTrackables)
+        public Project(string folderPath, IEnumerable<IEditorProjectTrackable> projectTrackables)
         {
             ArgumentNullException.ThrowIfNull(projectTrackables);
 
