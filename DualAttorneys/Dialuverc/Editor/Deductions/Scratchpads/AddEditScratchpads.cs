@@ -1,9 +1,8 @@
 using Dialuverc.Editor.Base.Observability;
-using Dialuverc.Editor.Base.Scratchpads;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 {
-    public class AddEditScratchpads<T> : IReadOnlyScratchpadsManager<T>
+    public class AddEditScratchpads<T>
     {
         public IReadOnlyObservableValue<AddEditEnum> Selection { get; private set; }
 

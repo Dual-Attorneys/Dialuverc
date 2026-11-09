@@ -5,7 +5,6 @@ using DualAttorneys.Dialuverc.Deductions;
 using System.Collections.Immutable;
 using System.Text.Json;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
-using Dialuverc.Editor.Base.Scratchpads;
 using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Observability;
 
@@ -26,7 +25,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         readonly public ObservableValue<AddEditEnum> ScratchpadSelection;
         readonly AddEditScratchpads<ThoughtsEditorFields> _scratchpadsManager;
-        public IReadOnlyScratchpadsManager<ThoughtsEditorFields> ScratchpadsManager => _scratchpadsManager;
+        public ThoughtsEditorFields? ActiveScratchpad => _scratchpadsManager.ActiveScratchpad;
 
         readonly LocalizationStore _localizationManager;
         public IReadOnlyLocalizationStore LocalizationManager => _localizationManager;
