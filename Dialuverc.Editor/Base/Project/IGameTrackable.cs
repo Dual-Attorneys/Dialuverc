@@ -6,7 +6,7 @@ namespace Dialuverc.Editor.Base.Project
     /// <inheritdoc cref="IEditorTrackable"/>
     /// <para>Exposes one-way exporting capability for game consumption.</para>
     /// </summary>
-    public interface IGameExportable : IEditorTrackable
+    public interface IGameTrackable : IEditorTrackable
     {
         /// <summary>
         /// Returns all <see cref="IExportable"/>s whose target is a game.
