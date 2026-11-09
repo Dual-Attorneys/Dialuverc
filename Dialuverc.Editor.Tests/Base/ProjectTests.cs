@@ -16,7 +16,7 @@ namespace Dialuverc.Editor.Tests.Base
             // Only saving creates backups, exporting doesn't.
             TestingImportable[] exportables = Array.Empty<TestingImportable>();
 
-            IEditorProjectTrackable[] trackables = new IEditorProjectTrackable[]
+            IEditorTrackable[] trackables = new IEditorTrackable[]
             {
                 new TestingProjectTrackable(importables, exportables),
             };
@@ -86,7 +86,7 @@ namespace Dialuverc.Editor.Tests.Base
             // Only saving creates backups, exporting doesn't.
             TestingImportable[] exportables = Array.Empty<TestingImportable>();
 
-            IEditorProjectTrackable[] trackables = new IEditorProjectTrackable[]
+            IEditorTrackable[] trackables = new IEditorTrackable[]
             {
                 new TestingProjectTrackable(importables, exportables),
             };
@@ -115,7 +115,7 @@ namespace Dialuverc.Editor.Tests.Base
             }
         }
 
-        private class TestingProjectTrackable : IEditorProjectTrackable
+        private class TestingProjectTrackable : IEditorTrackable
         {
             public bool HasUnsavedChanges { get; private set; }
 

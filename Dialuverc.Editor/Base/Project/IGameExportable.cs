@@ -3,10 +3,10 @@ using Dialuverc.Editor.Base.IO;
 namespace Dialuverc.Editor.Base.Project
 {
     /// <summary>
-    /// <inheritdoc cref="IEditorProjectTrackable"/><br/>
-    /// Exposes one-way exporting capability for game consumption.
+    /// <inheritdoc cref="IEditorTrackable"/>
+    /// <para>Exposes one-way exporting capability for game consumption.</para>
     /// </summary>
-    public interface IGameProjectTrackable : IEditorProjectTrackable
+    public interface IGameExportable : IEditorTrackable
     {
         /// <summary>
         /// Returns all <see cref="IExportable"/>s whose target is a game.
