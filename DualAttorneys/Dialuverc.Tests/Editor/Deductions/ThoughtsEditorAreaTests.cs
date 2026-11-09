@@ -378,7 +378,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 // Picked folder because importing from it happened to be implemented before Zip.
                 ExportableUtils.ExportToFolder(importables, fileStorage.AbsoluteFolderPath);
 
-                Assert.That(File.Exists(Path.Combine(fileStorage.AbsoluteFolderPath, importables.First().ExportPath)), Is.True);
+                Assert.That(File.Exists(Path.Combine(fileStorage.AbsoluteFolderPath, importables.First().RelativePath)), Is.True);
 
                 _area.RemoveThought(firstThoughtGuid);
                 _area.RemoveThought(secondThoughtGuid);

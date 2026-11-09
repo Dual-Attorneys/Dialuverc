@@ -30,7 +30,7 @@ namespace Dialuverc.Editor.Tests.Base
                     Path.Combine(tempStorage.AbsoluteFolderPath, "Project"),
                     trackables);
 
-                string filePath = Path.Combine(project.ContentFolderPath, importables[0].ExportPath);
+                string filePath = Path.Combine(project.ContentFolderPath, importables[0].RelativePath);
 
                 importables[0].Content = firstContent;
 
@@ -100,7 +100,7 @@ namespace Dialuverc.Editor.Tests.Base
                     Path.Combine(tempStorage.AbsoluteFolderPath, "Project"),
                     trackables);
 
-                string filePath = Path.Combine(project.ContentFolderPath, importables[0].ExportPath);
+                string filePath = Path.Combine(project.ContentFolderPath, importables[0].RelativePath);
 
                 importables[0].Content = firstContent;
 
@@ -141,7 +141,7 @@ namespace Dialuverc.Editor.Tests.Base
         private class TestingImportable : IImportable
         {
             readonly string _exportPath;
-            public string ExportPath => _exportPath;
+            public string RelativePath => _exportPath;
 
             public ImportableThrowOn ThrowOn { get; set; } = ImportableThrowOn.None;
 
