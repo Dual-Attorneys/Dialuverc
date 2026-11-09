@@ -18,7 +18,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             IEditorTrackable[] trackables = new IEditorTrackable[]
             {
-                new TestingProjectTrackable(importables, exportables),
+                new TestingEditorTrackable(importables, exportables),
             };
 
             string firstContent = "Hello";
@@ -88,7 +88,7 @@ namespace Dialuverc.Editor.Tests.Base
 
             IEditorTrackable[] trackables = new IEditorTrackable[]
             {
-                new TestingProjectTrackable(importables, exportables),
+                new TestingEditorTrackable(importables, exportables),
             };
 
             string firstContent = "Hello";
@@ -115,14 +115,14 @@ namespace Dialuverc.Editor.Tests.Base
             }
         }
 
-        private class TestingProjectTrackable : IEditorTrackable
+        private class TestingEditorTrackable : IEditorTrackable
         {
             public bool HasUnsavedChanges { get; private set; }
 
             readonly IEnumerable<IImportable> _importables;
             readonly IEnumerable<IExportable> _exportables;
 
-            public TestingProjectTrackable(IEnumerable<IImportable> importables, IEnumerable<IExportable> exportables)
+            public TestingEditorTrackable(IEnumerable<IImportable> importables, IEnumerable<IExportable> exportables)
             {
                 _importables = importables;
                 _exportables = exportables;
