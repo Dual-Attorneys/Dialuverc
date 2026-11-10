@@ -10,7 +10,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
     {
         readonly IReadOnlyLocalizationStore _localizationStore;
 
-        public CharacterSides SideFilter { get; set; } = CharacterSides.Any;
+        public CharacterSide SideFilter { get; set; } = CharacterSide.Any;
 
         /// <summary>
         /// An always-case-insensitive string that must be contained in a <see cref="Thought"/>'s localized name OR description to pass.
@@ -18,8 +18,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public string TextFilter { get; set; } = string.Empty;
 
         /// <summary>
-        /// Whether passing the filter requires an exact <see cref="CharacterSides"/> match.
-        /// <para>When <see langword="false"/>, <see cref="CharacterSides.Any"/> passes for all sides.</para>
+        /// Whether passing the filter requires an exact <see cref="CharacterSide"/> match.
+        /// <para>When <see langword="false"/>, <see cref="CharacterSide.Any"/> passes for all sides.</para>
         /// </summary>
         public bool Strict { get; set; } = false;
 
@@ -30,13 +30,13 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _localizationStore = localizationStore;
         }
 
-        bool PassesSidesFilter(CharacterSides side)
+        bool PassesSidesFilter(CharacterSide side)
         {
             if (SideFilter == side)
                 return true;
 
             if (!Strict &&
-                (SideFilter == CharacterSides.Any || side == CharacterSides.Any))
+                (SideFilter == CharacterSide.Any || side == CharacterSide.Any))
                 return true;
 
             return false;

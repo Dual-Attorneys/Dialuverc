@@ -38,8 +38,8 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
                 Assert.That(foundProblems.Count(p => p.Description.Contains("index 1.")), Is.EqualTo(fields));
             }
 
-            _thoughts.Add(new EditorThought(new Thought(new ThoughtGuid(), "singletonNameKey", "singletonDescriptionKey", CharacterSides.Any)));
-            _thoughts.Add(new EditorThought(new Thought(new ThoughtGuid(), "nameKey", "descriptionKey", CharacterSides.Any)));
+            _thoughts.Add(new EditorThought(new Thought(new ThoughtGuid(), "singletonNameKey", "singletonDescriptionKey", CharacterSide.Any)));
+            _thoughts.Add(new EditorThought(new Thought(new ThoughtGuid(), "nameKey", "descriptionKey", CharacterSide.Any)));
 
             _localizationStore.Lookup.Add("singletonNameKey", "value");
             _localizationStore.Lookup.Add("singletonDescriptionKey", "value");
@@ -80,7 +80,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             ThoughtGuid editedGuid = new ThoughtGuid();
 
-            _thoughts.Add(new EditorThought(new Thought(editedGuid, "nameKey", "descriptionKey", CharacterSides.Any)));
+            _thoughts.Add(new EditorThought(new Thought(editedGuid, "nameKey", "descriptionKey", CharacterSide.Any)));
 
             _localizationStore.Lookup.Add("nameKey", "value");
             _localizationStore.Lookup.Add("descriptionKey", "value");

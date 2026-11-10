@@ -29,7 +29,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             Assert.That(_area.ActiveScratchpad!.NameKey, Is.Empty);
             Assert.That(_area.ActiveScratchpad.DescriptionKey, Is.Empty);
-            Assert.That(_area.ActiveScratchpad.Side, Is.EqualTo(CharacterSides.Any));
+            Assert.That(_area.ActiveScratchpad.Side, Is.EqualTo(CharacterSide.Any));
             Assert.That(_area.ActiveScratchpad.EditorNote, Is.Empty);
 
             _area.SetNameKey("nameKey");
@@ -38,8 +38,8 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.SetDescriptionKey("descriptionKey");
             Assert.That(_area.ActiveScratchpad.DescriptionKey, Is.EqualTo("descriptionKey"));
 
-            _area.SetSide(CharacterSides.Tychon);
-            Assert.That(_area.ActiveScratchpad.Side, Is.EqualTo(CharacterSides.Tychon));
+            _area.SetSide(CharacterSide.Tychon);
+            Assert.That(_area.ActiveScratchpad.Side, Is.EqualTo(CharacterSide.Tychon));
 
             _area.SetEditorNote("editorNote");
             Assert.That(_area.ActiveScratchpad.EditorNote, Is.EqualTo("editorNote"));
@@ -52,14 +52,14 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.SetNameKey("nameKey");
             _area.SetDescriptionKey("descriptionKey");
-            _area.SetSide(CharacterSides.Tychon);
+            _area.SetSide(CharacterSide.Tychon);
             _area.SetEditorNote("editorNote");
 
             _area.RestorePreviousState(RestoreDirection.Previous);
             Assert.That(_area.ActiveScratchpad!.EditorNote, Is.Empty);
 
             _area.RestorePreviousState(RestoreDirection.Previous);
-            Assert.That(_area.ActiveScratchpad.Side, Is.EqualTo(CharacterSides.Any));
+            Assert.That(_area.ActiveScratchpad.Side, Is.EqualTo(CharacterSide.Any));
 
             _area.RestorePreviousState(RestoreDirection.Previous);
             Assert.That(_area.ActiveScratchpad.DescriptionKey, Is.Empty);
@@ -74,7 +74,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             Assert.That(_area.ActiveScratchpad.DescriptionKey, Is.EqualTo("descriptionKey"));
 
             _area.RestorePreviousState(RestoreDirection.Next);
-            Assert.That(_area.ActiveScratchpad.Side, Is.EqualTo(CharacterSides.Tychon));
+            Assert.That(_area.ActiveScratchpad.Side, Is.EqualTo(CharacterSide.Tychon));
 
             _area.RestorePreviousState(RestoreDirection.Next);
             Assert.That(_area.ActiveScratchpad.EditorNote, Is.EqualTo("editorNote"));
@@ -327,13 +327,13 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.SelectThought(guid);
             _area.SetNameKey("editedNameKey");
             _area.SetDescriptionKey("editedDescriptionKey");
-            _area.SetSide(CharacterSides.Forger);
+            _area.SetSide(CharacterSide.Forger);
             _area.SetEditorNote("editedEditorNote");
             _area.FinishBuilding();
 
             Assert.That(_area.Thoughts[0].RuntimeThought.NameKey, Is.EqualTo("editedNameKey"));
             Assert.That(_area.Thoughts[0].RuntimeThought.DescriptionKey, Is.EqualTo("editedDescriptionKey"));
-            Assert.That(_area.Thoughts[0].RuntimeThought.Side, Is.EqualTo(CharacterSides.Forger));
+            Assert.That(_area.Thoughts[0].RuntimeThought.Side, Is.EqualTo(CharacterSide.Forger));
             Assert.That(_area.Thoughts[0].EditorNote, Is.EqualTo("editedEditorNote"));
 
             Assert.That(_area.ActiveScratchpad!.HasChanges(_area.Thoughts[0]), Is.False);
@@ -347,7 +347,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.SelectThought(guid);
             _area.SetNameKey("editedNameKey");
             _area.SetDescriptionKey("editedDescriptionKey");
-            _area.SetSide(CharacterSides.Forger);
+            _area.SetSide(CharacterSide.Forger);
             _area.SetEditorNote("editedEditorNote");
             _area.FinishBuilding();
             _area.RestorePreviousState(RestoreDirection.Previous);
@@ -490,7 +490,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             _area.SetNameKey($"nameKey{offset}");
             _area.SetDescriptionKey($"descriptionKey{offset}");
-            _area.SetSide(CharacterSides.Tychon);
+            _area.SetSide(CharacterSide.Tychon);
             _area.SetEditorNote($"editorNote{offset}");
         }
 

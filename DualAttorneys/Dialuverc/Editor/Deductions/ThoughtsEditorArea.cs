@@ -95,7 +95,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             EndChange();
         }
 
-        public void SetSide(CharacterSides side)
+        public void SetSide(CharacterSide side)
         {
             if (_scratchpadsManager.ActiveScratchpad is null)
                 throw new InvalidOperationException($"Can't set side of a null scratchpad");

@@ -10,7 +10,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
         public string NameKey { get; init; } = string.Empty;
         public string DescriptionKey { get; init; } = string.Empty;
 
-        public CharacterSides Side { get; init; } = CharacterSides.Any;
+        public CharacterSide Side { get; init; } = CharacterSide.Any;
 
         public string EditorNote { get; init; } = string.Empty;
 
