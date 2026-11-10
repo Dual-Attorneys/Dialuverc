@@ -1,7 +1,7 @@
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Thoughts;
 
-namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
+namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 {
     /// <summary>
     /// Groups all of <see cref="ThoughtsEditorArea"/>'s fields exposed through the UI for scratchpads management.
