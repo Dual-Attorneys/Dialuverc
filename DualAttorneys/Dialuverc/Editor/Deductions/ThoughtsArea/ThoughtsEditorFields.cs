@@ -1,4 +1,5 @@
 using DualAttorneys.Dialuverc.Deductions;
+using DualAttorneys.Dialuverc.Editor.Deductions.Thoughts;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
 {

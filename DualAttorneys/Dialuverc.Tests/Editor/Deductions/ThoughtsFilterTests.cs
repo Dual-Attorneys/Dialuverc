@@ -1,7 +1,7 @@
 using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Observability;
 using DualAttorneys.Dialuverc.Deductions;
-using DualAttorneys.Dialuverc.Editor.Deductions;
+using DualAttorneys.Dialuverc.Editor.Deductions.Thoughts;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
