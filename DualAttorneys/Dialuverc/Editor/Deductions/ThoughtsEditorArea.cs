@@ -375,7 +375,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _selectionGuid = newState.ThoughtSelection;
 
-            ScratchpadSelection.ChangeValue(newState.Mode, invokeEvent: false);
+            ScratchpadSelection.ChangeValue(newState.ScratchpadSelection, invokeEvent: false);
         }
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(_scratchpadsManager, _selectionGuid, _thoughts, _localizationManager);
