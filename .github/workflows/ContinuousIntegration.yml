@@ -30,8 +30,9 @@ jobs:
         run: dotnet restore
 
       # This should have been done before pushing.
+      # Check the whole .slnx despite filters existing.
       - name: Check style
-        run: dotnet format --verify-no-changes
+        run: dotnet format Dialuverc.slnx --verify-no-changes
 
       - name: Build
         run: dotnet build
