@@ -1,9 +1,10 @@
 using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
 using System.Collections.Immutable;
 
-namespace DualAttorneys.Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
 {
     /// <summary>
     /// Groups all of <see cref="ThoughtsEditorArea"/>'s state for history management.

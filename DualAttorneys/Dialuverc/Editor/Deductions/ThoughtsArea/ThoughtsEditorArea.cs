@@ -7,8 +7,9 @@ using System.Text.Json;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Observability;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
 
-namespace DualAttorneys.Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
 {
     public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {

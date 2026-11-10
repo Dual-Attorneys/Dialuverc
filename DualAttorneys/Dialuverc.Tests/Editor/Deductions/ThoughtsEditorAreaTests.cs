@@ -5,6 +5,8 @@ using Dialuverc.Editor.Base.StateTracking;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Observability;
 using Dialuverc.Editor.Base.Localization;
+using DualAttorneys.Dialuverc.Editor.Deductions.Thoughts;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {

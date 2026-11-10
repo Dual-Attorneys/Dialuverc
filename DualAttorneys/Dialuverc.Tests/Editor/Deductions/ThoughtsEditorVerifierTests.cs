@@ -5,6 +5,8 @@ using Dialuverc.Editor.Base.Verifier;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
+using DualAttorneys.Dialuverc.Editor.Deductions.Thoughts;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
