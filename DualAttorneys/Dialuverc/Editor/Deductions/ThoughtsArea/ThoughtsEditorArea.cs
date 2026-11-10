@@ -7,8 +7,9 @@ using System.Text.Json;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Observability;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
 
-namespace DualAttorneys.Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
 {
     public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {
@@ -21,7 +22,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// Invoked when a <see cref="EditorThought"/> is selected or deselected while already in <see cref="AddEditEnum.Edit"/> mode.
         /// <para>Deselecting passes a <see langword="null"/> <see cref="EditorThought"/>.</para>
         /// </summary>
-        public event Action<EditorThought?>? OnThoughtSelectionChanged;
+        public event Action<EditorThought?>? ThoughtSelectionChanged;
 
         readonly public ObservableValue<AddEditEnum> ScratchpadSelection;
         readonly AddEditScratchpads<ThoughtsEditorFields> _scratchpadsManager;
@@ -95,7 +96,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             EndChange();
         }
 
-        public void SetSide(CharacterSides side)
+        public void SetSide(CharacterSide side)
         {
             if (_scratchpadsManager.ActiveScratchpad is null)
                 throw new InvalidOperationException($"Can't set side of a null scratchpad");
@@ -323,7 +324,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _selectionGuid = guid;
 
             if (!ScratchpadSelection.ChangeValue(AddEditEnum.Edit))
-                OnThoughtSelectionChanged?.Invoke(foundThought);
+                ThoughtSelectionChanged?.Invoke(foundThought);
         }
 
         #region Exportables/Importables
@@ -375,7 +376,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
             _selectionGuid = newState.ThoughtSelection;
 
-            ScratchpadSelection.ChangeValue(newState.Mode, invokeEvent: false);
+            ScratchpadSelection.ChangeValue(newState.ScratchpadSelection, invokeEvent: false);
         }
 
         public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(_scratchpadsManager, _selectionGuid, _thoughts, _localizationManager);

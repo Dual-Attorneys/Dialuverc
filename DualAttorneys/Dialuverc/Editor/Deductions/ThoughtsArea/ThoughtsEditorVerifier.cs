@@ -3,8 +3,9 @@ using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Verifier;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
 
-namespace DualAttorneys.Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
 {
     internal static class ThoughtsEditorVerifier
     {

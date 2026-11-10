@@ -120,7 +120,7 @@ namespace Dialuverc.Editor.Tests.Base
         {
             int count = 0;
 
-            _testStateHistoryTracker.OnStateChanged += () => { count++; };
+            _testStateHistoryTracker.StateChanged += () => { count++; };
 
             _testStateHistoryTracker.ChangeState("A");
             _testStateHistoryTracker.ChangeState("B");

@@ -1,9 +1,10 @@
 using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
 using System.Collections.Immutable;
 
-namespace DualAttorneys.Dialuverc.Editor.Deductions
+namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
 {
     /// <summary>
     /// Groups all of <see cref="ThoughtsEditorArea"/>'s state for history management.
@@ -17,7 +18,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public readonly ImmutableDictionary<string, ImmutableDictionary<string, string>> LocalizationLookup;
 
-        public readonly AddEditEnum Mode;
+        public readonly AddEditEnum ScratchpadSelection;
 
         /// <summary>
         /// Which thought was selected at the time this state was saved.
@@ -31,7 +32,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             AddScratchpad = scratchpads.AddScratchpad;
             EditScratchpad = scratchpads.EditScratchpad;
 
-            Mode = scratchpads.Selection.Value;
+            ScratchpadSelection = scratchpads.Selection.Value;
 
             ThoughtSelection = thoughtSelection;
 

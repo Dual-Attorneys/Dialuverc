@@ -21,7 +21,7 @@ namespace Dialuverc.Editor.Base.IO
             {
                 foreach (IExportable exportable in toExport)
                 {
-                    ZipArchiveEntry entry = archive.CreateEntry(exportable.ExportPath);
+                    ZipArchiveEntry entry = archive.CreateEntry(exportable.RelativePath);
 
                     using (Stream entryStream = entry.Open())
                     {
@@ -51,7 +51,7 @@ namespace Dialuverc.Editor.Base.IO
 
             foreach (IExportable exportable in toExport)
             {
-                string fullPath = Path.Combine(folderPath, exportable.ExportPath);
+                string fullPath = Path.Combine(folderPath, exportable.RelativePath);
                 string? nestedFolderPath = Path.GetDirectoryName(fullPath);
 
                 ThrowIfPathDirectoryTraversalIsNotAllowed(fullPath, folderPath, allowedTraversal);
@@ -68,7 +68,7 @@ namespace Dialuverc.Editor.Base.IO
         }
 
         /// <summary>
-        /// Provides each <see cref="IImportable"/> with a readable <see cref="FileStream"/> of the <see cref="ZipArchiveEntry"/> in the <see cref="ZipArchive"/> corresponding to its <see cref="IExportable.ExportPath"/>.
+        /// Provides each <see cref="IImportable"/> with a readable <see cref="FileStream"/> of the <see cref="ZipArchiveEntry"/> in the <see cref="ZipArchive"/> corresponding to its <see cref="IExportable.RelativePath"/>.
         /// </summary>
         public static void ImportFromZip(IEnumerable<IImportable> toImport, Stream stream)
         {
@@ -76,7 +76,7 @@ namespace Dialuverc.Editor.Base.IO
             {
                 foreach (IImportable importable in toImport)
                 {
-                    ZipArchiveEntry? entry = archive.GetEntry(importable.ExportPath);
+                    ZipArchiveEntry? entry = archive.GetEntry(importable.RelativePath);
 
                     // TODO: Proper error handling.
                     if (entry is null)
@@ -92,7 +92,7 @@ namespace Dialuverc.Editor.Base.IO
         }
 
         /// <summary>
-        /// Provides each <see cref="IImportable"/> with a readable <see cref="FileStream"/> of the <see cref="File"/> in the <see cref="Directory"/> corresponding to its <see cref="IExportable.ExportPath"/>.
+        /// Provides each <see cref="IImportable"/> with a readable <see cref="FileStream"/> of the <see cref="File"/> in the <see cref="Directory"/> corresponding to its <see cref="IExportable.RelativePath"/>.
         /// </summary>
         public static void ImportFromFolder(IEnumerable<IImportable> toImport, string folderPath, AllowedDirectoryTraversal allowedTraversal = AllowedDirectoryTraversal.None)
         {
@@ -104,13 +104,13 @@ namespace Dialuverc.Editor.Base.IO
 
             foreach (IImportable importable in toImport)
             {
-                string fullPath = Path.Combine(folderPath, importable.ExportPath);
+                string fullPath = Path.Combine(folderPath, importable.RelativePath);
                 string? nestedFolderPath = Path.GetDirectoryName(fullPath);
 
                 ThrowIfPathDirectoryTraversalIsNotAllowed(fullPath, folderPath, allowedTraversal);
 
                 if (!Directory.Exists(nestedFolderPath))
-                    throw new DirectoryNotFoundException($"Exportable's {nameof(IImportable.ExportPath)} '{nestedFolderPath}' points to a non-existing folder");
+                    throw new DirectoryNotFoundException($"Exportable's {nameof(IImportable.RelativePath)} '{nestedFolderPath}' points to a non-existing folder");
 
                 using (FileStream fileStream = File.Open(fullPath, FileMode.Open, FileAccess.Read))
                 {
@@ -160,7 +160,7 @@ namespace Dialuverc.Editor.Base.IO
         }
 
         /// <summary>
-        /// Where an <see cref="IExportable.ExportPath"/> is allowed to traverse to (only upwards traversal is relevant) relative to some reference folder.
+        /// Where an <see cref="IExportable.RelativePath"/> is allowed to traverse to (only upwards traversal is relevant) relative to some reference folder.
         /// </summary>
         public enum AllowedDirectoryTraversal
         {

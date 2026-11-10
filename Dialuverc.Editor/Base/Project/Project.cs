@@ -3,15 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Dialuverc.Editor.Base.Project
 {
-    public class DialuvercProject
+    public class Project
     {
         public string ProjectFolderPath { get; private set; }
         public string ContentFolderPath { get; private set; }
         public string BackupsFolderPath { get; private set; }
 
-        readonly IEnumerable<IEditorProjectTrackable> _projectTrackables;
+        readonly IEnumerable<IEditorTrackable> _projectTrackables;
 
-        public DialuvercProject(string folderPath, IEnumerable<IEditorProjectTrackable> projectTrackables)
+        public Project(string folderPath, IEnumerable<IEditorTrackable> projectTrackables)
         {
             ArgumentNullException.ThrowIfNull(projectTrackables);
 
@@ -53,7 +53,7 @@ namespace Dialuverc.Editor.Base.Project
 
         IEnumerable<IImportable> EnumerateImportables()
         {
-            foreach (IEditorProjectTrackable trackable in _projectTrackables)
+            foreach (IEditorTrackable trackable in _projectTrackables)
             {
                 foreach (IImportable importable in trackable.GetEditorImportables())
                 {
@@ -64,7 +64,7 @@ namespace Dialuverc.Editor.Base.Project
 
         public bool CheckHasUnsavedChanges()
         {
-            foreach (IEditorProjectTrackable trackable in _projectTrackables)
+            foreach (IEditorTrackable trackable in _projectTrackables)
             {
                 if (trackable.HasUnsavedChanges)
                     return true;
@@ -108,7 +108,7 @@ namespace Dialuverc.Editor.Base.Project
                 throw;
             }
 
-            foreach (IEditorProjectTrackable trackable in _projectTrackables)
+            foreach (IEditorTrackable trackable in _projectTrackables)
             {
                 trackable.SetCurrentStateAsSaved();
             }
@@ -139,7 +139,7 @@ namespace Dialuverc.Editor.Base.Project
         {
             ExportableUtils.ImportFromFolder(EnumerateImportables(), ContentFolderPath);
 
-            foreach (IEditorProjectTrackable trackable in _projectTrackables)
+            foreach (IEditorTrackable trackable in _projectTrackables)
             {
                 trackable.ClearStatesHistory();
             }
