@@ -17,7 +17,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
 
         public readonly ImmutableDictionary<string, ImmutableDictionary<string, string>> LocalizationLookup;
 
-        public readonly AddEditEnum Mode;
+        public readonly AddEditEnum ScratchpadSelection;
 
         /// <summary>
         /// Which thought was selected at the time this state was saved.
@@ -31,7 +31,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             AddScratchpad = scratchpads.AddScratchpad;
             EditScratchpad = scratchpads.EditScratchpad;
 
-            Mode = scratchpads.Selection.Value;
+            ScratchpadSelection = scratchpads.Selection.Value;
 
             ThoughtSelection = thoughtSelection;
 
