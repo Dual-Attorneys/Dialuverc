@@ -6,10 +6,10 @@ namespace Dialuverc.Editor.Base.IO
     public interface IExportable
     {
         /// <summary>
-        /// A path relative to the folder this <see cref="IExportable"/> is being saved in.<br/>
-        /// Can be used to group multiple <see cref="IExportable"/>s under the same subfolder.
+        /// A path relative to the storage this <see cref="IExportable"/> is being exported in.<br/>
+        /// Can be used to group multiple <see cref="IExportable"/>s under the same sub-storage.
         /// </summary>
-        public string ExportPath { get; }
+        public string RelativePath { get; }
 
         public void SerializeForExport(Stream stream);
     }

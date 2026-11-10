@@ -3,7 +3,7 @@ namespace DualAttorneys.Dialuverc.Deductions
     /// <summary>
     /// Represents which side (protagonist-wise) something belongs to. 
     /// </summary>
-    public enum CharacterSides
+    public enum CharacterSide
     {
         Tychon,
         Forger,

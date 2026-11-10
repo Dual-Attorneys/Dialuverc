@@ -10,9 +10,9 @@ namespace DualAttorneys.Dialuverc.Deductions
         /// <summary>
         /// Represents which character this thought can be given to.
         /// </summary>
-        public CharacterSides Side { get; init; }
+        public CharacterSide Side { get; init; }
 
-        public Thought(ThoughtGuid guid, string nameKey, string descriptionKey, CharacterSides side)
+        public Thought(ThoughtGuid guid, string nameKey, string descriptionKey, CharacterSide side)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(nameKey, nameof(nameKey));
             ArgumentNullException.ThrowIfNullOrWhiteSpace(descriptionKey, nameof(descriptionKey));

@@ -27,7 +27,7 @@ namespace Dialuverc.Editor.Tests.Base
 
                     for (int i = 0; i < toExport.Length; i++)
                     {
-                        Assert.That(readArchive.Entries[i].Name, Is.EqualTo(toExport[i].ExportPath));
+                        Assert.That(readArchive.Entries[i].Name, Is.EqualTo(toExport[i].RelativePath));
 
                         using (Stream stream = readArchive.Entries[i].Open())
                         {
@@ -57,7 +57,7 @@ namespace Dialuverc.Editor.Tests.Base
 
                 for (int i = 0; i < toExport.Length; i++)
                 {
-                    string filePath = Path.Combine(storage.AbsoluteFolderPath, toExport[i].ExportPath);
+                    string filePath = Path.Combine(storage.AbsoluteFolderPath, toExport[i].RelativePath);
 
                     Assert.That(File.Exists(filePath), Is.True);
                     Assert.That(File.ReadAllText(filePath), Is.EqualTo(toExport[i].Content));
@@ -150,7 +150,7 @@ namespace Dialuverc.Editor.Tests.Base
             public const string ImportFailedContent = "Failed";
 
             readonly string _exportName;
-            public string ExportPath => _exportName;
+            public string RelativePath => _exportName;
 
             public readonly string Content;
 

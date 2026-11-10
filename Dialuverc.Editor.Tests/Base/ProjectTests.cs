@@ -3,7 +3,7 @@ using Dialuverc.Editor.Base.Project;
 
 namespace Dialuverc.Editor.Tests.Base
 {
-    internal class DialuvercProjectTests
+    internal class ProjectTests
     {
         [Test]
         public void SaveSuccessCreatesBackup()
@@ -16,21 +16,21 @@ namespace Dialuverc.Editor.Tests.Base
             // Only saving creates backups, exporting doesn't.
             TestingImportable[] exportables = Array.Empty<TestingImportable>();
 
-            IEditorProjectTrackable[] trackables = new IEditorProjectTrackable[]
+            IEditorTrackable[] trackables = new IEditorTrackable[]
             {
-                new TestingProjectTrackable(importables, exportables),
+                new TestingEditorTrackable(importables, exportables),
             };
 
             string firstContent = "Hello";
             string secondContent = "World";
 
-            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(DialuvercProjectTests)))
+            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(ProjectTests)))
             {
-                DialuvercProject project = new DialuvercProject(
-                    Path.Combine(tempStorage.AbsoluteFolderPath, "DialuvercProject"),
+                Project project = new Project(
+                    Path.Combine(tempStorage.AbsoluteFolderPath, "Project"),
                     trackables);
 
-                string filePath = Path.Combine(project.ContentFolderPath, importables[0].ExportPath);
+                string filePath = Path.Combine(project.ContentFolderPath, importables[0].RelativePath);
 
                 importables[0].Content = firstContent;
 
@@ -86,21 +86,21 @@ namespace Dialuverc.Editor.Tests.Base
             // Only saving creates backups, exporting doesn't.
             TestingImportable[] exportables = Array.Empty<TestingImportable>();
 
-            IEditorProjectTrackable[] trackables = new IEditorProjectTrackable[]
+            IEditorTrackable[] trackables = new IEditorTrackable[]
             {
-                new TestingProjectTrackable(importables, exportables),
+                new TestingEditorTrackable(importables, exportables),
             };
 
             string firstContent = "Hello";
             string secondContent = "World";
 
-            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(DialuvercProjectTests)))
+            using (TemporaryFileStorage tempStorage = new TemporaryFileStorage(nameof(ProjectTests)))
             {
-                DialuvercProject project = new DialuvercProject(
-                    Path.Combine(tempStorage.AbsoluteFolderPath, "DialuvercProject"),
+                Project project = new Project(
+                    Path.Combine(tempStorage.AbsoluteFolderPath, "Project"),
                     trackables);
 
-                string filePath = Path.Combine(project.ContentFolderPath, importables[0].ExportPath);
+                string filePath = Path.Combine(project.ContentFolderPath, importables[0].RelativePath);
 
                 importables[0].Content = firstContent;
 
@@ -115,20 +115,20 @@ namespace Dialuverc.Editor.Tests.Base
             }
         }
 
-        private class TestingProjectTrackable : IEditorProjectTrackable
+        private class TestingEditorTrackable : IEditorTrackable
         {
             public bool HasUnsavedChanges { get; private set; }
 
             readonly IEnumerable<IImportable> _importables;
             readonly IEnumerable<IExportable> _exportables;
 
-            public TestingProjectTrackable(IEnumerable<IImportable> importables, IEnumerable<IExportable> exportables)
+            public TestingEditorTrackable(IEnumerable<IImportable> importables, IEnumerable<IExportable> exportables)
             {
                 _importables = importables;
                 _exportables = exportables;
             }
 
-            // This is usually needed by DialuvercProject, but not for tests.
+            // This is usually needed by Project, but not for tests.
             public void ClearStatesHistory() => throw new NotImplementedException();
 
             public IEnumerable<IImportable> GetEditorImportables() => _importables;
@@ -141,7 +141,7 @@ namespace Dialuverc.Editor.Tests.Base
         private class TestingImportable : IImportable
         {
             readonly string _exportPath;
-            public string ExportPath => _exportPath;
+            public string RelativePath => _exportPath;
 
             public ImportableThrowOn ThrowOn { get; set; } = ImportableThrowOn.None;
 

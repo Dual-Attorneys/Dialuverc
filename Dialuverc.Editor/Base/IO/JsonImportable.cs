@@ -8,21 +8,21 @@ namespace Dialuverc.Editor.Base.IO
     /// <typeparam name="T">The type to import/export. May need a <see cref="System.Text.Json.Serialization.JsonConverter"/>.</typeparam>
     public class JsonImportable<T> : IImportable
     {
-        public string ExportPath { get; private set; }
+        public string RelativePath { get; private set; }
 
         readonly Func<T> _getter;
         readonly Action<T?> _setter;
 
         readonly JsonSerializerOptions _jsonOptions;
 
-        public JsonImportable(string exportPath, Func<T> getter, Action<T?> setter, JsonSerializerOptions jsonOptions)
+        public JsonImportable(string relativePath, Func<T> getter, Action<T?> setter, JsonSerializerOptions jsonOptions)
         {
-            ArgumentNullException.ThrowIfNull(exportPath);
+            ArgumentNullException.ThrowIfNull(relativePath);
             ArgumentNullException.ThrowIfNull(getter);
             ArgumentNullException.ThrowIfNull(setter);
             ArgumentNullException.ThrowIfNull(jsonOptions);
 
-            ExportPath = exportPath;
+            RelativePath = relativePath;
             _getter = getter;
             _setter = setter;
             _jsonOptions = jsonOptions;

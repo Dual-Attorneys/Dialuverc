@@ -10,7 +10,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         public static bool HasSameValues(this Thought thought, Thought? other)
             => other is not null && HasSameValues(thought, other.NameKey, other.DescriptionKey, other.Side);
 
-        public static bool HasSameValues(this Thought thought, string nameKey, string descriptionKey, CharacterSides side)
+        public static bool HasSameValues(this Thought thought, string nameKey, string descriptionKey, CharacterSide side)
             => thought.NameKey == nameKey && thought.DescriptionKey == descriptionKey && thought.Side == side;
     }
 }

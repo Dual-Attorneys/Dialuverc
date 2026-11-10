@@ -5,7 +5,7 @@ namespace Dialuverc.Editor.Base.Project
     /// <summary>
     /// Represents an object on which project-level state history and persistence-related operations can be done.
     /// </summary>
-    public interface IEditorProjectTrackable
+    public interface IEditorTrackable
     {
         /// <summary>
         /// Whether this object has unsaved changes, making destructive operations dangerous.
