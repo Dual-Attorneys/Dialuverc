@@ -232,7 +232,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             EditorThought? currentSelection = null;
 
             _area.ScratchpadSelection.ValueChanged += (_) => { changeModeInvokations++; };
-            _area.OnThoughtSelectionChanged += (selection) =>
+            _area.ThoughtSelectionChanged += (selection) =>
             {
                 changeSelectInvokations++;
                 currentSelection = selection;
@@ -267,7 +267,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             int eventInvokations = 0;
 
-            _area.OnThoughtSelectionChanged += (selection) => { eventInvokations++; };
+            _area.ThoughtSelectionChanged += (selection) => { eventInvokations++; };
 
             _area.SelectThought(guid);
             _area.SelectThought(guid);
@@ -280,7 +280,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         {
             EditorThought? currentSelection = null;
 
-            _area.OnThoughtSelectionChanged += (selection) => { currentSelection = selection; };
+            _area.ThoughtSelectionChanged += (selection) => { currentSelection = selection; };
 
             ThoughtGuid guid = AddSampleThoughtToList();
 
@@ -306,7 +306,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             int eventInvokations = 0;
             EditorThought? currentSelection = null;
 
-            _area.OnThoughtSelectionChanged += (selection) =>
+            _area.ThoughtSelectionChanged += (selection) =>
             {
                 eventInvokations++;
                 currentSelection = selection;

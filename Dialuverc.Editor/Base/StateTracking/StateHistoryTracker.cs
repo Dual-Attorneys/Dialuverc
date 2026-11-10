@@ -24,7 +24,7 @@ namespace Dialuverc.Editor.Base.StateTracking
         /// <summary>
         /// Invoked when state is saved or restored.
         /// </summary>
-        public event Action? OnStateChanged;
+        public event Action? StateChanged;
 
         /// <summary>
         /// Begins a transaction and makes sure a base state to undo towards exists.
@@ -73,7 +73,7 @@ namespace Dialuverc.Editor.Base.StateTracking
             CurrentStateIndex = _savedStates.Count - 1;
 
             // This will get called twice on the first commit (MakeSureBaseStateIsSaved forces a Commit).
-            OnStateChanged?.Invoke();
+            StateChanged?.Invoke();
         }
 
         public void RestorePreviousState(RestoreDirection direction)
@@ -97,7 +97,7 @@ namespace Dialuverc.Editor.Base.StateTracking
 
             IsRestoringPreviousState = false;
 
-            OnStateChanged?.Invoke();
+            StateChanged?.Invoke();
         }
 
         protected abstract T GetStateToSave();

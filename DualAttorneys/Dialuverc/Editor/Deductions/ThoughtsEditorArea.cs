@@ -21,7 +21,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
         /// Invoked when a <see cref="EditorThought"/> is selected or deselected while already in <see cref="AddEditEnum.Edit"/> mode.
         /// <para>Deselecting passes a <see langword="null"/> <see cref="EditorThought"/>.</para>
         /// </summary>
-        public event Action<EditorThought?>? OnThoughtSelectionChanged;
+        public event Action<EditorThought?>? ThoughtSelectionChanged;
 
         readonly public ObservableValue<AddEditEnum> ScratchpadSelection;
         readonly AddEditScratchpads<ThoughtsEditorFields> _scratchpadsManager;
@@ -323,7 +323,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions
             _selectionGuid = guid;
 
             if (!ScratchpadSelection.ChangeValue(AddEditEnum.Edit))
-                OnThoughtSelectionChanged?.Invoke(foundThought);
+                ThoughtSelectionChanged?.Invoke(foundThought);
         }
 
         #region Exportables/Importables

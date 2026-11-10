@@ -9,7 +9,7 @@ namespace Dialuverc.Editor.Base.StateTracking
         public bool CanUndo { get; }
         public bool CanRedo { get; }
 
-        public event Action? OnStateChanged;
+        public event Action? StateChanged;
 
         public void RestorePreviousState(RestoreDirection direction);
     }
