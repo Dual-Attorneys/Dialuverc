@@ -198,6 +198,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
                     if (!_scratchpadsManager.EditScratchpad.HasChanges(editorThought))
                         return runtimeThought.Guid;
 
+                    // TODO: This almost surely needs better handling.
                     if (!_duplicationVerifier.CanFinishBuilding)
                         throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} with unsolved {nameof(Problem)}s");
 
@@ -224,6 +225,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 
                     ThoughtGuid addedGuid = new ThoughtGuid();
 
+                    // TODO: This almost surely needs better handling.
                     if (!_duplicationVerifier.CanFinishBuilding)
                         throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} with unsolved {nameof(Problem)}s");
 
