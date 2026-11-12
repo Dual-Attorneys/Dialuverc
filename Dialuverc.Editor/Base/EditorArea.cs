@@ -14,6 +14,7 @@ namespace Dialuverc.Editor.Base
     // the consumer of this should be interested in only one of those at any time as they represent different domains.
     public abstract class EditorArea<T> : StateHistoryTracker<T>, IGameTrackable, IVerifiable
     {
+        protected T CurrentState => SavedStates[CurrentStateIndex];
         T _lastSavedState = default!;
 
         // Do not check for null here as default state *could* be null.
@@ -34,7 +35,7 @@ namespace Dialuverc.Editor.Base
             _lastSavedState = default!;
         }
 
-        // Since saving is done using IImportables, we do not necessarily know who is doing the saving or when it happens.
+        // Since saving (to a storage) is done using IImportables, we do not necessarily know who is doing the saving or when it happens.
         // We let the object doing the saving tell us when changes are safe.
         public void SetCurrentStateAsSaved()
         {

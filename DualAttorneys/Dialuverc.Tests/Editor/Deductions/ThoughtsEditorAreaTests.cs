@@ -588,6 +588,27 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             }
         }
 
+        [Test]
+        public void StateChangeUpdatesVerifiers()
+        {
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+            _area.FinishBuilding();
+
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            Assert.That(_area.Verify, Has.Count.EqualTo(2));
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.Verify, Has.Count.EqualTo(1));
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.Verify, Has.Count.EqualTo(0));
+        }
+
         #region Helpers
 
         void PopulateSampleThought(int offset = 0)

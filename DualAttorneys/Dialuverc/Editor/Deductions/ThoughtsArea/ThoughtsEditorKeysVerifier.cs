@@ -1,37 +1,32 @@
 using Dialuverc.Editor.Base.Verifier;
 using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
-using System.Collections.Immutable;
+using System.Diagnostics;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 {
     internal class ThoughtsEditorKeysVerifier
     {
-        readonly AddEditScratchpads<ThoughtsEditorFields> _scratchpadsManager;
-
         readonly List<Problem> _problems = new List<Problem>();
+
+        ThoughtsEditorState? _lastVerifiedState = null;
 
         public bool CanFinishBuilding => _problems.Count == 0;
 
-        public ThoughtsEditorKeysVerifier(AddEditScratchpads<ThoughtsEditorFields> scratchpadsManager)
-        {
-            _scratchpadsManager = scratchpadsManager;
-        }
-
-        public void VerifyScratchpads(ThoughtGuid? ignore, ImmutableList<EditorThought> thoughts)
+        void VerifyScratchpads(ThoughtsEditorState state)
         {
             _problems.Clear();
 
-            foreach (EditorThought editorThought in thoughts)
+            foreach (EditorThought editorThought in state.Thoughts)
             {
                 Thought runtimeThought = editorThought.RuntimeThought;
 
-                VerifyIndividualScratchpad(AddEditEnum.Add, _scratchpadsManager.AddScratchpad, runtimeThought);
+                VerifyIndividualScratchpad(AddEditEnum.Add, state.AddScratchpad, runtimeThought);
 
                 // While we must check Add against all Thoughts,
                 // we must skip the Thought being edited when checking Edit.
-                if (runtimeThought.Guid != ignore)
-                    VerifyIndividualScratchpad(AddEditEnum.Edit, _scratchpadsManager.EditScratchpad, runtimeThought);
+                if (runtimeThought.Guid != state.ThoughtSelection)
+                    VerifyIndividualScratchpad(AddEditEnum.Edit, state.EditScratchpad, runtimeThought);
             }
         }
 
@@ -47,7 +42,18 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
                 _problems.Add(new Problem(ProblemSeverity.Error, $"{mode} scratchpad's {nameof(scratchpad.DescriptionKey)} is already defined."));
         }
 
-        // This check is run internally when a field representing a key is changed.
-        public IReadOnlyList<Problem> Run() => _problems;
+        public IReadOnlyList<Problem> Run(ThoughtsEditorState state)
+        {
+            // TODO: Should last saved state be nullable? A null default state *could* be allowable.
+            // In our usage should never be null anyway.
+            Debug.Assert(state is not null, $"{nameof(state)} was null. This should never happen.");
+
+            if (state != _lastVerifiedState)
+                VerifyScratchpads(state);
+
+            _lastVerifiedState = state;
+
+            return _problems;
+        }
     }
 }

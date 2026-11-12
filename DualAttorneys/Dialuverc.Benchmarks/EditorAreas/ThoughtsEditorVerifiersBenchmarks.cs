@@ -24,7 +24,7 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
             _thoughtsList = ImmutableList<EditorThought>.Empty;
 
             _scratchpads = new AddEditScratchpads<ThoughtsEditorFields>(new ObservableValue<AddEditEnum>(AddEditEnum.Add));
-            _verifier = new ThoughtsEditorKeysVerifier(_scratchpads);
+            _verifier = new ThoughtsEditorKeysVerifier();
 
             for (int i = 0; i < ThoughtsAmount; i++)
             {
@@ -40,7 +40,7 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         [Benchmark]
         public void RunKeyVerifier()
         {
-            _verifier!.VerifyScratchpads(null, _thoughtsList!);
+            // TODO: Run verifier.
         }
     }
 }

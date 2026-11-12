@@ -47,7 +47,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 
             _localizationManager = new LocalizationStore(localeChoice, "thoughts");
 
-            _duplicationVerifier = new ThoughtsEditorKeysVerifier(_scratchpadsManager);
+            _duplicationVerifier = new ThoughtsEditorKeysVerifier();
 
             JsonSerializerOptions jsonOptions = new JsonSerializerOptions
             {
@@ -79,7 +79,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 
             EndChange();
 
-            _duplicationVerifier.VerifyScratchpads(_selectionGuid, _thoughts);
+            _duplicationVerifier.Run(CurrentState);
         }
 
         public void SetDescriptionKey(string descriptionKey)
@@ -99,7 +99,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 
             EndChange();
 
-            _duplicationVerifier.VerifyScratchpads(_selectionGuid, _thoughts);
+            _duplicationVerifier.Run(CurrentState);
         }
 
         public void SetSide(CharacterSide side)
@@ -172,9 +172,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
         /// </summary>
         public ThoughtGuid FinishBuilding()
         {
-            if (!_duplicationVerifier.CanFinishBuilding)
-                throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} with unsolved {nameof(Problem)}s");
-
             AddEditEnum currentSelection = _scratchpadsManager.Selection.Value;
 
             switch (currentSelection)
@@ -201,6 +198,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
                     if (!_scratchpadsManager.EditScratchpad.HasChanges(editorThought))
                         return runtimeThought.Guid;
 
+                    if (!_duplicationVerifier.CanFinishBuilding)
+                        throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} with unsolved {nameof(Problem)}s");
+
                     BeginChange();
 
                     if (runtimeThought.NameKey != _scratchpadsManager.EditScratchpad.NameKey)
@@ -223,6 +223,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
                         throw new InvalidOperationException($"Can't commit new thought to list with null adding scratchpad");
 
                     ThoughtGuid addedGuid = new ThoughtGuid();
+
+                    if (!_duplicationVerifier.CanFinishBuilding)
+                        throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} with unsolved {nameof(Problem)}s");
 
                     BeginChange();
 
@@ -400,7 +403,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
             ScratchpadSelection.ChangeValue(newState.ScratchpadSelection, invokeEvent: false);
         }
 
-        public override IReadOnlyList<Problem> Verify() => _duplicationVerifier.Run();
+        public override IReadOnlyList<Problem> Verify() => _duplicationVerifier.Run(CurrentState);
 
         #endregion
     }
