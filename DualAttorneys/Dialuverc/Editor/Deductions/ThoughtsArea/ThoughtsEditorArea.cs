@@ -30,7 +30,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
         readonly LocalizationStore _localizationManager;
         public IReadOnlyLocalizationStore LocalizationManager => _localizationManager;
 
-        readonly ThoughtsEditorDuplicationVerifier _duplicationVerifier;
+        readonly ThoughtsEditorKeysVerifier _duplicationVerifier;
 
         // Records are immutable, making changes to this requires creating a new instance.
         readonly ThoughtsEditorFields _cachedDefaultScratchpad = new ThoughtsEditorFields();
@@ -47,7 +47,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 
             _localizationManager = new LocalizationStore(localeChoice, "thoughts");
 
-            _duplicationVerifier = new ThoughtsEditorDuplicationVerifier(_scratchpadsManager);
+            _duplicationVerifier = new ThoughtsEditorKeysVerifier(_scratchpadsManager);
 
             JsonSerializerOptions jsonOptions = new JsonSerializerOptions
             {
