@@ -5,8 +5,8 @@ using Dialuverc.Editor.Base.StateTracking;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Observability;
 using Dialuverc.Editor.Base.Localization;
-using DualAttorneys.Dialuverc.Editor.Deductions.Thoughts;
 using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
+using System.Collections.Immutable;
 
 namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 {
@@ -448,7 +448,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             _area.SetNameKey("nameKey");
 
-            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>().With.Message.Contains("name"));
+            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>());
 
             // FinishBuilding should not have saved state.
             Assert.That(_area.CurrentStateIndex, Is.EqualTo(4));
@@ -456,7 +456,7 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
             _area.SetNameKey("differentNameKey");
             _area.SetDescriptionKey("descriptionKey");
 
-            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>().With.Message.Contains("description"));
+            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>());
 
             // FinishBuilding should not have saved state.
             Assert.That(_area.CurrentStateIndex, Is.EqualTo(6));
@@ -484,6 +484,108 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out string? foundDescriptionValue), Is.True);
             Assert.That(foundDescriptionValue, Is.EqualTo("Thought description"));
+        }
+
+        [Test]
+        public void EditWithDuplicateKeysThrows()
+        {
+            PopulateSampleThought(0);
+            ThoughtGuid toEdit = _area.FinishBuilding();
+
+            _area.SetNameKey("uniqueNameKey");
+            _area.SetDescriptionKey("uniqueDescriptionKey");
+            _area.FinishBuilding();
+
+            _area.SelectThought(toEdit);
+
+            _area.SetNameKey("uniqueNameKey");
+
+            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>());
+
+            _area.SetNameKey("differentNameKey");
+            _area.SetDescriptionKey("uniqueDescriptionKey");
+
+            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>());
+        }
+
+        [Test]
+        public void EditAllowsDuplicatedKeysDefinedInItself()
+        {
+            _area.SetNameKey("uniqueNameKey");
+            _area.SetDescriptionKey("uniqueDescriptionKey");
+            ThoughtGuid toEdit = _area.FinishBuilding();
+
+            _area.SelectThought(toEdit);
+
+            // Any change works.
+            _area.SetNameLocalization("a");
+
+            Assert.That(_area.FinishBuilding, Throws.Nothing);
+        }
+
+        [Test]
+        public void EditFreesPreviouslyUsedKeys()
+        {
+            _area.SetNameKey("nameKey");
+            _area.SetDescriptionKey("descriptionKey");
+
+            ThoughtGuid toEdit = _area.FinishBuilding();
+
+            _area.SelectThought(toEdit);
+
+            _area.SetNameKey("changedNameKey");
+            _area.SetDescriptionKey("changedDescriptionKey");
+
+            _area.FinishBuilding();
+
+            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out _), Is.False);
+            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out _), Is.False);
+
+            _area.RestorePreviousState(RestoreDirection.Previous);
+
+            Assert.That(_area.LocalizationManager.TryGetValue("nameKey", out _), Is.True);
+            Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out _), Is.True);
+        }
+
+        [Test]
+        public void ImportingRestoresLocalization()
+        {
+            _area.SetNameKey("nameKey1");
+            _area.SetDescriptionKey("descriptionKey1");
+            _area.FinishBuilding();
+
+            _area.SetNameKey("nameKey2");
+            _area.SetDescriptionKey("descriptionKey2");
+            _area.FinishBuilding();
+
+            IImportable importableToSave = _area.GetEditorImportables()
+                .OfType<JsonImportable<ImmutableDictionary<string, ImmutableDictionary<string, string>>>>()
+                .First();
+
+            using (MemoryStream writeStream = new MemoryStream())
+            {
+                importableToSave.SerializeForExport(writeStream);
+
+                _area = new TestThoughtsEditorArea(_localeChoice);
+
+                Assert.That(_area.LocalizationManager.TryGetValue("nameKey1", out _), Is.False);
+                Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey1", out _), Is.False);
+                Assert.That(_area.LocalizationManager.TryGetValue("nameKey2", out _), Is.False);
+                Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey2", out _), Is.False);
+
+                IImportable importableToLoad = _area.GetEditorImportables()
+                .OfType<JsonImportable<ImmutableDictionary<string, ImmutableDictionary<string, string>>>>()
+                .First();
+
+                writeStream.Seek(0, SeekOrigin.Begin);
+
+                importableToLoad.DeserializeForImport(writeStream);
+
+                Assert.That(_area.LocalizationManager.TryGetValue("nameKey1", out _), Is.True);
+                Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey1", out _), Is.True);
+                Assert.That(_area.LocalizationManager.TryGetValue("nameKey2", out _), Is.True);
+                Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey2", out _), Is.True);
+            }
         }
 
         #region Helpers

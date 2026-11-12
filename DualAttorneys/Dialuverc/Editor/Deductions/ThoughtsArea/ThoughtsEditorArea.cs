@@ -7,9 +7,8 @@ using System.Text.Json;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Observability;
-using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
 
-namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
+namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 {
     public partial class ThoughtsEditorArea : EditorArea<ThoughtsEditorState>
     {
@@ -31,10 +30,10 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
         readonly LocalizationStore _localizationManager;
         public IReadOnlyLocalizationStore LocalizationManager => _localizationManager;
 
+        readonly ThoughtsEditorDuplicationVerifier _duplicationVerifier;
+
         // Records are immutable, making changes to this requires creating a new instance.
         readonly ThoughtsEditorFields _cachedDefaultScratchpad = new ThoughtsEditorFields();
-
-        readonly JsonImportable<ImmutableList<EditorThought>> _editorThoughtsImportable;
 
         readonly IImportable[] _cachedImportables;
 
@@ -48,15 +47,18 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
 
             _localizationManager = new LocalizationStore(localeChoice, "thoughts");
 
-            _editorThoughtsImportable = new JsonImportable<ImmutableList<EditorThought>>(nameof(ThoughtsEditorArea), GetEditorThoughtsForImportable, OnEditorThoughtsImported, new JsonSerializerOptions
+            _duplicationVerifier = new ThoughtsEditorDuplicationVerifier(_scratchpadsManager);
+
+            JsonSerializerOptions jsonOptions = new JsonSerializerOptions
             {
                 WriteIndented = true,
                 IncludeFields = true,
-            });
+            };
 
             _cachedImportables = new IImportable[]
             {
-                _editorThoughtsImportable,
+                new JsonImportable<ImmutableList<EditorThought>>($"{nameof(ThoughtsEditorArea)}Thoughts", GetEditorThoughtsForImportable, OnEditorThoughtsImported, jsonOptions),
+                new JsonImportable<ImmutableDictionary<string, ImmutableDictionary<string, string>>>($"{nameof(ThoughtsEditorArea)}Localization", GetLocalizationLookupForImportable, OnLocalizationImported, jsonOptions)
             };
         }
 
@@ -76,6 +78,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
                 _scratchpadsManager.ActiveScratchpad with { NameKey = nameKey };
 
             EndChange();
+
+            _duplicationVerifier.VerifyScratchpads(_selectionGuid, _thoughts);
         }
 
         public void SetDescriptionKey(string descriptionKey)
@@ -94,6 +98,8 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
                 _scratchpadsManager.ActiveScratchpad with { DescriptionKey = descriptionKey };
 
             EndChange();
+
+            _duplicationVerifier.VerifyScratchpads(_selectionGuid, _thoughts);
         }
 
         public void SetSide(CharacterSide side)
@@ -166,6 +172,9 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
         /// </summary>
         public ThoughtGuid FinishBuilding()
         {
+            if (!_duplicationVerifier.CanFinishBuilding)
+                throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} with unsolved {nameof(Problem)}s");
+
             AddEditEnum currentSelection = _scratchpadsManager.Selection.Value;
 
             switch (currentSelection)
@@ -178,16 +187,27 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
                     if (_scratchpadsManager.EditScratchpad is null)
                         throw new InvalidOperationException($"Can't commit changes to list with null editing scratchpad");
 
+                    // Only throw if the duplication is happening in a Thought we're not editing.
+
                     int index = _thoughts.FindIndex(d => d.RuntimeThought.Guid == _selectionGuid);
 
                     if (index < 0)
                         throw new InvalidOperationException($"No thought with id '{_selectionGuid}'");
 
+                    EditorThought editorThought = _thoughts[index];
+                    Thought runtimeThought = editorThought.RuntimeThought;
+
                     // List is checked by reference. Prevent stacking state saving when there's no actual changes.
-                    if (!_scratchpadsManager.EditScratchpad.HasChanges(_thoughts[index]))
-                        return _thoughts[index].RuntimeThought.Guid;
+                    if (!_scratchpadsManager.EditScratchpad.HasChanges(editorThought))
+                        return runtimeThought.Guid;
 
                     BeginChange();
+
+                    if (runtimeThought.NameKey != _scratchpadsManager.EditScratchpad.NameKey)
+                        _localizationManager.RemoveKeyForAllLocales(runtimeThought.NameKey);
+
+                    if (runtimeThought.DescriptionKey != _scratchpadsManager.EditScratchpad.DescriptionKey)
+                        _localizationManager.RemoveKeyForAllLocales(runtimeThought.DescriptionKey);
 
                     _thoughts = _thoughts.SetItem(index, _scratchpadsManager.EditScratchpad.CreateFromCurrentValues(_selectionGuid.Value));
 
@@ -201,15 +221,6 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
 
                     if (_scratchpadsManager.AddScratchpad is null)
                         throw new InvalidOperationException($"Can't commit new thought to list with null adding scratchpad");
-
-                    // To enforce the assumption of keys being defined from a single source at most.
-                    // TODO: This error path may need better internal handling.
-                    // Verifier should take care of surfacing the error to the user.
-                    if (_localizationManager.TryGetValue(_scratchpadsManager.AddScratchpad.NameKey, out _))
-                        throw new InvalidOperationException($"Name key \"{_scratchpadsManager.AddScratchpad.NameKey}\" is already defined in a different thought");
-
-                    if (_localizationManager.TryGetValue(_scratchpadsManager.AddScratchpad.DescriptionKey, out _))
-                        throw new InvalidOperationException($"Description key \"{_scratchpadsManager.AddScratchpad.DescriptionKey}\" is already defined in a different thought");
 
                     ThoughtGuid addedGuid = new ThoughtGuid();
 
@@ -332,6 +343,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
         public override IEnumerable<IImportable> GetEditorImportables() => _cachedImportables;
 
         ImmutableList<EditorThought> GetEditorThoughtsForImportable() => _thoughts;
+        ImmutableDictionary<string, ImmutableDictionary<string, string>> GetLocalizationLookupForImportable() => _localizationManager.Lookup;
 
         void OnEditorThoughtsImported(ImmutableList<EditorThought>? imported)
         {
@@ -345,6 +357,15 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
             _thoughts = imported;
 
             EndChange();
+        }
+
+        void OnLocalizationImported(ImmutableDictionary<string, ImmutableDictionary<string, string>>? imported)
+        {
+            if (imported is null)
+                return;
+
+            // TODO: IMPORTANT! This needs to invoke some event.
+            _localizationManager.Lookup = imported;
         }
 
         #endregion
@@ -379,7 +400,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
             ScratchpadSelection.ChangeValue(newState.ScratchpadSelection, invokeEvent: false);
         }
 
-        public override IReadOnlyList<Problem> Verify() => ThoughtsEditorVerifier.Run(_scratchpadsManager, _selectionGuid, _thoughts, _localizationManager);
+        public override IReadOnlyList<Problem> Verify() => _duplicationVerifier.Run();
 
         #endregion
     }
