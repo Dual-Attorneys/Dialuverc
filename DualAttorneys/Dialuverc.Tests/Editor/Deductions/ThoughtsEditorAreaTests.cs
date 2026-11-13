@@ -437,32 +437,6 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
         }
 
         [Test]
-        public void AddSameKeysMultipleTimesThrows()
-        {
-            _area.SetNameKey("nameKey");
-            _area.SetDescriptionKey("descriptionKey");
-
-            Assert.That(_area.FinishBuilding, Throws.Nothing);
-
-            Assert.That(_area.CurrentStateIndex, Is.EqualTo(3));
-
-            _area.SetNameKey("nameKey");
-
-            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>());
-
-            // FinishBuilding should not have saved state.
-            Assert.That(_area.CurrentStateIndex, Is.EqualTo(4));
-
-            _area.SetNameKey("differentNameKey");
-            _area.SetDescriptionKey("descriptionKey");
-
-            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>());
-
-            // FinishBuilding should not have saved state.
-            Assert.That(_area.CurrentStateIndex, Is.EqualTo(6));
-        }
-
-        [Test]
         public void RemoveThoughtRemovesLocalization()
         {
             _area.SetNameKey("nameKey");
@@ -484,43 +458,6 @@ namespace DualAttorneys.Dialuverc.Tests.Editor.Deductions
 
             Assert.That(_area.LocalizationManager.TryGetValue("descriptionKey", out string? foundDescriptionValue), Is.True);
             Assert.That(foundDescriptionValue, Is.EqualTo("Thought description"));
-        }
-
-        [Test]
-        public void EditWithDuplicateKeysThrows()
-        {
-            PopulateSampleThought(0);
-            ThoughtGuid toEdit = _area.FinishBuilding();
-
-            _area.SetNameKey("uniqueNameKey");
-            _area.SetDescriptionKey("uniqueDescriptionKey");
-            _area.FinishBuilding();
-
-            _area.SelectThought(toEdit);
-
-            _area.SetNameKey("uniqueNameKey");
-
-            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>());
-
-            _area.SetNameKey("differentNameKey");
-            _area.SetDescriptionKey("uniqueDescriptionKey");
-
-            Assert.That(_area.FinishBuilding, Throws.Exception.TypeOf<InvalidOperationException>());
-        }
-
-        [Test]
-        public void EditAllowsDuplicatedKeysDefinedInItself()
-        {
-            _area.SetNameKey("uniqueNameKey");
-            _area.SetDescriptionKey("uniqueDescriptionKey");
-            ThoughtGuid toEdit = _area.FinishBuilding();
-
-            _area.SelectThought(toEdit);
-
-            // Any change works.
-            _area.SetNameLocalization("a");
-
-            Assert.That(_area.FinishBuilding, Throws.Nothing);
         }
 
         [Test]

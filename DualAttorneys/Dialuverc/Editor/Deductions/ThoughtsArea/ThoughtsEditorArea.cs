@@ -7,6 +7,7 @@ using System.Text.Json;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using Dialuverc.Editor.Base.Localization;
 using Dialuverc.Editor.Base.Observability;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea.Verifier;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 {
@@ -199,7 +200,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
                         return runtimeThought.Guid;
 
                     // TODO: This almost surely needs better handling.
-                    if (!_duplicationVerifier.CanFinishBuilding)
+                    if (!_duplicationVerifier.CanFinishBuilding(AddEditEnum.Edit))
                         throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} with unsolved {nameof(Problem)}s");
 
                     BeginChange();
@@ -226,7 +227,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
                     ThoughtGuid addedGuid = new ThoughtGuid();
 
                     // TODO: This almost surely needs better handling.
-                    if (!_duplicationVerifier.CanFinishBuilding)
+                    if (!_duplicationVerifier.CanFinishBuilding(AddEditEnum.Add))
                         throw new InvalidOperationException($"Can't call {nameof(FinishBuilding)} with unsolved {nameof(Problem)}s");
 
                     BeginChange();
@@ -379,7 +380,18 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 
         protected override ThoughtsEditorState GetStateToSave()
         {
-            return new ThoughtsEditorState(_thoughts, _scratchpadsManager, _selectionGuid, _localizationManager);
+            return new ThoughtsEditorState()
+            {
+                Thoughts = _thoughts,
+
+                AddScratchpad = _scratchpadsManager.AddScratchpad,
+                EditScratchpad = _scratchpadsManager.EditScratchpad,
+                ScratchpadSelection = _scratchpadsManager.Selection.Value,
+
+                ThoughtSelection = _selectionGuid,
+
+                LocalizationLookup = _localizationManager.Lookup,
+            };
         }
 
         protected override bool CheckStateEquality(ThoughtsEditorState a, ThoughtsEditorState b)

@@ -4,6 +4,7 @@ using DualAttorneys.Dialuverc.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions;
 using DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads;
 using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea;
+using DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea.Verifier;
 using System.Collections.Immutable;
 namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
 {
