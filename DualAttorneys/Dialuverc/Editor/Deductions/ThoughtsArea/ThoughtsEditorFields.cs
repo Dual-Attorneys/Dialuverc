@@ -1,10 +1,9 @@
 using DualAttorneys.Dialuverc.Deductions;
-using DualAttorneys.Dialuverc.Editor.Deductions.Thoughts;
 
 namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 {
     /// <summary>
-    /// Groups all of <see cref="ThoughtsEditorArea"/>'s fields exposed through the UI for scratchpads management.
+    /// Groups all of <see cref="ThoughtsEditorArea"/>'s fields exposed through the UI for _scratchpadsManager management.
     /// </summary>
     public record class ThoughtsEditorFields
     {
