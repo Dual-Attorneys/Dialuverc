@@ -18,7 +18,6 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         ThoughtsEditorKeysVerifier? _verifier;
         ImmutableList<EditorThought>? _thoughtsList;
 
-
         [GlobalSetup]
         public void SetUpVerifier()
         {

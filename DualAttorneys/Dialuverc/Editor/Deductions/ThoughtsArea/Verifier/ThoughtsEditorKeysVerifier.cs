@@ -53,7 +53,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea.Verifier
                 _problems.Add(new KeyDuplicationProblem(ProblemSeverity.Error, $"{mode} scratchpad's has identical keys for {nameof(scratchpad.NameKey)} and {nameof(scratchpad.DescriptionKey)}", mode));
         }
 
-        public bool CanFinishBuilding(AddEditEnum mode) => _problems.Count(p => p.AffectedScratchpad == mode) == 0;
+        public bool CanFinishBuilding(AddEditEnum mode) => _problems.Any(p => p.AffectedScratchpad == mode);
 
         public IReadOnlyList<Problem> Run(ThoughtsEditorState state)
         {
