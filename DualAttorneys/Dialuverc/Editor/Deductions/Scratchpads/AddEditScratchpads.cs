@@ -10,7 +10,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.Scratchpads
         {
             // In similar spirit to exhaustive switches.
             if (selection.Value != AddEditEnum.Add && selection.Value != AddEditEnum.Edit)
-                throw new InvalidOperationException($"{selection} does not map to a valid scratchpad");
+                throw new InvalidOperationException($"{selection.Value} does not map to a valid scratchpad");
 
             Selection = selection;
         }

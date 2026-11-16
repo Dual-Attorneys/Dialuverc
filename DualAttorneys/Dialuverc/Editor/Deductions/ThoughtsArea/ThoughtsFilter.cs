@@ -1,7 +1,7 @@
 using Dialuverc.Editor.Base.Localization;
 using DualAttorneys.Dialuverc.Deductions;
 
-namespace DualAttorneys.Dialuverc.Editor.Deductions.Thoughts
+namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea
 {
     /// <summary>
     /// Defines a set of criteria against which a <see cref="Thought"/> can be tested.
