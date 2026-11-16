@@ -14,17 +14,17 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
         [Params(1, 100, 1000)]
         public int ThoughtsAmount;
 
-        AddEditScratchpads<ThoughtsEditorFields>? _scratchpads;
-        ThoughtsEditorKeysVerifier? _verifier;
-        ImmutableList<EditorThought>? _thoughtsList;
+        ThoughtsEditorKeysVerifier _verifier = new ThoughtsEditorKeysVerifier();
+
+        ImmutableList<EditorThought> _thoughtsList = ImmutableList<EditorThought>.Empty;
+
+        ThoughtsEditorState _noProblemsState = null!;
+        ThoughtsEditorState _stateWithProblems = null!;
 
         [GlobalSetup]
         public void SetUpVerifier()
         {
             _thoughtsList = ImmutableList<EditorThought>.Empty;
-
-            _scratchpads = new AddEditScratchpads<ThoughtsEditorFields>(new ObservableValue<AddEditEnum>(AddEditEnum.Add));
-            _verifier = new ThoughtsEditorKeysVerifier();
 
             for (int i = 0; i < ThoughtsAmount; i++)
             {
@@ -35,12 +35,59 @@ namespace DualAttorneys.Dialuverc.Benchmarks.EditorAreas
                     EditorNote = $"This is an editor note. Make it a little longer. It's for {i}",
                 });
             }
+
+            _noProblemsState = new ThoughtsEditorState()
+            {
+                Thoughts = _thoughtsList,
+
+                AddScratchpad = null,
+                EditScratchpad = null,
+
+                ThoughtSelection = null,
+                ScratchpadSelection = default,
+
+                LocalizationLookup = null!,
+            };
+
+            // This should resemble closely the maximum amount of key-related problems that can exist at once.
+            _stateWithProblems = new ThoughtsEditorState()
+            {
+                Thoughts = _thoughtsList,
+
+                AddScratchpad = new ThoughtsEditorFields()
+                {
+                    NameKey = "nameKey0",
+                    DescriptionKey = "descriptionKey0",
+                },
+
+                EditScratchpad = new ThoughtsEditorFields()
+                {
+                    NameKey = "nameKey0",
+                    DescriptionKey = "descriptionKey0",
+                },
+
+                // Try to find an index we can edit that is not 0.
+                ThoughtSelection = _thoughtsList[_thoughtsList.Count - 1].RuntimeThought.Guid,
+                ScratchpadSelection = default,
+
+                LocalizationLookup = null!,
+            };
         }
 
         [Benchmark]
-        public void RunKeyVerifier()
+        public void RunKeyVerifierNoProblems()
         {
-            // TODO: Run verifier.
+            _verifier.Clear();
+
+            _verifier.Run(_noProblemsState);
+        }
+
+        [Benchmark]
+        public void RunKeyVerifierWithProblems()
+        {
+            _verifier.Clear();
+
+            _verifier.Run(_stateWithProblems);
         }
     }
 }

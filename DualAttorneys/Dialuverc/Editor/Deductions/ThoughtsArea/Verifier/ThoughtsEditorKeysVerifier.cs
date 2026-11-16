@@ -53,7 +53,7 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea.Verifier
                 _problems.Add(new KeyDuplicationProblem(ProblemSeverity.Error, $"{mode} scratchpad's has identical keys for {nameof(scratchpad.NameKey)} and {nameof(scratchpad.DescriptionKey)}", mode));
         }
 
-        public bool CanFinishBuilding(AddEditEnum mode) => _problems.Any(p => p.AffectedScratchpad == mode);
+        public bool CanFinishBuilding(AddEditEnum mode) => !_problems.Any(p => p.AffectedScratchpad == mode);
 
         public IReadOnlyList<Problem> Run(ThoughtsEditorState state)
         {
@@ -67,6 +67,15 @@ namespace DualAttorneys.Dialuverc.Editor.Deductions.ThoughtsArea.Verifier
             _lastVerifiedState = state;
 
             return _problems;
+        }
+
+        // Note: Unsure about this.
+        // Currently used in benchmarks only to avoid having to create a new verifier each time.
+        public void Clear()
+        {
+            _lastVerifiedState = null;
+
+            _problems.Clear();
         }
     }
 }
